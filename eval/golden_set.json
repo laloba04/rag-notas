@@ -1,0 +1,273 @@
+[
+  {
+    "id": 1,
+    "tipo": "codigo_exacto",
+    "pregunta": "¿Cómo rehago la última confirmación si me he equivocado en el mensaje?",
+    "respuesta": "Con git commit --amend, que rehace la última confirmación.",
+    "fuentes": [
+      "11-git-deshacer-cambios.md"
+    ],
+    "texto_esperado": "--amend"
+  },
+  {
+    "id": 2,
+    "tipo": "codigo_exacto",
+    "pregunta": "¿Cómo saco un archivo del área de preparación?",
+    "respuesta": "Con git reset HEAD <archivo>.",
+    "fuentes": [
+      "11-git-deshacer-cambios.md"
+    ],
+    "texto_esperado": "git reset HEAD <file>"
+  },
+  {
+    "id": 3,
+    "tipo": "factual",
+    "pregunta": "¿Qué es un fast-forward al fusionar ramas?",
+    "respuesta": "Cuando la confirmación a fusionar es accesible siguiendo directamente el historial de la otra, Git solo avanza el puntero de la rama, porque no hay trabajo divergente que combinar.",
+    "fuentes": [
+      "12-git-ramas-y-fusiones.md"
+    ],
+    "texto_esperado": "avanzando el puntero"
+  },
+  {
+    "id": 4,
+    "tipo": "factual",
+    "pregunta": "¿Cuál es la regla de oro del rebase?",
+    "respuesta": "No reorganizar nunca confirmaciones que ya se hayan enviado (push) a un repositorio público.",
+    "fuentes": [
+      "13-git-rebase.md"
+    ],
+    "texto_esperado": "Nunca reorganices"
+  },
+  {
+    "id": 5,
+    "tipo": "codigo_exacto",
+    "pregunta": "¿Cómo recupero los cambios que guardé con git stash?",
+    "respuesta": "Con git stash apply.",
+    "fuentes": [
+      "14-git-stash-y-clean.md"
+    ],
+    "texto_esperado": "git stash apply"
+  },
+  {
+    "id": 6,
+    "tipo": "codigo_exacto",
+    "pregunta": "¿Cómo veo qué borraría git clean sin borrar nada?",
+    "respuesta": "Con git clean -n (simulación); por ejemplo git clean -n -d.",
+    "fuentes": [
+      "14-git-stash-y-clean.md"
+    ],
+    "texto_esperado": "git clean -n"
+  },
+  {
+    "id": 7,
+    "tipo": "factual",
+    "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+    "respuesta": "Es el primero en ejecutarse, antes de escribir el mensaje de confirmación. Se usa para inspeccionar lo que se va a confirmar, por ejemplo ejecutar pruebas o revisar el código.",
+    "fuentes": [
+      "15-git-hooks.md"
+    ],
+    "texto_esperado": "incluso antes de que"
+  },
+  {
+    "id": 8,
+    "tipo": "factual",
+    "pregunta": "¿Qué es un Pod en Kubernetes?",
+    "respuesta": "La unidad de computación desplegable más pequeña de Kubernetes: un grupo de uno o más contenedores con almacenamiento y red compartidos.",
+    "fuentes": [
+      "03-k8s-pods.md"
+    ],
+    "texto_esperado": "desplegables más pequeñas"
+  },
+  {
+    "id": 9,
+    "tipo": "numerico",
+    "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+    "respuesta": "Como máximo el 25% (maxUnavailable), y como máximo un 25% por encima del número deseado (maxSurge).",
+    "fuentes": [
+      "04-k8s-deployments.md"
+    ],
+    "texto_esperado": "25% no disponible"
+  },
+  {
+    "id": 10,
+    "tipo": "codigo_exacto",
+    "pregunta": "¿Cómo vuelvo a una revisión anterior de un Deployment?",
+    "respuesta": "Con kubectl rollout undo; con --to-revision se elige una revisión concreta.",
+    "fuentes": [
+      "04-k8s-deployments.md"
+    ],
+    "texto_esperado": "kubectl rollout undo"
+  },
+  {
+    "id": 11,
+    "tipo": "factual",
+    "pregunta": "¿Puedo guardar contraseñas en un ConfigMap?",
+    "respuesta": "No es lo adecuado: un ConfigMap no proporciona cifrado. Para datos confidenciales hay que usar un Secret.",
+    "fuentes": [
+      "05-k8s-configmaps.md"
+    ],
+    "texto_esperado": "ConfigMap no proporciona encriptación"
+  },
+  {
+    "id": 12,
+    "tipo": "restringido",
+    "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+    "respuesta": "1 MiB, para no agotar la memoria del apiserver y del kubelet. (Documento marcado como restringido: con filtro de permisos, debe responder que no lo tiene.)",
+    "fuentes": [
+      "06-k8s-secrets.md"
+    ],
+    "texto_esperado": "limitados a 1MiB"
+  },
+  {
+    "id": 13,
+    "tipo": "multi_hop",
+    "pregunta": "¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?",
+    "respuesta": "Los Secrets se guardan en etcd (doc. de Secrets), que es un almacén clave-valor persistente, consistente y distribuido (doc. de componentes).",
+    "fuentes": [
+      "06-k8s-secrets.md",
+      "02-k8s-componentes.md"
+    ],
+    "texto_esperado": "distribuido de clave-valor"
+  },
+  {
+    "id": 14,
+    "tipo": "numerico",
+    "pregunta": "¿Cuántos caracteres puede tener como máximo el valor de una etiqueta en Kubernetes?",
+    "respuesta": "63 caracteres, empezando y terminando por un carácter alfanumérico.",
+    "fuentes": [
+      "07-k8s-etiquetas-selectores.md"
+    ],
+    "texto_esperado": "como máximo 63 caracteres"
+  },
+  {
+    "id": 15,
+    "tipo": "factual",
+    "pregunta": "Si no hay ninguna NetworkPolicy, ¿un Pod acepta conexiones entrantes?",
+    "respuesta": "Sí. Por defecto un Pod no está aislado para la entrada: se permiten todas las conexiones entrantes.",
+    "fuentes": [
+      "08-k8s-network-policies.md"
+    ],
+    "texto_esperado": "no está aislado para la entrada"
+  },
+  {
+    "id": 16,
+    "tipo": "factual",
+    "pregunta": "¿Cuáles son las 4C de la seguridad cloud native?",
+    "respuesta": "Cloud (la nube), Clústeres, Contenedores y Código.",
+    "fuentes": [
+      "09-k8s-seguridad-cloud-native.md"
+    ],
+    "texto_esperado": "Clústeres, Contenedores y Código"
+  },
+  {
+    "id": 17,
+    "tipo": "factual",
+    "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+    "respuesta": "No, es un protocolo sin estado. Las cookies permiten mantener sesiones con estado.",
+    "fuentes": [
+      "16-http-vision-general.md"
+    ],
+    "texto_esperado": "protocolo sin estado"
+  },
+  {
+    "id": 18,
+    "tipo": "factual",
+    "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+    "respuesta": "OPTIONS.",
+    "fuentes": [
+      "17-http-cors.md"
+    ],
+    "texto_esperado": "utilizando el método OPTIONS"
+  },
+  {
+    "id": 19,
+    "tipo": "factual",
+    "pregunta": "¿Para qué sirve el atributo HttpOnly de una cookie?",
+    "respuesta": "Hace que la cookie no sea accesible desde JavaScript (document.cookie) y solo se envíe al servidor, lo que ayuda a prevenir ataques XSS.",
+    "fuentes": [
+      "18-http-cookies.md"
+    ],
+    "texto_esperado": "inaccesibles desde la API de Javascript"
+  },
+  {
+    "id": 20,
+    "tipo": "factual",
+    "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+    "respuesta": "Permite pedir que la cookie no se envíe en solicitudes cross-site, lo que da cierta protección contra ataques CSRF.",
+    "fuentes": [
+      "18-http-cookies.md"
+    ],
+    "texto_esperado": "cross-site request forgery"
+  },
+  {
+    "id": 21,
+    "tipo": "factual",
+    "pregunta": "¿Qué directiva de Cache-Control obliga a validar siempre con el servidor antes de reutilizar una respuesta?",
+    "respuesta": "no-cache.",
+    "fuentes": [
+      "19-http-cache.md"
+    ],
+    "texto_esperado": "directiva `no-cache` para forzar la validación"
+  },
+  {
+    "id": 22,
+    "tipo": "factual",
+    "pregunta": "¿La autenticación HTTP Basic cifra las credenciales?",
+    "respuesta": "No: las transmite codificadas en base64, que no es cifrado. Debe usarse siempre sobre HTTPS.",
+    "fuentes": [
+      "20-http-autenticacion.md"
+    ],
+    "texto_esperado": "codificado usando base64"
+  },
+  {
+    "id": 23,
+    "tipo": "factual",
+    "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+    "respuesta": "401 indica que faltan credenciales válidas; 403 que las credenciales son válidas pero no dan acceso a ese recurso.",
+    "fuentes": [
+      "20-http-autenticacion.md"
+    ],
+    "texto_esperado": "403 `Forbidden`"
+  },
+  {
+    "id": 24,
+    "tipo": "sin_respuesta",
+    "pregunta": "¿Cuál es la última versión estable de Kubernetes?",
+    "respuesta": null,
+    "fuentes": [],
+    "texto_esperado": null
+  },
+  {
+    "id": 25,
+    "tipo": "sin_respuesta",
+    "pregunta": "¿Cómo se configura un pipeline en Jenkins?",
+    "respuesta": null,
+    "fuentes": [],
+    "texto_esperado": null
+  },
+  {
+    "id": 26,
+    "tipo": "sin_respuesta",
+    "pregunta": "¿Cuánto cuesta un clúster gestionado de Kubernetes en Google Cloud?",
+    "respuesta": null,
+    "fuentes": [],
+    "texto_esperado": null
+  },
+  {
+    "id": 27,
+    "tipo": "sin_respuesta",
+    "pregunta": "¿Qué diferencia hay entre GitHub Actions y GitLab CI?",
+    "respuesta": null,
+    "fuentes": [],
+    "texto_esperado": null
+  },
+  {
+    "id": 28,
+    "tipo": "sin_respuesta",
+    "pregunta": "¿Cuál es la capital de Australia?",
+    "respuesta": null,
+    "fuentes": [],
+    "texto_esperado": null
+  }
+]

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+chroma/
+.env
+.cache/
+
+# PDFs pendientes de revisar licencia
+pdfs/
+
+# Notas personales
+guia-rag.md
+README-plantilla.md

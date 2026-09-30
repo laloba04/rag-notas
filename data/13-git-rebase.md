@@ -1,0 +1,181 @@
+---
+titulo: "Reorganizar el Trabajo Realizado"
+proyecto: Pro Git (Scott Chacon y Ben Straub)
+url: https://github.com/progit/progit2-es/blob/057c05738acd27b87232983c01dc53dc1388ce64/book/03-git-branching/sections/rebasing.asc
+licencia: CC BY-NC-SA 3.0
+descargado: 2026-09-30
+confidencialidad: publico
+---
+
+# Reorganizar el Trabajo Realizado
+
+En Git tenemos dos formas de integrar cambios de una rama en otra: la fusión (merge) y la reorganización (rebase).
+En esta sección vas a aprender en qué consiste la reorganización, cómo utilizarla, por qué es una herramienta sorprendente y en qué casos no es conveniente utilizarla.
+
+## Reorganización Básica
+
+Volviendo al ejemplo anterior, en la sección sobre fusiones  puedes ver que has separado tu trabajo y realizado confirmaciones (commit) en dos ramas diferentes.
+
+La manera más sencilla de integrar ramas, tal y como hemos visto, es el comando `git merge`.
+Realiza una fusión a tres bandas entre las dos últimas instantáneas de cada rama (C3 y C4) y el ancestro común a ambas (C2); creando una nueva instantánea (snapshot) y la correspondiente confirmación (commit).
+
+Sin embargo, también hay otra forma de hacerlo: puedes capturar los cambios introducidos en C4 y reaplicarlos encima de C3.
+Esto es lo que en Git llamamos _reorganizar_ (_rebasing_, en inglés).
+Con el comando `git rebase`, puedes capturar todos los cambios confirmados en una rama y reaplicarlos sobre otra.
+
+Por ejemplo, puedes lanzar los comandos:
+
+```
+$ git checkout experiment
+$ git rebase master
+First, rewinding head to replay your work on top of it...
+Applying: added staged command
+```
+
+Haciendo que Git vaya al ancestro común de ambas ramas (donde estás actualmente y de donde quieres reorganizar), saque las diferencias introducidas por cada confirmación en la rama donde estás, guarde esas diferencias en archivos temporales, reinicie (reset) la rama actual hasta llevarla a la misma confirmación que la rama de donde quieres reorganizar, y finalmente, vuelva a aplicar ordenadamente los cambios.
+
+En este momento, puedes volver a la rama `master` y hacer una fusión con avance rápido (fast-forward merge).
+
+```
+$ git checkout master
+$ git merge experiment
+```
+
+Así, la instantánea apuntada por `C4'` es exactamente la misma apuntada por `C5` en el ejemplo de la fusión.
+No hay ninguna diferencia en el resultado final de la integración, pero el haberla hecho reorganizando nos deja un historial más claro.
+Si examinas el historial de una rama reorganizada, este aparece siempre como un historial lineal: como si todo el trabajo se hubiera realizado en series, aunque realmente se haya hecho en paralelo.
+
+Habitualmente, optarás por esta vía cuando quieras estar seguro de que tus confirmaciones de cambio (commits) se pueden aplicar limpiamente sobre una rama remota; posiblemente, en un proyecto donde estés intentando colaborar, pero no lleves tú el mantenimiento.
+En casos como esos, puedes trabajar sobre una rama y luego reorganizar lo realizado en la rama `origin/master` cuando lo tengas todo listo para enviarlo al proyecto principal.
+De esta forma, la persona que mantiene el proyecto no necesitará hacer ninguna integración con tu trabajo; le bastará con un avance rápido o una incorporación limpia.
+
+Cabe destacar que, la instantánea (snapshot) apuntada por la confirmación (commit) final, tanto si es producto de una reorganización (rebase) como si lo es de una fusión (merge), es exactamente la misma instantánea; lo único diferente es el historial.
+La reorganización vuelve a aplicar cambios de una rama de trabajo sobre otra rama, en el mismo orden en que fueron introducidos en la primera, mientras que la fusión combina entre sí los dos puntos finales de ambas ramas.
+
+## Algunas Reorganizaciones Interesantes
+
+También puedes aplicar una reorganización (rebase) sobre otra cosa además de sobre la rama de reorganización.
+Por ejemplo, considera un historial como el de .
+Has ramificado a una rama puntual (`server`) para añadir algunas funcionalidades al proyecto, y luego has confirmado los cambios.
+Después, vuelves a la rama original para hacer algunos cambios en la parte cliente (rama `client`), y confirmas también esos cambios.
+Por último, vuelves sobre la rama `server` y haces algunos cambios más.
+
+Imagina que decides incorporar tus cambios del lado cliente sobre el proyecto principal para hacer un lanzamiento de versión; pero no quieres lanzar aún los cambios del lado servidor porque no están aún suficientemente probados.
+Puedes coger los cambios del cliente que no están en server (`C8` y `C9`) y reaplicarlos sobre tu rama principal usando la opción `--onto` del comando `git rebase`:
+
+```
+$ git rebase --onto master server client
+```
+
+Esto viene a decir: ``Activa la rama `client`, averigua los cambios desde el ancestro común entre las ramas `client` y `server`, y aplicalos en la rama `master`''.
+Puede parecer un poco complicado, pero los resultados son realmente interesantes.
+
+Y, tras esto, ya puedes avanzar la rama principal (ver ):
+
+```
+$ git checkout master
+$ git merge client
+```
+
+Ahora supongamos que decides traerlos (pull) también sobre tu rama `server`.
+Puedes reorganizar (rebase) la rama `server` sobre la rama `master` sin necesidad siquiera de comprobarlo previamente, usando el comando `git rebase [rama-base] [rama-puntual]`, el cual activa la rama puntual (`server` en este caso) y la aplica sobre la rama base (`master` en este caso):
+
+```
+$ git rebase master server
+```
+
+Esto vuelca el trabajo de `server` sobre el de `master`, tal y como se muestra en .
+
+Después, puedes avanzar rápidamente la rama base (`master`):
+
+```
+$ git checkout master
+$ git merge server
+```
+
+Y por último puedes eliminar las ramas `client` y `server` porque ya todo su contenido ha sido integrado y no las vas a necesitar más, dejando tu registro tras todo este proceso tal y como se muestra en :
+
+```
+$ git branch -d client
+$ git branch -d server
+```
+
+## Los Peligros de Reorganizar
+
+Ahh..., pero la dicha de la reorganización no la alcanzamos sin sus contrapartidas, las cuales pueden resumirse en una línea:
+
+**Nunca reorganices confirmaciones de cambio (commits) que hayas enviado (push) a un repositorio público.**
+
+Si sigues esta recomendación, no tendrás problemas.
+Pero si no lo haces, la gente te odiará y serás despreciado por tus familiares y amigos.
+
+Cuando reorganizas algo, estás abandonando las confirmaciones de cambio ya creadas y estás creando unas nuevas; que son similares, pero diferentes.
+Si envías (push) confirmaciones (commits) a alguna parte, y otros las recogen (pull) de allí; y después vas tú y las reescribes con `git rebase` y las vuelves a enviar (push); tus colaboradores tendrán que refusionar (re-merge) su trabajo  y todo se volverá tremendamente complicado cuando intentes recoger (pull) su trabajo de vuelta sobre el tuyo.
+
+Veamos con un ejemplo como reorganizar trabajo que has hecho público puede causar problemas.
+Imagínate que haces un clon desde un servidor central, y luego trabajas sobre él.
+Tu historial de cambios puede ser algo como esto:
+
+Ahora, otra persona trabaja también sobre ello, realiza una fusión (merge) y lleva (push) su trabajo al servidor central.
+Tú te traes (fetch) sus trabajos y los fusionas (merge) sobre una nueva rama en tu trabajo, con lo que tu historial quedaría parecido a esto:
+
+A continuación, la persona que había llevado cambios al servidor central decide retroceder y reorganizar su trabajo; haciendo un `git push --force` para sobrescribir el registro en el servidor.
+Tu te traes (fetch) esos nuevos cambios desde el servidor.
+
+Ahora los dos están en un aprieto.
+Si haces `git pull` crearás una fusión confirmada, la cual incluirá ambas líneas del historial, y tu repositorio lucirá así:
+
+Si ejecutas `git log` sobre un historial así, verás dos confirmaciones hechas por el mismo autor y con la misma fecha y mensaje, lo cual será confuso.
+Es más, si luego tu envías (push) ese registro de vuelta al servidor, vas a introducir todas esas confirmaciones reorganizadas en el servidor central.
+Lo que puede confundir aún más a la gente.
+Era más seguro asumir que el otro desarrollador no quería que `C4` y `C6` estuviesen en el historial; por ello había reorganizado su trabajo de esa manera.
+
+## Reorganizar una Reorganización
+
+Si te encuentras en una situación como esta, Git tiene algunos trucos que pueden ayudarte.
+Si alguien de tu equipo sobreescribe cambios en los que se basaba tu trabajo, tu reto es descubrir qué han sobreescrito y qué te pertenece.
+
+Además de la suma de control SHA-1, Git calcula una suma de control basada en el parche que introduce una confirmación. A esta se le conoce como ``patch-id''.
+
+Si te traes el trabajo que ha sido sobreescrito y lo reorganizas sobre las nuevas confirmaciones de tu compañero, es posible que Git pueda identificar qué parte correspondía específicamente a tu trabajo y aplicarla de vuelta en la rama nueva.
+
+Por ejemplo, en el caso anterior, si en vez de hacer una fusión cuando estábamos en  ejecutamos `git rebase teamone/master`, Git hará lo siguiente:
+
+* Determinar el trabajo que es específico de nuestra rama (C2, C3, C4, C6, C7)
+* Determinar cuáles no son fusiones confirmadas (C2, C3, C4)
+* Determinar cuáles no han sido sobreescritas en la rama destino (solo C2 y C3, pues C4 corresponde al mismo parche que C4')
+* Aplicar dichas confirmaciones encima de `teamone/master`
+
+Así que en vez del resultado que vimos en , terminaremos con algo más parecido a .
+
+Esto solo funciona si C4 y el C4' de tu compañero son parches muy similares. De lo contrario, la reorganización no será capaz de identificar que se trata de un duplicado y agregará otro parche similar a C4 (lo cual probablemente no podrá aplicarse limpiamente, pues los cambios ya estarían allí en algún lugar).
+
+También puedes simplificar el proceso si ejecutas `git pull --rebase` en vez del tradicional `git pull`. O, en este caso, puedes hacerlo manualmente con un `git fetch` primero, seguido de un `git rebase teamone/master`.
+
+Si sueles utilizar `git pull` y quieres que la opción `--rebase` esté activada por defecto, puedes asignar el valor de configuración `pull.rebase` haciendo algo como esto `git config --global pull.rebase true`.
+
+Si consideras la reorganización como una manera de limpiar tu trabajo y tus confirmaciones antes de enviarlas (push), y si sólo reorganizas confirmaciones (commits) que nunca han estado disponibles públicamente, no tendrás problemas.
+Si reorganizas (rebase) confirmaciones (commits) que ya estaban disponibles públicamente y la gente había basado su trabajo en ellas, entonces prepárate para tener problemas, frustrar a tu equipo y ser despreciado por tus compañeros.
+
+Si tu compañero o tú ven que aun así es necesario hacerlo en algún momento, asegúrense que todos sepan que deben ejecutar `git pull --rebase` para intentar aliviar en lo posible la frustración.
+
+## Reorganizar vs. Fusionar
+
+Ahora que has visto en acción la reorganización y la fusión, te preguntarás cuál es mejor.
+Antes de responder, repasemos un poco qué representa el historial.
+
+Para algunos, el historial de confirmaciones de tu repositorio es *un registro de todo lo que ha pasado.*
+Un documento histórico, valioso por sí mismo y que no debería ser alterado.
+Desde este punto de vista, cambiar el historial de confirmaciones es casi como blasfemar; estarías _mintiendo_ sobre lo que en verdad ocurrió.
+¿Y qué pasa si hay una serie desastrosa de fusiones confirmadas?
+Nada. Así fué como ocurrió y el repositorio debería tener un registro de esto para la posteridad.
+
+La otra forma de verlo puede ser que, el historial de confirmaciones es *la historia de cómo se hizo tu proyecto.*
+Tú no publicarías el primer borrador de tu novela, y el manual de cómo mantener tus programas también debe estar editado con mucho cuidado.
+Esta es el área que utiliza herramientas como `rebase` y `filter-branch` para contar la historia de la mejor manera para los futuros lectores.
+
+Ahora, sobre si es mejor  fusionar o reorganizar: verás que la respuesta no es tan sencilla.
+Git es una herramienta poderosa que te permite hacer muchas cosas con tu historial, y cada equipo y cada proyecto es diferente.
+Ahora que conoces cómo trabajan ambas herramientas, será cosa tuya decidir cuál de las dos es mejor para tu situación en particular.
+
+Normalmente, la manera de sacar lo mejor de ambas es reorganizar tu trabajo local, que aún no has compartido, antes de enviarlo a algún lugar; pero nunca reorganizar nada que ya haya sido compartido.

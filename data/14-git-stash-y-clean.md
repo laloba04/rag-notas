@@ -1,0 +1,254 @@
+---
+titulo: "Guardado rápido y Limpieza"
+proyecto: Pro Git (Scott Chacon y Ben Straub)
+url: https://github.com/progit/progit2-es/blob/057c05738acd27b87232983c01dc53dc1388ce64/book/07-git-tools/sections/stashing-cleaning.asc
+licencia: CC BY-NC-SA 3.0
+descargado: 2026-09-30
+confidencialidad: publico
+---
+
+# Guardado rápido y Limpieza
+
+Muchas veces, cuando has estado trabajando en una parte de tu proyecto, las cosas se encuentran desordenadas y quieres cambiar de ramas por un momento para trabajar en algo más.
+El problema es que no quieres hacer un ``commit'' de un trabajo que va por la mitad, así puedes volver a ese punto más tarde.
+La respuesta a ese problema es el comando `git stash`.
+
+El guardado rápido toma el desorden de tu directorio de trabajo – que es, tus archivos controlados por la versión modificados y cambios almacenados – y lo guarda en un saco de cambios sin terminar que puedes volver a usar en cualquier momento.
+
+## Guardando rápido tu trabajo
+
+Para demostrarlo, irás a tu proyecto y empezarás a trabajar en un par de archivos y posiblemente en tu etapa uno de cambios.
+Si ejecutas `git status`, puedes ver tu estado sucio:
+
+```
+$ git status
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	modified:   index.html
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   lib/simplegit.rb
+```
+
+Ahora quieres cambiar de rama, pero no quieres hacer ``commit'', todavía, a lo que has estado trabajando; así que le harás un guardado rápido a los cambios.
+ Para poner un nuevo guardado rápido en tus archivos, ejecuta `git stash` o `git stash save`:
+
+```
+$ git stash
+Saved working directory and index state \
+  "WIP on master: 049d078 added the index file"
+HEAD is now at 049d078 added the index file
+(To restore them type "git stash apply")
+```
+
+Tu directorio de trabajo está limpio:
+
+```
+$ git status
+# On branch master
+nothing to commit, working directory clean
+```
+
+En este punto, puedes fácilmente cambiar de ramas y hacer trabajos en otro lugar; tus cambios están guardados en tus archivos.
+Para ver qué guardados rápidos has almacenado, puedes usar `git stash list`:
+
+```
+$ git stash list
+stash@{0}: WIP on master: 049d078 added the index file
+stash@{1}: WIP on master: c264051 Revert "added file_size"
+stash@{2}: WIP on master: 21d80a5 added number to log
+```
+
+En este caso, dos guardados fueron hechos previamente, así que tienes tres diferentes trabajos guardados.
+Puedes volver a aplicar el que acabas de guardar utilizando el comando que se muestra en la salida de ayuda del comando original: `git stash apply`.
+Si quieres hacer entrada a uno de los guardados rápidos anteriores, puedes especificarlo poniendo su nombre de esta manera: `git stash apply stash@{2}`.
+Si no especificas un guardado, Git adopta el guardado más reciente e intenta hacerle entrada:
+
+```
+$ git stash apply
+# On branch master
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#
+#      modified:   index.html
+#      modified:   lib/simplegit.rb
+#
+```
+
+Puedes ver que Git remodifica los archivos que revertiste cuando hiciste el guardado rápido.
+En este caso, tenías un directorio de trabajo despejado cuando intentaste hacer entrada al guardado, e intentaste hacerle entrada en la misma rama en la que lo guardaste; pero tener un directorio de trabajo despejado y usarlo en la misma rama no es necesario para hacerle entrada a un guardado con éxito.
+Puedes almacenar un guardado en una rama, cambiar a otra rama luego, e intentar volver a hacerle entrada a los cambios.
+También puedes tener archivos modificados y sin aplicar en tu directorio de trabajo cuando des entrada a un guardado – Git te da conflictos de cambinación si algo ya no se usa de manera limpia.
+
+Los cambios a tus archivos fueron reaplicados, pero el archivo que tu guardaste antes no fue realmacenado.
+Para hacer eso, tienes que ejecuar el comando `git stash apply` con una opción de `--index` para decirle al comando que intente reaplicar los cambios almacenados.
+Si anteriormente lo hubieras ejecutado, lo habrías vuelto a tener en su posición original:
+
+```
+$ git stash apply --index
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#      modified:   index.html
+#
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#
+#      modified:   lib/simplegit.rb
+#
+```
+
+La opción de hacer entrada sólo intenta hacer entrada al trabajo guardado –lo continúas teniendo en tus archivos.
+Para removerlo, puedes ejecutar `git stash drop` con el nombre del guardado a eliminar:
+
+```
+$ git stash list
+stash@{0}: WIP on master: 049d078 added the index file
+stash@{1}: WIP on master: c264051 Revert "added file_size"
+stash@{2}: WIP on master: 21d80a5 added number to log
+$ git stash drop stash@{0}
+Dropped stash@{0} (364e91f3f268f0900bc3ee613f9f733e82aaed43)
+```
+
+También puedes ejecutar `git stash pop` para hacer entrada al guardado y luego eliminarlo inmediatemente de tus archivos.
+
+## Guardado rápido creativo
+
+Hay algunas pocas variantes de guardado rápido que pueden ser útiles también. La primera opción que es muy popular es `--keep-index` para el comando `stash save`. Esto le dice a Git que no guarde nada que tú ya hayas almacenado con el comando `git add`.
+
+Esto puede ser útil de verdad si has hecho un buen número de cambios, pero sólo quieres aplicar permanentemente algunos de ellos y luego regresar al resto de cambios en una siguient ocasión.
+
+```
+$ git status -s
+M  index.html
+ M lib/simplegit.rb
+
+$ git stash --keep-index
+Saved working directory and index state WIP on master: 1b65b17 added the index file
+HEAD is now at 1b65b17 added the index file
+
+$ git status -s
+M  index.html
+```
+
+Otra cosa común que puede que quieras hacer con tus guardados es hacer un guardado rápido de los archivos que no están bajo control de la versión al igual que con los que lo están. Por defecto, `git stash` solamente guardará archivos que ya están en el índice. Si especificas `--include-untracked` o `-u`, Git también hará un guardado rápido de cualquier archivo que no esté bajo control de la versión que hayas creado.
+
+```
+$ git status -s
+M  index.html
+ M lib/simplegit.rb
+?? new-file.txt
+
+$ git stash -u
+Saved working directory and index state WIP on master: 1b65b17 added the index file
+HEAD is now at 1b65b17 added the index file
+
+$ git status -s
+$
+```
+
+Finalmente, si especificas la flag `--patch`, Git no hará guardado rápido de todo lo que es modificado, pero, en su lugar, te recordará cuales de los cambios te gustaría guardar y cuales te gustaría mantener en tu trabajo directamente.
+
+```
+$ git stash --patch
+diff --git a/lib/simplegit.rb b/lib/simplegit.rb
+index 66d332e..8bb5674 100644
+--- a/lib/simplegit.rb
++++ b/lib/simplegit.rb
+@@ -16,6 +16,10 @@ class SimpleGit
+         return `#{git_cmd} 2>&1`.chomp
+       end
+     end
++
++    def show(treeish = 'master')
++      command("git show #{treeish}")
++    end
+
+ end
+ test
+Stash this hunk [y,n,q,a,d,/,e,?]? y
+
+Saved working directory and index state WIP on master: 1b65b17 added the index file
+```
+
+## Creando una Rama desde un Guardado Rápido
+
+Si haces guardado rápido de algo de trabajo, lo dejas ahí por un rato y continúas en la rama de la cual hiciste guardado rápido de tu trabajo, puede que tengas problemas rehaciendo la entrada al trabajo.
+Si la entrada intenta modificar un archivo que desde entonces has modificado, tendrás un conflicto de combinación y tendrás que intentar resolverlo.
+Si quieres una forma más fácil de probar los cambios guardados de nuevo, puedes ejecutar `git stash branch`, el cual crea una nueva rama para ti, verifica el ``commit'' en el que estabas cuando hiciste guardado rápido de tu trabajo, recrea tu trabajo allí, y luego arroja el guardado rápido si la entrada se realiza con éxito:
+
+```
+$ git stash branch testchanges
+Switched to a new branch "testchanges"
+# On branch testchanges
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#      modified:   index.html
+#
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#
+#      modified:   lib/simplegit.rb
+#
+Dropped refs/stash@{0} (f0dfc4d5dc332d1cee34a634182e168c4efc3359)
+```
+
+Este es un buen método rápido para recuperar trabajos guardados y trabajar en una nueva rama.
+
+## Limpiando tu Directorio de Trabajo
+
+Finalmente, puede que no quieras hacer guardado rápido de algo de trabajo o de archivos en tu directorio de trabajo, pero quieres deshacerte de ellos. El comando `git clean` hará esto por ti.
+
+Algunas razones comunes para esto pueden ser: remover archivos cruft que han sido generados por herramientas de combinación o externas, o para eliminar viejos archivos de versión con el fin de ejecutar una versión limpia.
+
+Querrás ser más bien delicado con este comando, ya que está diseñado para eliminar archivos de tu directorio de trabajo que no están siendo tomados en cuenta. Si cambias de opinión, muchas veces no hay restauración para el contenido de esos archivos. Una opción más segura es ejecutar `git stash --all` para eliminar todo, pero lo almacena en un guardado.
+
+Asumiendo que quieres eliminar los archivos cruft o limpiar tu directorio de trabajo, puedes hacerlo con `git clean`. Para remover los archivos que no están bajo el control de la versión en tu directorio de trabajo, puedes ejecutar `git clean -f -d`, el cual remueve cualquier archivo y también cualquier subdirectorio que se vuelva vacío como resultado. El `-f` significa 'fuerza' o “realmente haz esto”.
+
+Si alguna vez quieres ver que haría, puedes ejecutar el comando con la opción `-n` que significa ``haz un arranque en seco y dime que habrías eliminado ''.
+
+```
+$ git clean -d -n
+Would remove test.o
+Would remove tmp/
+```
+
+Por defecto, el comando `git clean` sólo removerá archivos que no sean controlados y que no sean ignorados. Cualquier archivo que empareje en patrón en tu `.gitignore` u otros archivos ignorados no serán removidos. Si quieres eliminar esos archivos también, como eliminar todos los `.o` generados por la versión, así puedes hacer una versión completamente limpia, puedes añadir un `-x` al comando.
+
+```
+$ git status -s
+ M lib/simplegit.rb
+?? build.TMP
+?? tmp/
+
+$ git clean -n -d
+Would remove build.TMP
+Would remove tmp/
+
+$ git clean -n -d -x
+Would remove build.TMP
+Would remove test.o
+Would remove tmp/
+```
+
+Si no sabes lo que el comando `git clean` va a hacer, siempre ejecútalo con un `-n` primero para estar seguro antes de cambiar el `-n` a `-f` y hacerlo de verdad. La otra forma en la que puedes ser cuidadoso con el proceso es ejecutarlo con el `-i` o con la flag ``interactive''.
+
+Esto ejecutará el comando en limpio en un modo interactivo.
+
+```
+$ git clean -x -i
+Would remove the following items:
+  build.TMP  test.o
+*** Commands ***
+    1: clean                2: filter by pattern    3: select by numbers    4: ask each             5: quit
+    6: help
+What now>
+```
+
+De esta forma puedes decidir por cada archivo individualmente o especificar los términos para la eliminación de forma interactiva.
