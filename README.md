@@ -4,7 +4,7 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker y evaluación de la recuperación. Pendiente: búsqueda híbrida y generación de respuestas con citas.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas y evaluación de la recuperación. Pendiente: evaluar la calidad de las respuestas y búsqueda híbrida.
 
 ## Corpus
 
@@ -38,16 +38,19 @@ Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 | Troceado en dos fases: por cabeceras Markdown y después en fragmentos de 800 caracteres con 100 de solape | Cada fragmento pertenece a una sola sección. El tamaño es un punto de partida, pendiente de comparar con otros |
 | Ruta de secciones al inicio de cada fragmento (p. ej. `Pods > Uso de Pods`) | El fragmento conserva su contexto aunque se recupere suelto |
 | Reranker cross-encoder `BAAI/bge-reranker-v2-m3` sobre 25 candidatos | +0,08 de recall@1 a cambio de ~8 s por consulta en CPU. Con GPU el coste bajaría mucho |
+| LLM local `qwen2.5:14b` con Ollama, servido desde otro equipo de la red con GPU (RTX 4080) | Sin coste por consulta y los documentos no salen de la red local. El firewall solo admite conexiones del equipo de desarrollo, porque Ollama no tiene autenticación |
+| Prompt que obliga a usar solo el contexto, con una frase fija para "no lo tengo" y citas `[n]` | Permitir explícitamente el "no lo sé" reduce las invenciones; las citas hacen la respuesta auditable. Las citas a fragmentos inexistentes se detectan en post-proceso |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
 
-Python · ChromaDB · sentence-transformers · LangChain text splitters
+Python · ChromaDB · sentence-transformers · LangChain text splitters · Ollama
 
 ## Limitaciones
 
 - Conjunto de evaluación pequeño (23 preguntas con respuesta): los números orientan, no son concluyentes.
-- Por ahora solo se mide la recuperación; todavía no se generan respuestas.
+- Por ahora solo se mide la recuperación; la calidad de las respuestas generadas todavía no se ha evaluado.
+- El LLM es un modelo abierto de 14B cuantizado a 4 bits: responde peor que los modelos comerciales grandes.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 
 ## Ejecutarlo en local
@@ -57,9 +60,12 @@ git clone https://github.com/laloba04/rag-notas.git
 cd rag-notas
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt   # incluye torch para CPU; la primera vez descarga ~2 GB de modelo
+cp .env.example .env             # dirección de Ollama y modelo
+ollama pull qwen2.5:14b          # en el equipo que ejecute Ollama
 python ingest.py                  # indexa los documentos de data/ en chroma/
-python retrieve.py "¿Qué es un Pod?"               # con reranker
+python retrieve.py "¿Qué es un Pod?"               # búsqueda con reranker
 python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
+python generate.py "¿Qué es un Pod?"               # respuesta con citas
 python evaluate.py                # reproduce la tabla de resultados (~4 min en CPU)
 ```
 
@@ -68,6 +74,7 @@ python evaluate.py                # reproduce la tabla de resultados (~4 min en 
 ```
 ingest.py              troceado, embeddings e indexación en Chroma
 retrieve.py            búsqueda vectorial y reranking
+generate.py            prompt, llamada al LLM y comprobación de citas
 evaluate.py            recall@k de cada configuración sobre el conjunto de evaluación
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación

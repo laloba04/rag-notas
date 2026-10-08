@@ -10,3 +10,7 @@ pdfs/
 # Notas personales
 guia-rag.md
 README-plantilla.md
+
+# Configuración local de Claude Code
+CLAUDE.md
+.claude/
