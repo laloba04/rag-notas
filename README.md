@@ -4,7 +4,7 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial y evaluación de la recuperación. Pendiente: búsqueda híbrida, reranker y generación de respuestas con citas.
+**Estado actual:** ingesta, búsqueda vectorial, reranker y evaluación de la recuperación. Pendiente: búsqueda híbrida y generación de respuestas con citas.
 
 ## Corpus
 
@@ -14,17 +14,19 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 Recuperación evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta.
 
-| Configuración | Recall@1 | Recall@5 |
-|---|---|---|
-| Solo vectorial | 0,57 | 0,91 |
+| Configuración | Recall@1 | Recall@5 | Latencia de búsqueda (CPU) |
+|---|---|---|---|
+| Solo vectorial | 0,57 | 0,91 | ~0,1 s |
+| Vectorial + reranker (25 candidatos) | 0,65 | 0,91 | ~8 s |
 
-Por tipo de pregunta (recall@5): comandos literales 5/5, cifras 2/2, factuales 13/14, multi-hop 0/1.
+Por tipo de pregunta (recall@5, igual en las dos configuraciones): comandos literales 5/5, cifras 2/2, factuales 13/14, multi-hop 0/1.
+
+**Qué aporta el reranker:** sube el fragmento correcto al primer puesto en 6 preguntas, pero lo baja en otras 4 (de 1.º a 2.º en dos de ellas). Ganancia neta: 2 preguntas más con el fragmento correcto en primer lugar. No cambia el recall@5: los fallos están antes, en los candidatos que recibe.
 
 **Qué fallos hay y por qué:**
 
-- **"¿Cuál es la regla de oro del rebase?"** La traducción española de Pro Git no usa "rebase" ni "regla de oro", sino "reorganizar": *"Nunca reorganices confirmaciones que hayas enviado a un repositorio público"*. La búsqueda llega al documento correcto pero no a ese fragmento.
+- **"¿Cuál es la regla de oro del rebase?"** La traducción española de Pro Git no usa "rebase" ni "regla de oro", sino "reorganizar": *"Nunca reorganices confirmaciones que hayas enviado a un repositorio público"*. La búsqueda vectorial deja ese fragmento en el puesto 31, fuera de los 25 candidatos del reranker. Ni ampliando a 50 candidatos lo sube al top 10: es un problema de vocabulario de la pregunta, no de orden. Candidato a reescritura de la consulta.
 - **"¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?"** Necesita combinar dos documentos (los Secrets se guardan en etcd; etcd es un almacén clave-valor). Una sola búsqueda no lo resuelve.
-- **Recall@1 de 0,57:** el fragmento correcto suele estar entre los 5 primeros, pero no en el primer puesto. Es el margen que debería cubrir un reranker.
 
 Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 
@@ -35,6 +37,7 @@ Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 | Embeddings `intfloat/multilingual-e5-large` en local | Documentos en español; los datos no salen de la máquina |
 | Troceado en dos fases: por cabeceras Markdown y después en fragmentos de 800 caracteres con 100 de solape | Cada fragmento pertenece a una sola sección. El tamaño es un punto de partida, pendiente de comparar con otros |
 | Ruta de secciones al inicio de cada fragmento (p. ej. `Pods > Uso de Pods`) | El fragmento conserva su contexto aunque se recupere suelto |
+| Reranker cross-encoder `BAAI/bge-reranker-v2-m3` sobre 25 candidatos | +0,08 de recall@1 a cambio de ~8 s por consulta en CPU. Con GPU el coste bajaría mucho |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
@@ -45,7 +48,7 @@ Python · ChromaDB · sentence-transformers · LangChain text splitters
 
 - Conjunto de evaluación pequeño (23 preguntas con respuesta): los números orientan, no son concluyentes.
 - Por ahora solo se mide la recuperación; todavía no se generan respuestas.
-- El modelo de embeddings se ejecuta en CPU: la primera ingesta tarda varios minutos.
+- Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 
 ## Ejecutarlo en local
 
@@ -55,16 +58,17 @@ cd rag-notas
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt   # incluye torch para CPU; la primera vez descarga ~2 GB de modelo
 python ingest.py                  # indexa los documentos de data/ en chroma/
-python retrieve.py "¿Qué es un Pod?"
-python evaluate.py                # reproduce la tabla de resultados
+python retrieve.py "¿Qué es un Pod?"               # con reranker
+python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
+python evaluate.py                # reproduce la tabla de resultados (~4 min en CPU)
 ```
 
 ## Estructura
 
 ```
 ingest.py              troceado, embeddings e indexación en Chroma
-retrieve.py            búsqueda vectorial
-evaluate.py            recall@k sobre el conjunto de evaluación
+retrieve.py            búsqueda vectorial y reranking
+evaluate.py            recall@k de cada configuración sobre el conjunto de evaluación
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
 eval/resultados/       resultados de cada evaluación, con fecha
