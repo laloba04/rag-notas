@@ -5,21 +5,15 @@ usando SOLO esos trozos, citando cada afirmación con [n].
 Uso (desde la raíz del repo, después de python ingest.py y con .env configurado):
     python generate.py "¿Cómo deshago el último commit?"
 """
-import os
 import re
 import sys
 import time
 
 import requests
-from dotenv import load_dotenv
 
+from config import (LLM_MODELO, NO_LO_TENGO, OLLAMA_URL, TEMPERATURA, TIMEOUT_LLM_S,
+                    comprobar_llm)
 from retrieve import buscar
-
-load_dotenv()   # lee OLLAMA_URL y OLLAMA_MODELO de .env
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODELO = os.environ.get("OLLAMA_MODELO", "qwen2.5:14b")
-
-NO_LO_TENGO = "No tengo esa información en la documentación."
 
 # Instrucciones fijas para el modelo (sección 8 de la guía).
 SYSTEM = f"""Eres un asistente que responde preguntas sobre documentación técnica.
@@ -42,19 +36,20 @@ def construir_prompt(pregunta, resultados):
 
 def llamar_llm(prompt):
     """Envía el prompt a Ollama y devuelve la respuesta y los tokens usados."""
+    comprobar_llm()
     respuesta = requests.post(
         f"{OLLAMA_URL}/api/chat",
         json={
-            "model": OLLAMA_MODELO,
+            "model": LLM_MODELO,
             "messages": [
                 {"role": "system", "content": SYSTEM},
                 {"role": "user", "content": prompt},
             ],
             "stream": False,
             # Temperatura baja: queremos fidelidad al contexto, no creatividad.
-            "options": {"temperature": 0.1},
+            "options": {"temperature": TEMPERATURA},
         },
-        timeout=300,   # la primera vez el sobremesa tiene que cargar el modelo en la GPU
+        timeout=TIMEOUT_LLM_S,   # la primera vez el servidor tiene que cargar el modelo en la GPU
     )
     respuesta.raise_for_status()
     datos = respuesta.json()
@@ -79,6 +74,7 @@ def responder(pregunta, k=5, rerank=True):
         "pregunta": pregunta,
         "respuesta": texto,
         "fuentes": [meta for _, meta, _ in resultados],
+        "docs": resultados,
         "citas_invalidas": citas_invalidas(texto, len(resultados)),
         "tokens": tokens,
         "segundos": {"busqueda": round(t1 - t0, 2), "generacion": round(t2 - t1, 2)},
