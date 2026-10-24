@@ -4,7 +4,43 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas y evaluación de la recuperación. Pendiente: evaluar la calidad de las respuestas y búsqueda híbrida.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. Pendiente: filtro por permisos, búsqueda híbrida y prueba de prompt injection.
+
+## Arquitectura
+
+Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el prompt de generación:
+
+- **Pipeline directo** (`generate.py`): búsqueda vectorial → reranker → LLM con citas.
+- **Grafo** (`grafo.py`, LangGraph): decide si la pregunta necesita buscar, evalúa si lo recuperado es relevante y, si no lo es, reformula la pregunta una vez antes de responder "No lo tengo en la documentación."
+
+```mermaid
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	decidir(decidir)
+	responder_directo(responder_directo)
+	recuperar(recuperar)
+	evaluar(evaluar)
+	reescribir(reescribir)
+	generar(generar)
+	sin_respuesta(sin_respuesta)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> decidir;
+	decidir -.-> recuperar;
+	decidir -.-> responder_directo;
+	evaluar -.-> generar;
+	evaluar -.-> reescribir;
+	evaluar -.-> sin_respuesta;
+	recuperar --> evaluar;
+	reescribir --> recuperar;
+	generar --> __end__;
+	responder_directo --> __end__;
+	sin_respuesta --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+
+Diagrama generado con `app.get_graph().draw_mermaid()` (`python scripts/dibujar_grafo.py`, también en [`docs/grafo.md`](docs/grafo.md)). Las flechas discontinuas son aristas condicionales.
 
 ## Corpus
 
@@ -12,7 +48,9 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 ## Resultados
 
-Recuperación evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta.
+### Recuperación
+
+Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta.
 
 | Configuración | Recall@1 | Recall@5 | Latencia de búsqueda (CPU) |
 |---|---|---|---|
@@ -28,6 +66,41 @@ Por tipo de pregunta (recall@5, igual en las dos configuraciones): comandos lite
 - **"¿Cuál es la regla de oro del rebase?"** La traducción española de Pro Git no usa "rebase" ni "regla de oro", sino "reorganizar": *"Nunca reorganices confirmaciones que hayas enviado a un repositorio público"*. La búsqueda vectorial deja ese fragmento en el puesto 31, fuera de los 25 candidatos del reranker. Ni ampliando a 50 candidatos lo sube al top 10: es un problema de vocabulario de la pregunta, no de orden. Candidato a reescritura de la consulta.
 - **"¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?"** Necesita combinar dos documentos (los Secrets se guardan en etcd; etcd es un almacén clave-valor). Una sola búsqueda no lo resuelve.
 
+### Respuestas: pipeline directo frente al grafo
+
+Las 28 preguntas, con `qwen2.5:14b`. Aquí el recall@5 se mide sobre los fragmentos que de verdad recibe el LLM: en el grafo, los que superan la evaluación de relevancia.
+
+| Configuración | Recall@5 | "No lo tengo" en las 5 sin respuesta | "No lo tengo" en las 23 con respuesta | Latencia media | Latencia mediana |
+|---|---|---|---|---|---|
+| Pipeline directo | 0,91 | 5/5 | 1/23 | 12,1 s | 12,2 s |
+| Grafo, evaluación con reranker (umbral 0,5) | 0,87 | 5/5 | 2/23 | 14,7 s | 12,6 s |
+| Grafo, evaluación con LLM juez | 0,87 | 5/5 | 2/23 | 17,4 s | 15,2 s |
+
+**Ramas del grafo** (28 preguntas): con reranker, 23 acaban en `generar` y 5 en `sin_respuesta`, y 7 pasan por `reescribir`. Con LLM juez, 22 en `generar` y 6 en `sin_respuesta`, y 6 pasan por `reescribir`. Ninguna pregunta del conjunto va a `responder_directo`, y no hubo errores ni cortes por límite.
+
+**Pregunta trampa** ("¿Cuál es la última versión estable de Kubernetes?", el modelo conoce una respuesta por su entrenamiento): en las tres configuraciones acaba en "No lo tengo en la documentación." En el grafo recorre `decidir → recuperar → evaluar → reescribir → recuperar → evaluar → sin_respuesta`, sin pasar por `responder_directo`.
+
+**Latencia media por nodo** (de las trazas):
+
+| Nodo | Con reranker | Con LLM juez |
+|---|---|---|
+| decidir | 0,57 s | 0,55 s |
+| recuperar | 9,93 s | 10,06 s |
+| evaluar | 0,00 s | 2,59 s |
+| reescribir | 0,81 s | 0,49 s |
+| generar | 1,85 s | 1,70 s |
+
+Fragmentos medios que pasan la evaluación: de 5 a 2,17 con reranker y de 5 a 1,26 con LLM juez.
+
+**Conclusiones:**
+
+- **En este corpus, el grafo no mejora al pipeline directo.** El pipeline directo ya dice "No lo tengo" en las 5 preguntas sin respuesta, y el filtro de relevancia del grafo a veces descarta el fragmento bueno. Con reranker, en "¿Cómo veo qué borraría git clean sin borrar nada?" el fragmento con la respuesta queda por debajo de 0,5. Con LLM juez, en "¿Puedo guardar contraseñas en un ConfigMap?" el juez descarta los cinco fragmentos.
+- **La reescritura no arregla la pregunta del rebase.** Una reformulación genérica no llega a "reorganizar".
+- **Las diferencias de una pregunta no son significativas.** Entre dos ejecuciones idénticas del pipeline directo, con temperatura 0,1, los "No lo tengo" en preguntas con respuesta pasaron de 2/23 a 1/23.
+- Lo que aporta el grafo y no mide este conjunto: no busca ni gasta tiempo con saludos (en las pruebas, una respuesta directa tarda ~1 s frente a ~12 s), y deja trazado por qué responde lo que responde.
+
+**Primera versión del grafo, corregida antes de estos números.** El nodo `decidir` era un sí/no y mandó una pregunta técnica ("¿Cómo rehago la última confirmación…?") a `responder_directo`. Ahora el LLM clasifica en categorías explícitas y solo saludos, despedidas, agradecimientos y preguntas sobre la conversación van a `directo`; cualquier otra cosa busca. Además, el prompt de reescritura incluía un ejemplo sacado de una respuesta del conjunto de evaluación. Lo quité porque era sobreajuste. Los resultados de esa versión están en `eval/resultados/` (2026-10-24, 13:10-13:25).
+
 Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 
 ## Decisiones técnicas
@@ -40,16 +113,27 @@ Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 | Reranker cross-encoder `BAAI/bge-reranker-v2-m3` sobre 25 candidatos | +0,08 de recall@1 a cambio de ~8 s por consulta en CPU. Con GPU el coste bajaría mucho |
 | LLM local `qwen2.5:14b` con Ollama, servido desde otro equipo de la red con GPU (RTX 4080) | Sin coste por consulta y los documentos no salen de la red local. El firewall solo admite conexiones del equipo de desarrollo, porque Ollama no tiene autenticación |
 | Prompt que obliga a usar solo el contexto, con una frase fija para "no lo tengo" y citas `[n]` | Permitir explícitamente el "no lo sé" reduce las invenciones; las citas hacen la respuesta auditable. Las citas a fragmentos inexistentes se detectan en post-proceso |
+| Capa agéntica y correctiva en un solo `StateGraph` de LangGraph | El flujo (decidir, evaluar, reintentar) queda explícito, se puede dibujar y se prueba nodo a nodo. Reutiliza la búsqueda y el prompt del pipeline directo, sin reimplementarlos |
+| `decidir` con salida estructurada en categorías; solo las sociales van a `directo` | Ante la duda, buscar: responder un dato técnico de memoria es peor que tardar unos segundos más. Si el LLM falla al clasificar, también se busca |
+| Evaluación de relevancia configurable: puntuación del reranker con umbral 0,5 o LLM juez sí/no | El reranker ya puntúa cada fragmento al buscar, así que filtrar no cuesta nada (0,00 s frente a 2,59 s del juez). 0,5 es la frontera de decisión de su salida (una probabilidad); no se calibra con 28 preguntas para no sobreajustar |
+| Máximo 1 reescritura | Si una reformulación no encuentra nada relevante, lo más probable es que el corpus no tenga la respuesta; cada reintento cuesta ~10 s de búsqueda |
+| Límites: 10 pasos de grafo, timeout por paso y por llamada al LLM | El camino más largo posible son 7 pasos; el límite corta cualquier bucle por error. Si se supera un límite, la respuesta es "No lo tengo" |
+| Proveedor y modelo del LLM solo en `.env` | Cambiar de modelo no toca el código. Si faltan, el programa falla con un mensaje claro |
+| Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (12 tests en <1 s) |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
 
-Python · ChromaDB · sentence-transformers · LangChain text splitters · Ollama
+Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama · pytest
 
 ## Limitaciones
 
 - Conjunto de evaluación pequeño (23 preguntas con respuesta): los números orientan, no son concluyentes.
-- Por ahora solo se mide la recuperación; la calidad de las respuestas generadas todavía no se ha evaluado.
+- De las respuestas se mide si dicen "No lo tengo", no si su contenido es correcto (falta un juez de fidelidad al contexto).
+- El conjunto no tiene saludos ni preguntas sobre la conversación, así que la rama `responder_directo` solo se ha probado a mano y en los tests.
+- El cambio de `decidir` se hizo tras ver un fallo en este mismo conjunto de evaluación, que también se usa para medirlo.
+- Sin filtro por permisos todavía: el documento marcado como restringido se puede recuperar.
 - El LLM es un modelo abierto de 14B cuantizado a 4 bits: responde peor que los modelos comerciales grandes.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 
@@ -65,8 +149,11 @@ ollama pull qwen2.5:14b          # en el equipo que ejecute Ollama
 python ingest.py                  # indexa los documentos de data/ en chroma/
 python retrieve.py "¿Qué es un Pod?"               # búsqueda con reranker
 python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
-python generate.py "¿Qué es un Pod?"               # respuesta con citas
-python evaluate.py                # reproduce la tabla de resultados (~4 min en CPU)
+python generate.py "¿Qué es un Pod?"               # respuesta con citas (pipeline directo)
+python grafo.py "¿Qué es un Pod?"                  # respuesta con el grafo
+python evaluate.py                # tabla de recuperación (~4 min en CPU)
+python evaluate.py --grafo        # pipeline directo frente al grafo (~25 min)
+python -m pytest                  # tests del enrutado del grafo, sin LLM
 ```
 
 ## Estructura
@@ -75,7 +162,11 @@ python evaluate.py                # reproduce la tabla de resultados (~4 min en 
 ingest.py              troceado, embeddings e indexación en Chroma
 retrieve.py            búsqueda vectorial y reranking
 generate.py            prompt, llamada al LLM y comprobación de citas
-evaluate.py            recall@k de cada configuración sobre el conjunto de evaluación
+grafo.py               capa agéntica y correctiva con LangGraph, límites y trazas
+config.py              proveedor y modelo del LLM (desde .env) y límites del grafo
+evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
+tests/                 tests del enrutado del grafo con el LLM simulado
+docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
 eval/resultados/       resultados de cada evaluación, con fecha
