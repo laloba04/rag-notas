@@ -1,0 +1,553 @@
+{
+  "configuracion": "grafo_llm",
+  "recall@5": 0.87,
+  "no_lo_tengo_en_sin_respuesta": "5/5",
+  "no_lo_tengo_en_con_respuesta": "2/23",
+  "latencia_media_s": 17.36,
+  "latencia_mediana_s": 15.16,
+  "trampa_kubernetes": {
+    "ruta": [
+      "decidir",
+      "recuperar",
+      "evaluar",
+      "reescribir",
+      "recuperar",
+      "evaluar",
+      "sin_respuesta"
+    ],
+    "paso_por_responder_directo": false,
+    "respondio_no_lo_tengo": true
+  },
+  "ramas": {
+    "final": {
+      "generar": 22,
+      "sin_respuesta": 6
+    },
+    "pasan_por_reescribir": 6,
+    "errores": 0
+  },
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo rehago la última confirmación si me he equivocado en el mensaje?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.14,
+      "respuesta": "Para rehacer la última confirmación y corregir un mensaje de confirmación incorrecto, puedes usar el comando `git commit --amend`. Este comando abrirá tu editor de texto predeterminado con el mensaje de la última confirmación ya cargado. Puedes editar este mensaje para hacer los ajustes necesarios y luego guardarlos. Al hacer esto, se sobrescribirá la confirmación anterior con una nueva que incluirá tus cambios en el mensaje [1][2]."
+    },
+    {
+      "id": 2,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo saco un archivo del área de preparación?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.1,
+      "respuesta": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo, si quieres deshacer la preparación del archivo `CONTRIBUTING.md`, ejecutarías:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEste comando moverá el archivo de vuelta al estado no preparado en tu directorio de trabajo. [1], [2]"
+    },
+    {
+      "id": 3,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un fast-forward al fusionar ramas?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 16.17,
+      "respuesta": "Un \"avance rápido\" o \"fast forward\" en la fusión de ramas ocurre cuando Git puede mover directamente el apuntador hacia adelante sin necesidad de crear una nueva confirmación de fusión. Esto sucede cuando todas las confirmaciones en la rama que se está fusionando ya están presentes en la rama principal, es decir, no hay divergencias entre ellas.\n\nCuando ocurre un avance rápido, Git simplemente actualiza el apuntador de la rama principal para apuntar a la última confirmación de la rama que se ha fusionado. Esto simplifica el historial y evita la creación innecesaria de una nueva confirmación de fusión.\n\nEste concepto es mencionado en [1]."
+    },
+    {
+      "id": 4,
+      "tipo": "factual",
+      "pregunta": "¿Cuál es la regla de oro del rebase?",
+      "con_respuesta": true,
+      "recall5": false,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.38,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 5,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo recupero los cambios que guardé con git stash?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.56,
+      "respuesta": "Para recuperar los cambios que has guardado con `git stash`, puedes usar el comando `git stash apply`. Este comando aplicará el último guardado rápido a tu directorio de trabajo. Si deseas aplicar un guardado específico, debes indicarlo por su nombre, como en `git stash apply stash@{2}`.\n\nSi quieres que los cambios del guardado se quiten del historial después de ser aplicados (esto es, si no planeas volver a usar ese guardado), puedes utilizar el comando `git stash pop` en lugar de `git stash apply`. [1][2]"
+    },
+    {
+      "id": 6,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo veo qué borraría git clean sin borrar nada?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.72,
+      "respuesta": "Para ver qué archivos y directorios removería `git clean` sin realmente eliminarlos, puedes ejecutar el comando con la opción `-n`. Esta opción simula lo que haría el comando sin efectuar cambios reales. Por ejemplo:\n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```\nEsta salida muestra qué archivos y directorios se eliminarían si ejecutas `git clean` con las mismas opciones, pero no realiza ninguna acción de borrado [1][2]."
+    },
+    {
+      "id": 7,
+      "tipo": "factual",
+      "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 14.03,
+      "respuesta": "El punto de enganche `pre-commit` se activa antes de que teclées el mensaje de confirmación. Se utiliza para inspeccionar la instantánea (snapshot) que vas a confirmar, para verificar si has olvidado algo, asegurar que las pruebas se ejecutan o revisar cualquier aspecto del código que necesites inspeccionar. [1]"
+    },
+    {
+      "id": 8,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un Pod en Kubernetes?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 14.49,
+      "respuesta": "Un _Pod_ en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar. Esencialmente, un Pod (como una vaina) agrupa uno o más contenedores con almacenamiento y red compartidos, junto con especificaciones sobre cómo ejecutar los contenedores. Los contenedores dentro de un Pod son siempre colocados, programados y ejecutados en un contexto compartido, lo que significa que comparten la misma dirección IP y puerto, y pueden comunicarse entre sí a través de `localhost`. Además, estos contenedores tienen acceso al mismo conjunto de namespaces de Linux y cgroups para el aislamiento. [1][2]"
+    },
+    {
+      "id": 9,
+      "tipo": "numerico",
+      "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.24,
+      "respuesta": "Por defecto, el valor es 25%. Esto significa que al menos el 25% menos del número deseado de Pods se está ejecutando (máx. 25% no disponible) durante la actualización.\n\nFuentes:\n[1], [2]"
+    },
+    {
+      "id": 10,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo vuelvo a una revisión anterior de un Deployment?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 17.11,
+      "respuesta": "Para volver a una revisión anterior de un Deployment, puedes usar el comando `kubectl rollout undo`. Este comando permite retroceder al despliegue previo sin especificar ninguna versión en particular:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment\n```\n\nO bien, si deseas retroceder específicamente a una revisión determinada, por ejemplo la revisión 2, puedes hacerlo de esta manera:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n[1]"
+    },
+    {
+      "id": 11,
+      "tipo": "factual",
+      "pregunta": "¿Puedo guardar contraseñas en un ConfigMap?",
+      "con_respuesta": true,
+      "recall5": false,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 28.11,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 12,
+      "tipo": "restringido",
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.39,
+      "respuesta": "Los `Secrets` individuales están limitados a 1MiB de tamaño. [1]"
+    },
+    {
+      "id": 13,
+      "tipo": "multi_hop",
+      "pregunta": "¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?",
+      "con_respuesta": true,
+      "recall5": false,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.18,
+      "respuesta": "Kubernetes utiliza etcd como banco de datos, y etcd mantiene el estado del clúster (incluidos los Secretos). [1] No se especifica explícitamente que otro tipo de base de datos sea usada para guardar los Secrets. Por lo tanto, según la información proporcionada en este contexto, etcd es la base de datos utilizada por Kubernetes para almacenar los Secrets. [1]"
+    },
+    {
+      "id": 14,
+      "tipo": "numerico",
+      "pregunta": "¿Cuántos caracteres puede tener como máximo el valor de una etiqueta en Kubernetes?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 14.57,
+      "respuesta": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres [1]."
+    },
+    {
+      "id": 15,
+      "tipo": "factual",
+      "pregunta": "Si no hay ninguna NetworkPolicy, ¿un Pod acepta conexiones entrantes?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.45,
+      "respuesta": "Sí, si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes. Por defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas [1]."
+    },
+    {
+      "id": 16,
+      "tipo": "factual",
+      "pregunta": "¿Cuáles son las 4C de la seguridad cloud native?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.95,
+      "respuesta": "Las 4C de la seguridad en Cloud Native son:\n1. C**lode (Nube)**\n2. Clústeres\n3. Contenedores\n4. Código\n\nEstas capas se describen como una forma de aumentar la defensa en profundidad en la seguridad, según [1]."
+    },
+    {
+      "id": 17,
+      "tipo": "factual",
+      "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.91,
+      "respuesta": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, se puede usar la capacidad de ampliación del protocolo HTTP a través de las cookies para guardar datos con respecto a la sesión de comunicación y crear un contexto común para cada sesión de comunicación [1]."
+    },
+    {
+      "id": 18,
+      "tipo": "factual",
+      "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.34,
+      "respuesta": "El navegador utiliza el método HTTP `OPTIONS` para realizar la verificación previa (preflight) en CORS. [1] [2]"
+    },
+    {
+      "id": 19,
+      "tipo": "factual",
+      "pregunta": "¿Para qué sirve el atributo HttpOnly de una cookie?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 14.36,
+      "respuesta": "El atributo `HttpOnly` de una cookie es utilizado para prevenir ataques cross-site scripting (XSS). Este atributo hace que la cookie sea inaccesible desde la API de JavaScript Document.cookie, lo que significa que solo se envía al servidor y no puede ser accedida mediante scripts maliciosos. Esto ayuda a mitigar el riesgo de robo de cookies a través de XSS.\n\nFuente: [2]"
+    },
+    {
+      "id": 20,
+      "tipo": "factual",
+      "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.07,
+      "respuesta": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). [1]"
+    },
+    {
+      "id": 21,
+      "tipo": "factual",
+      "pregunta": "¿Qué directiva de Cache-Control obliga a validar siempre con el servidor antes de reutilizar una respuesta?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.72,
+      "respuesta": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada. Esto se puede ver en [1] y [2].\n\nAdemás, la combinación de `max-age=0` y `must-revalidate`, aunque no es exactamente equivalente debido a limitaciones históricas en implementaciones anteriores a HTTP/1.1, tiene una semántica similar a `no-cache`. Esto se menciona en [3]."
+    },
+    {
+      "id": 22,
+      "tipo": "factual",
+      "pregunta": "¿La autenticación HTTP Basic cifra las credenciales?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 14.1,
+      "respuesta": "No lo tiene exactamente así en la documentación proporcionada. La documentación indica que el esquema de autenticación \"Basic\" transmite las credenciales codificadas con base64, pero no cifradas. Base64 es un método de codificación y no una forma de cifrado seguro [1]. Por lo tanto, se considera que la autenticación básica no cifra las credenciales, sino que simplemente las codifica en base64 [2]."
+    },
+    {
+      "id": 23,
+      "tipo": "factual",
+      "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+      "con_respuesta": true,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.09,
+      "respuesta": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria pero no ha sido proporcionada o es incorrecta, mientras que el código 403 `Forbidden` se usa cuando las credenciales son válidas pero no autorizadas para acceder al recurso específico. La diferencia clave está en que con un 401 aún puede ser posible autenticarse correctamente para obtener acceso, mientras que con un 403 la respuesta es definitiva y el usuario no tiene los permisos necesarios incluso si las credenciales son correctas.\n\nLa fuente proporcionada solo explica directamente sobre el código 403 `Forbidden`, pero se menciona explícitamente la diferencia entre este y el 401 `Unauthorized`. [1]"
+    },
+    {
+      "id": 24,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la última versión estable de Kubernetes?",
+      "con_respuesta": false,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 28.09,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 25,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cómo se configura un pipeline en Jenkins?",
+      "con_respuesta": false,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 25.85,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 26,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuánto cuesta un clúster gestionado de Kubernetes en Google Cloud?",
+      "con_respuesta": false,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 28.87,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 27,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Qué diferencia hay entre GitHub Actions y GitLab CI?",
+      "con_respuesta": false,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 25.39,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 28,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la capital de Australia?",
+      "con_respuesta": false,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 25.81,
+      "respuesta": "No lo tengo en la documentación."
+    }
+  ]
+}
