@@ -3,6 +3,10 @@ __pycache__/
 chroma/
 .env
 .cache/
+.pytest_cache/
+
+# Trazas del grafo (se generan al ejecutar)
+logs/
 
 # PDFs pendientes de revisar licencia
 pdfs/
@@ -10,3 +14,4 @@ pdfs/
 # Notas personales
 guia-rag.md
 README-plantilla.md
+notas-entrevista.md
