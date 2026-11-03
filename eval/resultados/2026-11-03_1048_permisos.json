@@ -1,0 +1,69 @@
+{
+  "fuentes_restringidas": [
+    "06-k8s-secrets.md"
+  ],
+  "busqueda": {
+    "vectorial_publico": {
+      "trozos": 0,
+      "preguntas": 0
+    },
+    "vectorial_total": {
+      "trozos": 68,
+      "preguntas": 7
+    },
+    "hibrida_publico": {
+      "trozos": 0,
+      "preguntas": 0
+    },
+    "hibrida_total": {
+      "trozos": 58,
+      "preguntas": 9
+    }
+  },
+  "respuestas": [
+    {
+      "id": 12,
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "pipeline": "actual",
+      "acceso": "publico",
+      "trozos_restringidos": 0,
+      "recall5": false,
+      "no_lo_tengo": true,
+      "segundos": 16.66,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 12,
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "pipeline": "actual",
+      "acceso": "total",
+      "trozos_restringidos": 5,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "segundos": 10.71,
+      "respuesta": "Los `Secrets` individuales están limitados a 1MiB de tamaño. Esto es para desalentar la creación de `Secrets` muy grandes que agotarían la memoria del apiserver y de kubelet [1]."
+    },
+    {
+      "id": 12,
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "pipeline": "grafo_reranker",
+      "acceso": "publico",
+      "trozos_restringidos": 0,
+      "recall5": false,
+      "no_lo_tengo": true,
+      "segundos": 20.62,
+      "respuesta": "No lo tengo en la documentación."
+    },
+    {
+      "id": 12,
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "pipeline": "grafo_reranker",
+      "acceso": "total",
+      "trozos_restringidos": 1,
+      "recall5": true,
+      "no_lo_tengo": false,
+      "segundos": 10.36,
+      "respuesta": "Los `Secrets` individuales están limitados a 1MiB de tamaño.[1]"
+    }
+  ]
+}

@@ -4,9 +4,15 @@ Evaluación con el golden set.
 Uso (desde la raíz del repo, después de python ingest.py):
     python evaluate.py           # búsqueda: recall@k de cada configuración, desglosado por tipo
     python evaluate.py --grafo   # respuestas: pipeline actual frente al grafo (necesita el LLM)
+    python evaluate.py --permisos  # filtro por permisos: búsqueda y respuestas con acceso público y total
 
 Una pregunta cuenta como acierto en recall@k si alguno de los k primeros trozos
 es de una de sus fuentes esperadas y contiene su texto_esperado.
+
+La evaluación de búsqueda y la de --grafo miden CALIDAD, así que se hacen con acceso total
+(todos los niveles): así los números son comparables con los anteriores al filtro y la
+pregunta del documento restringido no cuenta como fallo de la búsqueda. El filtro se mide
+aparte, con --permisos.
 """
 import json
 import statistics
@@ -17,17 +23,21 @@ from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
+import config
 from retrieve import buscar
 
 K_MAX = 10          # buscamos 10 trozos y miramos en qué puesto aparece el bueno
 KS = [1, 3, 5, 10]  # recall@1, @3, @5 y @10 salen de la misma búsqueda
 
+# Acceso total para medir calidad (ver la cabecera); el filtro se mide con --permisos.
+ACCESO_TOTAL = config.NIVELES_ACCESO
+
 # Cada configuración es un nombre y los parámetros que se pasan a buscar().
 CONFIGURACIONES = {
-    "vectorial": {"rerank": False, "hibrida": False},
-    "vectorial+reranker": {"rerank": True, "hibrida": False},
-    "hibrida": {"rerank": False, "hibrida": True},
-    "hibrida+reranker": {"rerank": True, "hibrida": True},
+    "vectorial": {"rerank": False, "hibrida": False, "acceso": ACCESO_TOTAL},
+    "vectorial+reranker": {"rerank": True, "hibrida": False, "acceso": ACCESO_TOTAL},
+    "hibrida": {"rerank": False, "hibrida": True, "acceso": ACCESO_TOTAL},
+    "hibrida+reranker": {"rerank": True, "hibrida": True, "acceso": ACCESO_TOTAL},
 }
 
 golden = json.load(open("eval/golden_set.json", encoding="utf-8"))
@@ -97,7 +107,7 @@ def evaluar(nombre, parametros):
 def evaluar_busqueda():
     # Calentamiento: la primera búsqueda carga los modelos y el índice BM25 (>10 s);
     # sin esto, esa carga inflaría la latencia de la primera configuración.
-    buscar("calentamiento", rerank=True, hibrida=True)
+    buscar("calentamiento", rerank=True, hibrida=True, acceso=ACCESO_TOTAL)
     todos ={nombre: evaluar(nombre, parametros) for nombre, parametros in CONFIGURACIONES.items()}
 
     # Tabla resumen para copiar al README.
@@ -126,9 +136,9 @@ def acierta_recall(q, docs):
                for texto, meta, _ in docs[:5])
 
 
-def ejecutar_actual(pregunta):
+def ejecutar_actual(pregunta, acceso=ACCESO_TOTAL):
     import generate
-    r = generate.responder(pregunta)
+    r = generate.responder(pregunta, acceso=acceso)
     return {"respuesta": r["respuesta"], "docs": r["docs"], "ruta": None, "intentos": 0,
             "segundos": r["segundos"]["busqueda"] + r["segundos"]["generacion"]}
 
@@ -137,8 +147,8 @@ def ejecutor_grafo(metodo):
     import grafo
     app = grafo.construir_grafo(replace(grafo.dependencias_reales(), metodo_evaluacion=metodo))
 
-    def ejecutar(pregunta):
-        r = grafo.responder(pregunta, app=app)
+    def ejecutar(pregunta, acceso=ACCESO_TOTAL):
+        r = grafo.responder(pregunta, app=app, acceso=acceso)
         return {"respuesta": r["respuesta"], "docs": r.get("docs", []), "ruta": r["ruta"],
                 "intentos": r.get("intentos", 0), "segundos": r["total_s"], "error": r["error"]}
     return ejecutar
@@ -207,8 +217,74 @@ def evaluar_respuestas():
               f"| {r['no_lo_tengo_en_con_respuesta']} | {r['latencia_media_s']} s |".replace(".", ","))
 
 
+# ---------------------------------------------------------------------------
+# Permisos: el documento restringido no debe salir con acceso público
+# ---------------------------------------------------------------------------
+
+def fuentes_restringidas():
+    """Ficheros con confidencialidad distinta de "publico", leídos del frontmatter de data/."""
+    import frontmatter
+    return sorted(r.name for r in Path("data").glob("*.md")
+                  if frontmatter.load(r).get("confidencialidad") != "publico")
+
+
+def evaluar_permisos():
+    restringidas = fuentes_restringidas()
+    accesos = {"publico": ("publico",), "total": ACCESO_TOTAL}
+    print(f"Documentos no públicos: {', '.join(restringidas)}\n")
+
+    # 1) Búsqueda, sin LLM: las 28 preguntas, mirando los K_INICIAL candidatos (lo que recibe
+    #    el reranker; el reranker solo reordena, no añade nada). Con acceso público tiene que
+    #    salir 0; con acceso total se cuenta también, para ver que la prueba no es vacía.
+    busqueda = {}
+    print("=== Búsqueda: trozos restringidos entre los candidatos de las 28 preguntas ===")
+    for modo in ("vectorial", "hibrida"):
+        for nombre_acceso, acceso in accesos.items():
+            trozos = preguntas = 0
+            for q in golden:
+                docs = buscar(q["pregunta"], k=config.K_INICIAL, rerank=False,
+                              hibrida=modo == "hibrida", acceso=acceso)
+                n = sum(meta["fuente"] in restringidas for _, meta, _ in docs)
+                trozos += n
+                preguntas += n > 0
+            busqueda[f"{modo}_{nombre_acceso}"] = {"trozos": trozos, "preguntas": preguntas}
+            print(f"  {modo:9s} acceso {nombre_acceso:7s}: {trozos} trozos restringidos "
+                  f"en {preguntas} de {len(golden)} preguntas", flush=True)
+
+    # 2) Respuestas, con el LLM: las preguntas de tipo "restringido", por los dos pipelines.
+    print("\n=== Respuestas a las preguntas sobre el documento restringido ===")
+    respuestas = []
+    ejecutores = {"actual": ejecutar_actual, "grafo_reranker": ejecutor_grafo("reranker")}
+    for q in (q for q in golden if q["tipo"] == "restringido"):
+        for nombre, ejecutar in ejecutores.items():
+            for nombre_acceso, acceso in accesos.items():
+                r = ejecutar(q["pregunta"], acceso=acceso)
+                fila = {
+                    "id": q["id"], "pregunta": q["pregunta"], "pipeline": nombre,
+                    "acceso": nombre_acceso,
+                    "trozos_restringidos": sum(m["fuente"] in restringidas for _, m, _ in r["docs"]),
+                    "recall5": acierta_recall(q, r["docs"]),
+                    "no_lo_tengo": dice_no_lo_tengo(r["respuesta"]),
+                    "segundos": round(r["segundos"], 2), "respuesta": r["respuesta"],
+                }
+                respuestas.append(fila)
+                print(f"  {q['id']:>2} {nombre:14s} acceso {nombre_acceso:7s}: "
+                      f"{fila['trozos_restringidos']} trozos restringidos, "
+                      f"{'dice' if fila['no_lo_tengo'] else 'NO dice'} \"No lo tengo\"", flush=True)
+                print(f"     -> {r['respuesta'][:200]!r}", flush=True)
+
+    salida = Path("eval/resultados") / f"{datetime.now():%Y-%m-%d_%H%M}_permisos.json"
+    salida.parent.mkdir(exist_ok=True)
+    salida.write_text(json.dumps({"fuentes_restringidas": restringidas, "busqueda": busqueda,
+                                  "respuestas": respuestas}, ensure_ascii=False, indent=2),
+                      encoding="utf-8")
+    print(f"\nGuardado en {salida}")
+
+
 if __name__ == "__main__":
-    if "--grafo" in sys.argv:
+    if "--permisos" in sys.argv:
+        evaluar_permisos()
+    elif "--grafo" in sys.argv:
         evaluar_respuestas()
     else:
         evaluar_busqueda()
