@@ -4,7 +4,7 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. Pendiente: filtro por permisos, búsqueda híbrida y prueba de prompt injection.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Pendiente: filtro por permisos y prueba de prompt injection.
 
 ## Arquitectura
 
@@ -52,12 +52,14 @@ Diagrama generado con `app.get_graph().draw_mermaid()` (`python scripts/dibujar_
 
 Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta.
 
-| Configuración | Recall@1 | Recall@5 | Latencia de búsqueda (CPU) |
-|---|---|---|---|
-| Solo vectorial | 0,57 | 0,91 | ~0,1 s |
-| Vectorial + reranker (25 candidatos) | 0,65 | 0,91 | ~8 s |
+| Configuración | Recall@1 | Recall@3 | Recall@5 | Recall@10 | Latencia media (CPU) |
+|---|---|---|---|---|---|
+| Solo vectorial | 0,57 | 0,87 | 0,91 | 0,91 | 0,12 s |
+| Vectorial + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 10,11 s |
+| Híbrida (vectorial + BM25, RRF) | 0,52 | 0,83 | 0,83 | 0,91 | 0,12 s |
+| Híbrida + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 8,44 s |
 
-Por tipo de pregunta (recall@5, igual en las dos configuraciones): comandos literales 5/5, cifras 2/2, factuales 13/14, multi-hop 0/1.
+Por tipo de pregunta (recall@5): las configuraciones con reranker y la solo vectorial sacan comandos literales 5/5, cifras 2/2, factuales 13/14 y multi-hop 0/1. La híbrida sin reranker baja a cifras 1/2 y factuales 12/14.
 
 **Qué aporta el reranker:** sube el fragmento correcto al primer puesto en 6 preguntas, pero lo baja en otras 4 (de 1.º a 2.º en dos de ellas). Ganancia neta: 2 preguntas más con el fragmento correcto en primer lugar. No cambia el recall@5: los fallos están antes, en los candidatos que recibe.
 
@@ -65,6 +67,15 @@ Por tipo de pregunta (recall@5, igual en las dos configuraciones): comandos lite
 
 - **"¿Cuál es la regla de oro del rebase?"** La traducción española de Pro Git no usa "rebase" ni "regla de oro", sino "reorganizar": *"Nunca reorganices confirmaciones que hayas enviado a un repositorio público"*. La búsqueda vectorial deja ese fragmento en el puesto 31, fuera de los 25 candidatos del reranker. Ni ampliando a 50 candidatos lo sube al top 10: es un problema de vocabulario de la pregunta, no de orden. Candidato a reescritura de la consulta.
 - **"¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?"** Necesita combinar dos documentos (los Secrets se guardan en etcd; etcd es un almacén clave-valor). Una sola búsqueda no lo resuelve.
+
+**Qué aporta la búsqueda híbrida: nada en este corpus.**
+
+- **Con reranker, el resultado es idéntico**: el fragmento correcto queda en el mismo puesto en las 23 preguntas. BM25 añade candidatos, pero el reranker nunca los prefiere a los de la búsqueda vectorial. La diferencia de latencia (10,11 s frente a 8,44 s) no se debe a la híbrida: las dos pasan 25 candidatos al reranker, así que es variación entre ejecuciones.
+- **Sin reranker, empeora**: recall@5 baja de 0,91 a 0,83. Mejora 2 preguntas de comandos (recuperar lo guardado con `git stash` y volver a una revisión anterior de un Deployment pasan del 2.º al 1.er puesto), pero empeora 7. BM25 premia palabras sueltas: en "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?" el fragmento correcto pasa del 3.er al 7.º puesto.
+- **Los comandos literales no la necesitaban**: la búsqueda vectorial ya los encontraba todos (5/5) en el 1.er o 2.º puesto. El modelo de embeddings capta bien `--amend`, `git stash` o `kubectl` porque aparecen escritos igual en la pregunta y en el texto.
+- **No arregla la pregunta del rebase**: el fragmento correcto solo comparte con la pregunta las palabras "la" y "de", y BM25 lo deja en el puesto 305 de 610. Las palabras exactas no ayudan cuando el documento dice "reorganizar" y la pregunta, "rebase".
+
+Por eso está desactivada por defecto (`HIBRIDA=false` en `config.py`; se activa con `HIBRIDA=true` en `.env` o `python retrieve.py --hibrida`). Con un corpus con más códigos, siglas o nombres propios que no aparezcan escritos igual en la pregunta, podría compensar; habría que medirlo.
 
 ### Respuestas: pipeline directo frente al grafo
 
@@ -120,7 +131,9 @@ Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 | Límites: 10 pasos de grafo, timeout por paso y por llamada al LLM | El camino más largo posible son 7 pasos; el límite corta cualquier bucle por error. Si se supera un límite, la respuesta es "No lo tengo" |
 | Proveedor y modelo del LLM solo en `.env` | Cambiar de modelo no toca el código. Si faltan, el programa falla con un mensaje claro |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (12 tests en <1 s) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (19 tests en <1 s, contando los de RRF) |
+| Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
+| Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
@@ -149,9 +162,10 @@ ollama pull qwen2.5:14b          # en el equipo que ejecute Ollama
 python ingest.py                  # indexa los documentos de data/ en chroma/
 python retrieve.py "¿Qué es un Pod?"               # búsqueda con reranker
 python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
+python retrieve.py --hibrida "¿Qué es un Pod?"     # vectorial + BM25 y reranker
 python generate.py "¿Qué es un Pod?"               # respuesta con citas (pipeline directo)
 python grafo.py "¿Qué es un Pod?"                  # respuesta con el grafo
-python evaluate.py                # tabla de recuperación (~4 min en CPU)
+python evaluate.py                # tabla de recuperación, 4 configuraciones (~8 min en CPU)
 python evaluate.py --grafo        # pipeline directo frente al grafo (~25 min)
 python -m pytest                  # tests del enrutado del grafo, sin LLM
 ```
@@ -160,12 +174,12 @@ python -m pytest                  # tests del enrutado del grafo, sin LLM
 
 ```
 ingest.py              troceado, embeddings e indexación en Chroma
-retrieve.py            búsqueda vectorial y reranking
+retrieve.py            búsqueda vectorial, BM25, fusión RRF y reranking
 generate.py            prompt, llamada al LLM y comprobación de citas
 grafo.py               capa agéntica y correctiva con LangGraph, límites y trazas
 config.py              proveedor y modelo del LLM (desde .env) y límites del grafo
 evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
-tests/                 tests del enrutado del grafo con el LLM simulado
+tests/                 tests del grafo (LLM simulado) y de la fusión RRF
 docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
