@@ -11,6 +11,7 @@ es de una de sus fuentes esperadas y contiene su texto_esperado.
 import json
 import statistics
 import sys
+import time
 from collections import Counter, defaultdict
 from dataclasses import replace
 from datetime import datetime
@@ -23,8 +24,10 @@ KS = [1, 3, 5, 10]  # recall@1, @3, @5 y @10 salen de la misma búsqueda
 
 # Cada configuración es un nombre y los parámetros que se pasan a buscar().
 CONFIGURACIONES = {
-    "vectorial": {"rerank": False},
-    "vectorial+reranker": {"rerank": True},
+    "vectorial": {"rerank": False, "hibrida": False},
+    "vectorial+reranker": {"rerank": True, "hibrida": False},
+    "hibrida": {"rerank": False, "hibrida": True},
+    "hibrida+reranker": {"rerank": True, "hibrida": True},
 }
 
 golden = json.load(open("eval/golden_set.json", encoding="utf-8"))
@@ -33,27 +36,35 @@ con_respuesta = [q for q in golden if q["texto_esperado"]]
 
 
 def puesto_del_acierto(q, parametros):
-    """Devuelve el puesto (1, 2, ...) del primer trozo correcto, o None si no está en los K_MAX."""
-    for puesto, (texto, meta, _) in enumerate(buscar(q["pregunta"], k=K_MAX, **parametros), start=1):
+    """Devuelve (puesto del primer trozo correcto o None si no está en los K_MAX, segundos)."""
+    t0 = time.perf_counter()
+    resultados = buscar(q["pregunta"], k=K_MAX, **parametros)
+    segundos = time.perf_counter() - t0
+    for puesto, (texto, meta, _) in enumerate(resultados, start=1):
         if meta["fuente"] in q["fuentes"] and q["texto_esperado"].lower() in texto.lower():
-            return puesto
-    return None
+            return puesto, segundos
+    return None, segundos
 
 
 def recall(filas, k):
     return sum(1 for r in filas if r["puesto"] and r["puesto"] <= k) / len(filas)
 
 
+def latencia_media(filas):
+    return statistics.mean(r["segundos"] for r in filas)
+
+
 def evaluar(nombre, parametros):
     print(f"=== {nombre} ===")
-    resultados = [
-        {"id": q["id"], "tipo": q["tipo"], "pregunta": q["pregunta"],
-         "puesto": puesto_del_acierto(q, parametros)}
-        for q in con_respuesta
-    ]
+    resultados = []
+    for q in con_respuesta:
+        puesto, segundos = puesto_del_acierto(q, parametros)
+        resultados.append({"id": q["id"], "tipo": q["tipo"], "pregunta": q["pregunta"],
+                           "puesto": puesto, "segundos": round(segundos, 3)})
 
     for k in KS:
         print(f"recall@{k:<2} = {recall(resultados, k):.2f}")
+    print(f"latencia media = {latencia_media(resultados):.2f} s")
 
     print("\nrecall@5 por tipo:")
     por_tipo = defaultdict(list)
@@ -76,6 +87,7 @@ def evaluar(nombre, parametros):
     salida.write_text(json.dumps({
         "configuracion": nombre,
         **{f"recall@{k}": round(recall(resultados, k), 3) for k in KS},
+        "latencia_media_s": round(latencia_media(resultados), 3),
         "preguntas": resultados,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nGuardado en {salida}\n")
@@ -83,13 +95,17 @@ def evaluar(nombre, parametros):
 
 
 def evaluar_busqueda():
-    todos = {nombre: evaluar(nombre, parametros) for nombre, parametros in CONFIGURACIONES.items()}
+    # Calentamiento: la primera búsqueda carga los modelos y el índice BM25 (>10 s);
+    # sin esto, esa carga inflaría la latencia de la primera configuración.
+    buscar("calentamiento", rerank=True, hibrida=True)
+    todos ={nombre: evaluar(nombre, parametros) for nombre, parametros in CONFIGURACIONES.items()}
 
     # Tabla resumen para copiar al README.
-    print("| Configuración | " + " | ".join(f"Recall@{k}" for k in KS) + " |")
-    print("|---" * (len(KS) + 1) + "|")
+    print("| Configuración | " + " | ".join(f"Recall@{k}" for k in KS) + " | Latencia media |")
+    print("|---" * (len(KS) + 2) + "|")
     for nombre, resultados in todos.items():
-        print(f"| {nombre} | " + " | ".join(f"{recall(resultados, k):.2f}".replace(".", ",") for k in KS) + " |")
+        print(f"| {nombre} | " + " | ".join(f"{recall(resultados, k):.2f}".replace(".", ",") for k in KS)
+              + f" | {latencia_media(resultados):.2f} s |".replace(".", ","))
 
 
 # ---------------------------------------------------------------------------
