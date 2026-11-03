@@ -4,7 +4,7 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Pendiente: filtro por permisos y prueba de prompt injection.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda. Pendiente: prueba de prompt injection.
 
 ## Arquitectura
 
@@ -50,7 +50,7 @@ Diagrama generado con `app.get_graph().draw_mermaid()` (`python scripts/dibujar_
 
 ### Recuperación
 
-Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta.
+Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta. Esta tabla y la de respuestas miden calidad, así que se calculan con acceso total (también lo restringido); el filtro por permisos se mide aparte, en [Seguridad](#seguridad). Al añadir el filtro se repitió la evaluación con acceso total y los puestos de las 23 preguntas salieron idénticos en las 4 configuraciones (`eval/resultados/2026-11-03_1040` a `_1046`).
 
 | Configuración | Recall@1 | Recall@3 | Recall@5 | Recall@10 | Latencia media (CPU) |
 |---|---|---|---|---|---|
@@ -114,6 +114,36 @@ Fragmentos medios que pasan la evaluación: de 5 a 2,17 con reranker y de 5 a 1,
 
 Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 
+## Seguridad
+
+### Filtro por permisos
+
+Cada documento lleva en su frontmatter un nivel de `confidencialidad` (`publico` o `restringido`), que se copia a los metadatos de todos sus fragmentos. `06-k8s-secrets.md` está marcado como restringido a propósito, para probar el filtro.
+
+- **El filtro va en la recuperación, no en el prompt.** `buscar()` recibe los niveles que puede ver quien pregunta y se los pasa a Chroma como filtro `where` dentro de la propia consulta. Lo que no se recupera no puede llegar al LLM. Pedirle al modelo que "no use los documentos restringidos" dependería de que obedezca, y una inyección de prompt podría convencerle de lo contrario: el LLM no es un control de acceso.
+- **Por defecto, solo lo público** (mínimo privilegio). El valor por defecto está fijo en `config.py` y no en `.env`, para que una línea olvidada en la configuración no abra todo el corpus.
+- **BM25 filtra también.** La búsqueda híbrida junta dos búsquedas: si solo filtrara la vectorial, el documento restringido entraría por la de palabras clave, y en la fusión RRF ya no se distinguiría de dónde vino. Por eso hay un índice BM25 por nivel de acceso, construido solo con los fragmentos permitidos: los restringidos no están en el índice público ni cuentan en sus estadísticas.
+- **Falla en cerrado.** Un fragmento sin etiqueta de confidencialidad no lo ve nadie, y un nivel desconocido (por ejemplo, una errata como `"pubico"`) da error en vez de devolver una lista vacía sin avisar.
+- **Tests sin modelos** (`tests/test_permisos.py`): con una colección de Chroma real en memoria, se pregunta con el texto literal del fragmento restringido y k mayor que el número de fragmentos, por las 6 vías (vectorial, BM25, híbrida y `buscar()` sin y con reranker). Con acceso público no sale nunca; con acceso total, sí. Si se quita el filtro, fallan 8 tests.
+
+Medido con `python evaluate.py --permisos` (`eval/resultados/2026-11-03_1048_permisos.json`):
+
+| Búsqueda (25 candidatos, las 28 preguntas) | Fragmentos de `06-k8s-secrets.md` | Preguntas en las que aparecen |
+|---|---|---|
+| Vectorial, acceso público | 0 | 0 de 28 |
+| Vectorial, acceso total | 68 | 7 de 28 |
+| Híbrida, acceso público | 0 | 0 de 28 |
+| Híbrida, acceso total | 58 | 9 de 28 |
+
+Con acceso total, el documento restringido aparece entre los candidatos de 7 a 9 preguntas, aunque solo una pregunta trata sobre él: sin filtro se colaría en respuestas a preguntas que no lo buscan.
+
+| Pregunta 12: "¿Qué tamaño máximo puede tener un Secret?" | Acceso público | Acceso total |
+|---|---|---|
+| Pipeline directo | "No lo tengo en la documentación." (0 fragmentos restringidos) | Responde 1 MiB citando el documento restringido |
+| Grafo (reranker, umbral 0,5) | "No lo tengo en la documentación." (0 fragmentos restringidos) | Responde 1 MiB citando el documento restringido |
+
+Es una sola pregunta y una sola ejecución por caso: comprueba que el nivel de acceso llega de punta a punta, no es una medida estadística.
+
 ## Decisiones técnicas
 
 | Decisión | Motivo |
@@ -131,9 +161,10 @@ Cada ejecución de la evaluación se guarda con fecha en `eval/resultados/`.
 | Límites: 10 pasos de grafo, timeout por paso y por llamada al LLM | El camino más largo posible son 7 pasos; el límite corta cualquier bucle por error. Si se supera un límite, la respuesta es "No lo tengo" |
 | Proveedor y modelo del LLM solo en `.env` | Cambiar de modelo no toca el código. Si faltan, el programa falla con un mensaje claro |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (19 tests en <1 s, contando los de RRF) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (36 tests en <1 s, contando los de RRF y los de permisos) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
+| Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
@@ -146,7 +177,7 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama 
 - De las respuestas se mide si dicen "No lo tengo", no si su contenido es correcto (falta un juez de fidelidad al contexto).
 - El conjunto no tiene saludos ni preguntas sobre la conversación, así que la rama `responder_directo` solo se ha probado a mano y en los tests.
 - El cambio de `decidir` se hizo tras ver un fallo en este mismo conjunto de evaluación, que también se usa para medirlo.
-- Sin filtro por permisos todavía: el documento marcado como restringido se puede recuperar.
+- Los permisos son por documento y de dos niveles (`publico` / `restringido`), y quien llama declara su nivel: no hay autenticación de usuarios. En un sistema real, el nivel saldría de la identidad autenticada (p. ej. los grupos del usuario), nunca de lo que diga la petición.
 - El LLM es un modelo abierto de 14B cuantizado a 4 bits: responde peor que los modelos comerciales grandes.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 
@@ -165,8 +196,10 @@ python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
 python retrieve.py --hibrida "¿Qué es un Pod?"     # vectorial + BM25 y reranker
 python generate.py "¿Qué es un Pod?"               # respuesta con citas (pipeline directo)
 python grafo.py "¿Qué es un Pod?"                  # respuesta con el grafo
+python generate.py --acceso=publico,restringido "¿Qué tamaño máximo puede tener un Secret?"  # ve también lo restringido (por defecto, solo lo público; vale igual en retrieve.py y grafo.py)
 python evaluate.py                # tabla de recuperación, 4 configuraciones (~8 min en CPU)
 python evaluate.py --grafo        # pipeline directo frente al grafo (~25 min)
+python evaluate.py --permisos     # filtro por permisos: búsqueda y respuestas con acceso público y total
 python -m pytest                  # tests del enrutado del grafo, sin LLM
 ```
 
@@ -179,7 +212,7 @@ generate.py            prompt, llamada al LLM y comprobación de citas
 grafo.py               capa agéntica y correctiva con LangGraph, límites y trazas
 config.py              proveedor y modelo del LLM (desde .env) y límites del grafo
 evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
-tests/                 tests del grafo (LLM simulado) y de la fusión RRF
+tests/                 tests del grafo (LLM simulado), de la fusión RRF y del filtro por permisos
 docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
