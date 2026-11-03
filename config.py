@@ -53,6 +53,13 @@ HIBRIDA = os.environ.get("HIBRIDA", "false").lower() == "true"
 # original (Cormack et al., 2009); suaviza la diferencia entre los primeros puestos.
 RRF_K = 60
 
+# --- Permisos ---
+# Niveles de confidencialidad que existen en el frontmatter de data/*.md.
+NIVELES_ACCESO = ("publico", "restringido")
+# Mínimo privilegio: si quien llama no dice nada, solo ve lo público. Va fijo en el código
+# y no en .env a propósito: una línea olvidada en .env no debe poder abrir todo el corpus.
+ACCESO_POR_DEFECTO = ("publico",)
+
 # Trazas del grafo: una línea JSON por respuesta.
 FICHERO_TRAZAS = os.environ.get("FICHERO_TRAZAS", "logs/trazas.jsonl")
 
