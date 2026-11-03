@@ -4,6 +4,7 @@ recuperado y, si no sirve, reescribe la pregunta una vez antes de rendirse.
 
 Uso (desde la raíz del repo, después de python ingest.py y con .env configurado):
     python grafo.py "¿Cómo deshago el último commit?"
+    python grafo.py --acceso=publico,restringido "¿Qué tamaño máximo puede tener un Secret?"
 
     decidir -> responder_directo                    (saludos y preguntas sobre la conversación)
     decidir -> recuperar -> evaluar -> generar      (hay chunks relevantes)
@@ -30,6 +31,7 @@ import config
 class Estado(TypedDict, total=False):
     pregunta: str                   # la que se usa para buscar (puede estar reescrita)
     pregunta_original: str          # la del usuario, sin tocar
+    acceso: tuple                   # niveles de confidencialidad que puede ver quien pregunta
     docs: list                      # chunks como (texto, metadatos, puntuación)
     intentos: int                   # reescrituras hechas
     ruta: Annotated[list, operator.add]          # nodos recorridos, en orden
@@ -46,7 +48,7 @@ class Dependencias:
     """Lo que el grafo necesita del exterior. En los tests se sustituye por funciones falsas."""
     decidir: Callable[[str], str]                 # pregunta -> "buscar" | "directo"
     responder_directo: Callable[[str], str]       # pregunta -> texto
-    buscar: Callable[[str], list]                 # pregunta -> [(texto, meta, puntuación)]
+    buscar: Callable[[str, tuple], list]          # (pregunta, acceso) -> [(texto, meta, puntuación)]
     juzgar: Callable[[str, str], bool]            # (pregunta, texto del chunk) -> ¿relevante?
     reescribir: Callable[[str], str]              # pregunta -> pregunta reformulada
     generar: Callable[[str, list], str]           # (pregunta, docs) -> respuesta con citas
@@ -82,7 +84,9 @@ def construir_grafo(dep: Dependencias):
         return {"respuesta": dep.responder_directo(estado["pregunta_original"]), "fuentes": []}
 
     def recuperar(estado):
-        return {"docs": dep.buscar(estado["pregunta"])}
+        # El acceso viaja en el estado (es de cada petición, no del grafo compilado) y se
+        # aplica en la búsqueda: lo que no se recupera no llega ni a evaluar ni al LLM.
+        return {"docs": dep.buscar(estado["pregunta"], estado["acceso"])}
 
     def evaluar(estado):
         docs = estado["docs"]
@@ -199,7 +203,7 @@ def dependencias_reales():
         decidir=lambda p: ("directo" if clasificador.invoke(PROMPT_DECIDIR.format(pregunta=p))
                            .categoria in CATEGORIAS_DIRECTAS else "buscar"),
         responder_directo=lambda p: texto(llm.invoke(PROMPT_DIRECTO.format(pregunta=p))),
-        buscar=lambda p: buscar(p, k=config.K, rerank=True),
+        buscar=lambda p, acceso: buscar(p, k=config.K, rerank=True, acceso=acceso),
         juzgar=lambda p, t: juez.invoke(PROMPT_JUZGAR.format(pregunta=p, texto=t)).relevante,
         reescribir=lambda p: texto(llm.invoke(PROMPT_REESCRIBIR.format(pregunta=p))),
         generar=lambda p, docs: texto(llm.invoke(
@@ -229,6 +233,7 @@ def guardar_traza(pregunta, estado, total_s, metodo_evaluacion, error=None):
         "pregunta_longitud": len(pregunta),
         "modelo": config.LLM_MODELO,
         "metodo_evaluacion": metodo_evaluacion,
+        "acceso": list(estado.get("acceso", [])),
         "ruta": estado.get("ruta", []),
         "reintentos": estado.get("intentos", 0),
         "latencias": estado.get("latencias", []),
@@ -242,10 +247,13 @@ def guardar_traza(pregunta, estado, total_s, metodo_evaluacion, error=None):
         f.write(json.dumps(traza, ensure_ascii=False) + "\n")
 
 
-def responder(pregunta, app=None, trazar=True):
-    """Ejecuta el grafo con el límite de pasos y devuelve el estado final."""
+def responder(pregunta, app=None, trazar=True, acceso=None):
+    """Ejecuta el grafo con el límite de pasos y devuelve el estado final.
+    acceso: niveles que puede ver quien pregunta (None = config.ACCESO_POR_DEFECTO)."""
+    from retrieve import normalizar_acceso     # no carga modelos: solo valida los niveles
     app = app or app_por_defecto()
-    inicial = {"pregunta": pregunta, "pregunta_original": pregunta, "intentos": 0}
+    inicial = {"pregunta": pregunta, "pregunta_original": pregunta, "intentos": 0,
+               "acceso": normalizar_acceso(acceso)}
     t0 = time.perf_counter()
     error = None
     try:
@@ -261,8 +269,10 @@ def responder(pregunta, app=None, trazar=True):
 
 
 if __name__ == "__main__":
-    pregunta = " ".join(sys.argv[1:]) or "¿Cómo deshago el último commit?"
-    r = responder(pregunta)
+    from retrieve import separar_acceso
+    acceso, args = separar_acceso(sys.argv[1:])
+    pregunta = " ".join(args) or "¿Cómo deshago el último commit?"
+    r = responder(pregunta, acceso=acceso)
     print(f"Pregunta: {pregunta}\n")
     print(r["respuesta"])
     if r.get("fuentes"):

@@ -4,6 +4,7 @@ usando SOLO esos trozos, citando cada afirmación con [n].
 
 Uso (desde la raíz del repo, después de python ingest.py y con .env configurado):
     python generate.py "¿Cómo deshago el último commit?"
+    python generate.py --acceso=publico,restringido "¿Qué tamaño máximo puede tener un Secret?"
 """
 import re
 import sys
@@ -13,7 +14,7 @@ import requests
 
 from config import (LLM_MODELO, NO_LO_TENGO, OLLAMA_URL, TEMPERATURA, TIMEOUT_LLM_S,
                     comprobar_llm)
-from retrieve import buscar
+from retrieve import buscar, separar_acceso
 
 # Instrucciones fijas para el modelo (sección 8 de la guía).
 SYSTEM = f"""Eres un asistente que responde preguntas sobre documentación técnica.
@@ -63,10 +64,11 @@ def citas_invalidas(texto, n_fragmentos):
     return sorted(n for n in citadas if not 1 <= n <= n_fragmentos)
 
 
-def responder(pregunta, k=5, rerank=True):
-    """Pipeline completo: búsqueda -> prompt -> LLM -> comprobación de citas."""
+def responder(pregunta, k=5, rerank=True, acceso=None):
+    """Pipeline completo: búsqueda -> prompt -> LLM -> comprobación de citas.
+    acceso: niveles que puede ver quien pregunta (None = solo lo público, ver retrieve.buscar)."""
     t0 = time.perf_counter()
-    resultados = buscar(pregunta, k=k, rerank=rerank)
+    resultados = buscar(pregunta, k=k, rerank=rerank, acceso=acceso)
     t1 = time.perf_counter()
     texto, tokens = llamar_llm(construir_prompt(pregunta, resultados))
     t2 = time.perf_counter()
@@ -82,8 +84,9 @@ def responder(pregunta, k=5, rerank=True):
 
 
 if __name__ == "__main__":
-    pregunta = " ".join(sys.argv[1:]) or "¿Cómo deshago el último commit?"
-    r = responder(pregunta)
+    acceso, args = separar_acceso(sys.argv[1:])
+    pregunta = " ".join(args) or "¿Cómo deshago el último commit?"
+    r = responder(pregunta, acceso=acceso)
     print(f"Pregunta: {r['pregunta']}\n")
     print(r["respuesta"])
     print("\nFuentes:")

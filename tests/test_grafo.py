@@ -6,6 +6,8 @@ Uso:  python -m pytest
 """
 import json
 
+import pytest
+
 import config
 from grafo import Dependencias, construir_grafo, responder
 
@@ -19,13 +21,15 @@ class Llamadas:
         self.buscar = 0
         self.reescribir = 0
         self.juzgar = 0
+        self.acceso = None      # el último nivel de acceso con el que se buscó
 
 
 def dependencias(llamadas, decision="buscar", docs=(IRRELEVANTE,), docs_tras_reescribir=None,
                  **opciones):
     """Dependencias falsas. docs_tras_reescribir: lo que devuelve la búsqueda tras reescribir."""
-    def buscar(pregunta):
+    def buscar(pregunta, acceso):
         llamadas.buscar += 1
+        llamadas.acceso = acceso
         if docs_tras_reescribir is not None and pregunta.startswith("REESCRITA"):
             return list(docs_tras_reescribir)
         return list(docs)
@@ -148,3 +152,25 @@ def test_la_traza_no_guarda_el_texto_de_la_pregunta(tmp_path, monkeypatch):
     assert traza["reintentos"] == 0
     assert traza["chunks"] == [{"antes": 1, "despues": 1}]
     assert {l["nodo"] for l in traza["latencias"]} == set(traza["ruta"])
+
+
+def test_por_defecto_el_grafo_busca_solo_en_lo_publico():
+    llamadas = Llamadas()
+    ejecutar(dependencias(llamadas))
+    assert llamadas.acceso == ("publico",)
+
+
+def test_el_nivel_de_acceso_llega_hasta_la_busqueda():
+    llamadas = Llamadas()
+    dep = dependencias(llamadas)
+    responder("¿Cuánto ocupa un Secret?", app=construir_grafo(dep), trazar=False,
+              acceso=("restringido", "publico"))
+    assert llamadas.acceso == ("publico", "restringido")
+
+
+def test_un_nivel_de_acceso_desconocido_es_un_error_y_no_busca():
+    llamadas = Llamadas()
+    with pytest.raises(ValueError):
+        responder("hola", app=construir_grafo(dependencias(llamadas)), trazar=False,
+                  acceso=("pubico",))
+    assert llamadas.buscar == 0
