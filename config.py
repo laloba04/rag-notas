@@ -43,6 +43,15 @@ UMBRAL_RERANKER = float(os.environ.get("UMBRAL_RERANKER", "0.5"))
 
 # Nº de chunks que se recuperan en cada búsqueda.
 K = 5
+# Candidatos que se le pasan al reranker (y que aporta cada búsqueda antes de fusionar).
+K_INICIAL = 25
+
+# --- Búsqueda híbrida (vectorial + BM25, fusionadas con Reciprocal Rank Fusion) ---
+# Desactivada por defecto hasta medirla con evaluate.py.
+HIBRIDA = os.environ.get("HIBRIDA", "false").lower() == "true"
+# Constante de RRF: puntuación = suma de 1 / (RRF_K + puesto). 60 es el valor del artículo
+# original (Cormack et al., 2009); suaviza la diferencia entre los primeros puestos.
+RRF_K = 60
 
 # Trazas del grafo: una línea JSON por respuesta.
 FICHERO_TRAZAS = os.environ.get("FICHERO_TRAZAS", "logs/trazas.jsonl")
