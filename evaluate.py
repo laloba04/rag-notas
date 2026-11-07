@@ -139,7 +139,8 @@ def acierta_recall(q, docs):
 def ejecutar_actual(pregunta, acceso=ACCESO_TOTAL):
     import generate
     r = generate.responder(pregunta, acceso=acceso)
-    return {"respuesta": r["respuesta"], "docs": r["docs"], "ruta": None, "intentos": 0,
+    return {"respuesta": r["respuesta"], "cruda": r["respuesta_cruda"],
+            "bloqueada": r["salida_bloqueada"], "docs": r["docs"], "ruta": None, "intentos": 0,
             "segundos": r["segundos"]["busqueda"] + r["segundos"]["generacion"]}
 
 
@@ -149,7 +150,9 @@ def ejecutor_grafo(metodo):
 
     def ejecutar(pregunta, acceso=ACCESO_TOTAL):
         r = grafo.responder(pregunta, app=app, acceso=acceso)
-        return {"respuesta": r["respuesta"], "docs": r.get("docs", []), "ruta": r["ruta"],
+        return {"respuesta": r["respuesta"], "cruda": r.get("respuesta_cruda"),
+                "bloqueada": r.get("salida_bloqueada", False),
+                "docs": r.get("docs", []), "ruta": r["ruta"],
                 "intentos": r.get("intentos", 0), "segundos": r["total_s"], "error": r["error"]}
     return ejecutar
 
@@ -166,6 +169,7 @@ def evaluar_configuracion(nombre, ejecutar):
             "no_lo_tengo": dice_no_lo_tengo(r["respuesta"]),
             "ruta": r["ruta"], "intentos": r["intentos"], "error": r.get("error"),
             "segundos": round(r["segundos"], 2), "respuesta": r["respuesta"],
+            "respuesta_cruda": r["cruda"], "salida_bloqueada": r["bloqueada"],
         })
         print(f"  {q['id']:>2} {filas[-1]['segundos']:6.1f} s  "
               f"{' -> '.join(r['ruta']) if r['ruta'] else 'pipeline actual'}", flush=True)
@@ -178,6 +182,7 @@ def evaluar_configuracion(nombre, ejecutar):
         "recall@5": round(sum(f["recall5"] for f in con) / len(con), 3),
         "no_lo_tengo_en_sin_respuesta": f"{sum(f['no_lo_tengo'] for f in sin)}/{len(sin)}",
         "no_lo_tengo_en_con_respuesta": f"{sum(f['no_lo_tengo'] for f in con)}/{len(con)}",
+        "salidas_bloqueadas": sum(f["salida_bloqueada"] for f in filas),
         "latencia_media_s": round(statistics.mean(f["segundos"] for f in filas), 2),
         "latencia_mediana_s": round(statistics.median(f["segundos"] for f in filas), 2),
         "trampa_kubernetes": {
