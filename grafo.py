@@ -26,6 +26,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
 import config
+from generate import validar_salida
 
 
 class Estado(TypedDict, total=False):
@@ -37,6 +38,8 @@ class Estado(TypedDict, total=False):
     ruta: Annotated[list, operator.add]          # nodos recorridos, en orden
     decision: str                   # "buscar" | "directo", la toma el nodo decidir
     respuesta: str
+    respuesta_cruda: str            # lo que dijo el LLM al generar, antes de validar
+    salida_bloqueada: bool          # la validación de salida la cambió por "No lo tengo"
     fuentes: list                   # metadatos de los chunks usados para responder
     # Para las trazas:
     latencias: Annotated[list, operator.add]     # [{"nodo": ..., "s": ...}, ...]
@@ -108,8 +111,10 @@ def construir_grafo(dep: Dependencias):
                 "intentos": estado.get("intentos", 0) + 1}
 
     def generar(estado):
-        return {"respuesta": dep.generar(estado["pregunta_original"], estado["docs"]),
-                "fuentes": [meta for _, meta, _ in estado["docs"]]}
+        cruda = dep.generar(estado["pregunta_original"], estado["docs"])
+        respuesta, bloqueada = validar_salida(cruda, len(estado["docs"]))
+        return {"respuesta": respuesta, "respuesta_cruda": cruda, "salida_bloqueada": bloqueada,
+                "fuentes": [] if bloqueada else [meta for _, meta, _ in estado["docs"]]}
 
     def sin_respuesta(estado):
         return {"respuesta": config.NO_LO_TENGO, "fuentes": []}
@@ -189,7 +194,7 @@ Pregunta: {pregunta}"""
 
 def dependencias_reales():
     """Construye las dependencias con el LLM configurado en .env y la búsqueda actual."""
-    from generate import SYSTEM, construir_prompt     # reutiliza el prompt del pipeline actual
+    from generate import construir_prompt, system_prompt   # reutiliza el prompt del pipeline actual
     from retrieve import buscar
 
     llm = config.crear_llm()
@@ -207,7 +212,7 @@ def dependencias_reales():
         juzgar=lambda p, t: juez.invoke(PROMPT_JUZGAR.format(pregunta=p, texto=t)).relevante,
         reescribir=lambda p: texto(llm.invoke(PROMPT_REESCRIBIR.format(pregunta=p))),
         generar=lambda p, docs: texto(llm.invoke(
-            [("system", SYSTEM), ("user", construir_prompt(p, docs))])),
+            [("system", system_prompt()), ("user", construir_prompt(p, docs))])),
     )
 
 
@@ -238,6 +243,7 @@ def guardar_traza(pregunta, estado, total_s, metodo_evaluacion, error=None):
         "reintentos": estado.get("intentos", 0),
         "latencias": estado.get("latencias", []),
         "chunks": estado.get("chunks", []),
+        "salida_bloqueada": estado.get("salida_bloqueada", False),
         "total_s": round(total_s, 3),
         "error": error,
     }

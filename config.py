@@ -60,6 +60,12 @@ NIVELES_ACCESO = ("publico", "restringido")
 # y no en .env a propósito: una línea olvidada en .env no debe poder abrir todo el corpus.
 ACCESO_POR_DEFECTO = ("publico",)
 
+# --- Prompt injection ---
+# Contexto delimitado y marcado como datos no confiables, instrucción de no obedecerlo y
+# validación de la salida. Solo se apaga para medir el "antes" en scripts/prueba_injection.py;
+# igual que el acceso, no se lee de .env: una línea olvidada no debe poder desactivarlo.
+MITIGAR_INJECTION = True
+
 # Trazas del grafo: una línea JSON por respuesta.
 FICHERO_TRAZAS = os.environ.get("FICHERO_TRAZAS", "logs/trazas.jsonl")
 
