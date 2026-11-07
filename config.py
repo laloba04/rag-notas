@@ -11,10 +11,11 @@ load_dotenv()
 NO_LO_TENGO = "No lo tengo en la documentación."
 
 # --- LLM: proveedor y modelo SOLO por variables de entorno, nunca en el código ---
-LLM_PROVEEDOR = os.environ.get("LLM_PROVEEDOR")      # p. ej. "ollama"
+# Ollama por defecto: los datos solo salen de casa si alguien elige un proveedor externo en .env.
+LLM_PROVEEDOR = os.environ.get("LLM_PROVEEDOR", "ollama")
 LLM_MODELO = os.environ.get("LLM_MODELO")            # p. ej. "qwen2.5:14b"
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-PROVEEDORES = ("ollama",)
+PROVEEDORES = ("ollama", "groq")
 
 # Temperatura baja en todos los nodos: queremos fidelidad al contexto, no creatividad.
 TEMPERATURA = float(os.environ.get("LLM_TEMPERATURA", "0.1"))
@@ -71,7 +72,7 @@ FICHERO_TRAZAS = os.environ.get("FICHERO_TRAZAS", "logs/trazas.jsonl")
 
 
 def comprobar_llm():
-    """Falla con un mensaje claro si falta el proveedor o el modelo en .env."""
+    """Falla con un mensaje claro si falta el proveedor, el modelo o la clave en .env."""
     if not LLM_PROVEEDOR or not LLM_MODELO:
         raise RuntimeError(
             "Falta configurar el LLM: define LLM_PROVEEDOR y LLM_MODELO en .env "
@@ -79,11 +80,22 @@ def comprobar_llm():
     if LLM_PROVEEDOR not in PROVEEDORES:
         raise RuntimeError(
             f"Proveedor de LLM no soportado: {LLM_PROVEEDOR!r}. Opciones: {', '.join(PROVEEDORES)}")
+    if LLM_PROVEEDOR == "groq" and not os.environ.get("GROQ_API_KEY"):
+        raise RuntimeError("Falta GROQ_API_KEY en .env (mira .env.example).")
 
 
 def crear_llm():
-    """Devuelve el modelo de chat de LangChain según .env."""
+    """Devuelve el modelo de chat de LangChain según .env. Es el único sitio que conoce a los
+    proveedores; cada paquete se importa solo si se usa, para no cargar lo que no hace falta."""
     comprobar_llm()
+    if LLM_PROVEEDOR == "groq":
+        from langchain_groq import ChatGroq
+        return ChatGroq(
+            model=LLM_MODELO,
+            api_key=os.environ["GROQ_API_KEY"],
+            temperature=TEMPERATURA,
+            timeout=TIMEOUT_LLM_S,
+        )
     from langchain_ollama import ChatOllama
     return ChatOllama(
         model=LLM_MODELO,
