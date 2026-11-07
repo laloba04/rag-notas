@@ -41,6 +41,13 @@ def coleccion():
     return _col
 
 
+def usar_coleccion(col):
+    """Cambia la colección de la búsqueda (para pruebas aisladas, sin tocar "docs")."""
+    global _col, _bm25
+    _col = col
+    _bm25 = {}          # los índices BM25 eran de la colección anterior
+
+
 def reranker():
     global _reranker
     if _reranker is None:
