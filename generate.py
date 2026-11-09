@@ -1,5 +1,5 @@
 """
-Generación: busca los trozos relevantes y le pide a un LLM (Ollama) que responda
+Generación: busca los trozos relevantes y le pide al LLM de config.crear_llm() que responda
 usando SOLO esos trozos, citando cada afirmación con [n].
 
 Uso (desde la raíz del repo, después de python ingest.py y con .env configurado):
@@ -10,11 +10,8 @@ import re
 import sys
 import time
 
-import requests
-
 import config
-from config import (LLM_MODELO, NO_LO_TENGO, OLLAMA_URL, TEMPERATURA, TIMEOUT_LLM_S,
-                    comprobar_llm)
+from config import NO_LO_TENGO
 from retrieve import buscar, separar_acceso
 
 # Instrucciones fijas para el modelo (sección 8 de la guía).
@@ -66,27 +63,25 @@ def construir_prompt(pregunta, resultados):
             f"\n\nPREGUNTA: {pregunta}")
 
 
+_llm = None
+
+
+def llm():
+    """El modelo de chat de config.crear_llm(): el mismo proveedor y modelo que usa el grafo.
+    Se crea la primera vez que hace falta y se reutiliza en las siguientes llamadas."""
+    global _llm
+    if _llm is None:
+        _llm = config.crear_llm()
+    return _llm
+
+
 def llamar_llm(prompt):
-    """Envía el prompt a Ollama y devuelve la respuesta y los tokens usados."""
-    comprobar_llm()
-    respuesta = requests.post(
-        f"{OLLAMA_URL}/api/chat",
-        json={
-            "model": LLM_MODELO,
-            "messages": [
-                {"role": "system", "content": system_prompt()},
-                {"role": "user", "content": prompt},
-            ],
-            "stream": False,
-            # Temperatura baja: queremos fidelidad al contexto, no creatividad.
-            "options": {"temperature": TEMPERATURA},
-        },
-        timeout=TIMEOUT_LLM_S,   # la primera vez el servidor tiene que cargar el modelo en la GPU
-    )
-    respuesta.raise_for_status()
-    datos = respuesta.json()
-    tokens = {"entrada": datos.get("prompt_eval_count"), "salida": datos.get("eval_count")}
-    return datos["message"]["content"].strip(), tokens
+    """Envía el prompt al LLM configurado y devuelve la respuesta y los tokens usados."""
+    mensaje = llm().invoke([("system", system_prompt()), ("user", prompt)])
+    # usage_metadata es el formato común de LangChain para los tokens, sea cual sea el proveedor.
+    uso = mensaje.usage_metadata or {}
+    tokens = {"entrada": uso.get("input_tokens"), "salida": uso.get("output_tokens")}
+    return mensaje.content.strip(), tokens
 
 
 def citas_invalidas(texto, n_fragmentos):
