@@ -4,7 +4,7 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo.
 
 ## Arquitectura
 
@@ -144,6 +144,17 @@ Con acceso total, el documento restringido aparece entre los candidatos de 7 a 9
 
 Es una sola pregunta y una sola ejecución por caso: comprueba que el nivel de acceso llega de punta a punta, no es una medida estadística.
 
+### Nada restringido hacia un proveedor externo
+
+El filtro anterior decide qué puede ver quien pregunta. Con un LLM por API hay una segunda pregunta: qué puede salir de la red. Son controles distintos: aunque alguien tenga acceso total, lo restringido no se envía a Groq.
+
+- **Se comprueba fragmento a fragmento, justo antes de enviar** (`config.comprobar_envio`): en el pipeline directo, nada más buscar; en el grafo, en el nodo `recuperar`, antes de que los fragmentos lleguen al juez de relevancia o al generador.
+- **Falla en cerrado y con error.** Si el proveedor es externo y algún fragmento no es `publico` (o no tiene etiqueta), no se envía nada y salta un `PermissionError` que nombra el documento. Quitar en silencio los fragmentos restringidos daría una respuesta peor sin que nadie supiera por qué. Un proveedor desconocido cuenta como externo.
+- **Fijo en `config.py`** (`NIVELES_PARA_EXTERNOS`), no en `.env`, por la misma razón que el acceso por defecto.
+- **Queda en la traza** del grafo (`ruta: ["bloqueado"]`), que guarda también el proveedor de cada respuesta.
+- **Probado de punta a punta:** con Groq y acceso total, la pregunta 12 da el error y no se llama a Groq; con acceso público, responde "No lo tengo en la documentación.". Los tests lo cubren en `config`, en el pipeline directo y en el grafo, comprobando que el LLM no recibe nada.
+- **Límite:** protege los documentos, no lo que escribe el usuario. La pregunta sí llega a Groq.
+
 ### Prompt injection indirecta
 
 El atacante no escribe al asistente: deja una orden dentro de un documento y espera a que se recupere. Para el modelo, ese texto llega mezclado con sus instrucciones.
@@ -192,8 +203,35 @@ Resultados en `eval/resultados/2026-11-07_1834_injection.json`.
 | Riesgo | Qué hay en este proyecto |
 |---|---|
 | **LLM01 Prompt Injection** | La prueba anterior: contexto delimitado, instrucción y validación de la salida |
-| **LLM02 Sensitive Information Disclosure** | Filtro por permisos en la búsqueda: el documento restringido no llega al LLM sin acceso. El ataque `filtrar_datos` prueba otra vía de fuga |
+| **LLM02 Sensitive Information Disclosure** | Filtro por permisos en la búsqueda: el documento restringido no llega al LLM sin acceso. Con un proveedor externo, ningún fragmento no público sale de la red, ni siquiera con acceso total. El ataque `filtrar_datos` prueba otra vía de fuga |
 | **LLM08 Vector and Embedding Weaknesses** | El filtro va en la consulta al almacén vectorial, y el índice BM25 público no contiene ni cuenta los fragmentos restringidos |
+
+## LLM local o por API
+
+Todo el código pide el LLM a una sola fábrica, `config.crear_llm()`, que devuelve un modelo de chat de LangChain según `.env`. El pipeline directo y el grafo usan el mismo, y los tokens se leen de `usage_metadata`, que es igual para cualquier proveedor. Cambiar de proveedor es cambiar `.env`.
+
+| | Ollama en local (por defecto) | Groq por API (opción) |
+|---|---|---|
+| **Coste** | Ninguno por consulta; hace falta un equipo con GPU | Plan gratuito con límites (en esta cuenta, a 2026-11-09: 1000 peticiones al día y 8000 tokens por minuto); de pago al superarlos |
+| **Privacidad** | Los documentos y las preguntas no salen de la red local | Las preguntas y los fragmentos públicos salen hacia Groq; los restringidos se bloquean ([ver Seguridad](#nada-restringido-hacia-un-proveedor-externo)) |
+| **Calidad** | Medida: es la de todas las tablas de este README (`qwen2.5:14b`) | **Sin medir** con el conjunto de evaluación. Modelos más grandes, pero no se ha comprobado que respondan mejor aquí |
+| **Disponibilidad** | Depende de que el equipo de la GPU esté encendido | Depende de un servicio externo y de sus límites: una evaluación completa chocaría con el límite por minuto |
+
+**Por qué local por defecto:** sin `LLM_PROVEEDOR` en `.env`, el proveedor es Ollama. Que los datos salgan de casa tiene que ser una decisión explícita, no lo que pasa cuando falta una línea.
+
+**Por qué `openai/gpt-oss-120b` en Groq:** el grafo usa salida estructurada (las clases `Decision` y `Juicio`), y comprobé a mano que funciona con este modelo. Con `qwen/qwen3.8-27b`, Groq rechaza parte de las llamadas (error 400): el modelo se inventa el nombre de la herramienta que debe rellenar. En `decidir` ese fallo no se vería, porque ante un error el grafo busca igualmente; en `juzgar` lo rompería.
+
+**LLM juez:** `LLM_JUEZ_PROVEEDOR` y `LLM_JUEZ_MODELO` configuran un segundo modelo para evaluar respuestas, con la misma fábrica (`config.crear_llm_juez()`). Sin ellas, el juez es el LLM principal, que entonces se estaría evaluando a sí mismo.
+
+**Configurar Groq:** crea una clave en `console.groq.com/keys` y añade a `.env`:
+
+```bash
+LLM_PROVEEDOR=groq
+LLM_MODELO=openai/gpt-oss-120b
+GROQ_API_KEY=tu_clave
+```
+
+La clave solo va en `.env`, que no se sube al repositorio. Si falta, el programa se para con un mensaje que dice cuál.
 
 ## Decisiones técnicas
 
@@ -210,9 +248,10 @@ Resultados en `eval/resultados/2026-11-07_1834_injection.json`.
 | Evaluación de relevancia configurable: puntuación del reranker con umbral 0,5 o LLM juez sí/no | El reranker ya puntúa cada fragmento al buscar, así que filtrar no cuesta nada (0,00 s frente a 2,59 s del juez). 0,5 es la frontera de decisión de su salida (una probabilidad); no se calibra con 28 preguntas para no sobreajustar |
 | Máximo 1 reescritura | Si una reformulación no encuentra nada relevante, lo más probable es que el corpus no tenga la respuesta; cada reintento cuesta ~10 s de búsqueda |
 | Límites: 10 pasos de grafo, timeout por paso y por llamada al LLM | El camino más largo posible son 7 pasos; el límite corta cualquier bucle por error. Si se supera un límite, la respuesta es "No lo tengo" |
-| Proveedor y modelo del LLM solo en `.env` | Cambiar de modelo no toca el código. Si faltan, el programa falla con un mensaje claro |
+| Proveedor y modelo del LLM solo en `.env`, con una sola fábrica (`config.crear_llm()`) para Ollama y Groq | Cambiar de modelo o de proveedor no toca el código, y el pipeline directo y el grafo no pueden usar LLM distintos por error. Si falta el modelo o la clave, el programa falla con un mensaje claro. Ollama por defecto: los datos solo salen de la red si se elige así |
+| Comprobación de cada fragmento antes de enviarlo a un proveedor externo | El filtro de la búsqueda depende del acceso de quien pregunta; esto depende de adónde van los datos. Con acceso total y Groq, lo restringido no sale, y se avisa con un error en vez de quitarlo en silencio |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (66 tests en ~1 s, contando los de RRF, permisos y prompt injection) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (90 tests en ~1 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM y el bloqueo hacia proveedores externos) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
@@ -221,7 +260,7 @@ Resultados en `eval/resultados/2026-11-07_1834_injection.json`.
 
 ## Stack
 
-Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama · pytest
+Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama · Groq · pytest
 
 ## Limitaciones
 
@@ -232,6 +271,7 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama 
 - Los permisos son por documento y de dos niveles (`publico` / `restringido`), y quien llama declara su nivel: no hay autenticación de usuarios. En un sistema real, el nivel saldría de la identidad autenticada (p. ej. los grupos del usuario), nunca de lo que diga la petición.
 - El formato de cita del prompt de las mitigaciones se corrigió tras ver un fallo en este mismo conjunto de evaluación, que también se usa para medirlo. Fue un solo cambio.
 - El LLM es un modelo abierto de 14B cuantizado a 4 bits: responde peor que los modelos comerciales grandes.
+- Con Groq no hay evaluación: todas las tablas son de `qwen2.5:14b` en local. Con el plan gratuito, una evaluación completa necesitaría esperar entre llamadas por el límite de tokens por minuto.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 
 ## Ejecutarlo en local
@@ -241,8 +281,8 @@ git clone https://github.com/laloba04/rag-notas.git
 cd rag-notas
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt   # incluye torch para CPU; la primera vez descarga ~2 GB de modelo
-cp .env.example .env             # dirección de Ollama y modelo
-ollama pull qwen2.5:14b          # en el equipo que ejecute Ollama
+cp .env.example .env             # proveedor, modelo y, según el caso, dirección de Ollama o clave de Groq
+ollama pull qwen2.5:14b          # en el equipo que ejecute Ollama (no hace falta con Groq)
 python ingest.py                  # indexa los documentos de data/ en chroma/
 python retrieve.py "¿Qué es un Pod?"               # búsqueda con reranker
 python retrieve.py --sin-rerank "¿Qué es un Pod?"  # solo vectorial
@@ -254,7 +294,7 @@ python evaluate.py                # tabla de recuperación, 4 configuraciones (~
 python evaluate.py --grafo        # pipeline directo frente al grafo (~25 min)
 python evaluate.py --permisos     # filtro por permisos: búsqueda y respuestas con acceso público y total
 python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin mitigaciones (~6 min)
-python -m pytest                  # tests del enrutado del grafo, sin LLM
+python -m pytest                  # tests sin LLM ni modelos (~1 s)
 ```
 
 ## Estructura
@@ -264,9 +304,9 @@ ingest.py              troceado, embeddings e indexación en Chroma
 retrieve.py            búsqueda vectorial, BM25, fusión RRF y reranking
 generate.py            prompt, llamada al LLM y comprobación de citas
 grafo.py               capa agéntica y correctiva con LangGraph, límites y trazas
-config.py              proveedor y modelo del LLM (desde .env) y límites del grafo
+config.py              fábrica del LLM (Ollama o Groq, desde .env), LLM juez, permisos y límites del grafo
 evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
-tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos y de las mitigaciones
+tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones y de la fábrica del LLM
 docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
