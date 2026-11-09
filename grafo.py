@@ -58,6 +58,9 @@ class Dependencias:
     metodo_evaluacion: str = config.METODO_EVALUACION
     umbral_reranker: float = config.UMBRAL_RERANKER
     max_reintentos: int = config.MAX_REINTENTOS
+    # Proveedores de LLM que verán los fragmentos. Si alguno es externo, solo pueden ir
+    # fragmentos públicos (config.comprobar_envio). Vacío en los tests con dependencias falsas.
+    proveedores_con_fragmentos: tuple = ()
 
 
 def construir_grafo(dep: Dependencias):
@@ -89,7 +92,11 @@ def construir_grafo(dep: Dependencias):
     def recuperar(estado):
         # El acceso viaja en el estado (es de cada petición, no del grafo compilado) y se
         # aplica en la búsqueda: lo que no se recupera no llega ni a evaluar ni al LLM.
-        return {"docs": dep.buscar(estado["pregunta"], estado["acceso"])}
+        docs = dep.buscar(estado["pregunta"], estado["acceso"])
+        # Se comprueba aquí, en cuanto se recuperan: después van al juez y al generador.
+        for proveedor in dep.proveedores_con_fragmentos:
+            config.comprobar_envio(docs, proveedor)
+        return {"docs": docs}
 
     def evaluar(estado):
         docs = estado["docs"]
@@ -213,6 +220,8 @@ def dependencias_reales():
         reescribir=lambda p: texto(llm.invoke(PROMPT_REESCRIBIR.format(pregunta=p))),
         generar=lambda p, docs: texto(llm.invoke(
             [("system", system_prompt()), ("user", construir_prompt(p, docs))])),
+        # El juez de relevancia del grafo y el generador usan el LLM principal.
+        proveedores_con_fragmentos=(config.LLM_PROVEEDOR,),
     )
 
 
@@ -236,6 +245,7 @@ def guardar_traza(pregunta, estado, total_s, metodo_evaluacion, error=None):
         "fecha": datetime.now().isoformat(timespec="seconds"),
         "pregunta_hash": hashlib.sha256(pregunta.encode("utf-8")).hexdigest()[:12],
         "pregunta_longitud": len(pregunta),
+        "proveedor": config.LLM_PROVEEDOR,
         "modelo": config.LLM_MODELO,
         "metodo_evaluacion": metodo_evaluacion,
         "acceso": list(estado.get("acceso", [])),
@@ -268,6 +278,12 @@ def responder(pregunta, app=None, trazar=True, acceso=None):
         # Si algo se sale de los límites, la salida segura es no responder.
         error = type(e).__name__
         estado = {**inicial, "ruta": ["error"], "respuesta": config.NO_LO_TENGO, "fuentes": []}
+    except PermissionError:
+        # Fragmentos no públicos hacia un proveedor externo: queda en la traza y el error sigue.
+        if trazar:
+            guardar_traza(pregunta, {**inicial, "ruta": ["bloqueado"]},
+                          time.perf_counter() - t0, app.metodo_evaluacion, "PermissionError")
+        raise
     total = time.perf_counter() - t0
     if trazar:
         guardar_traza(pregunta, estado, total, app.metodo_evaluacion, error)

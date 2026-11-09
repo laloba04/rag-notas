@@ -68,3 +68,68 @@ def test_sin_modelo_falla(monkeypatch):
     monkeypatch.setattr(config, "LLM_MODELO", None)
     with pytest.raises(RuntimeError, match="LLM_MODELO"):
         config.crear_llm()
+
+
+# --- LLM juez ---------------------------------------------------------------
+
+@pytest.fixture
+def principal_ollama(monkeypatch):
+    monkeypatch.setattr(config, "LLM_PROVEEDOR", "ollama")
+    monkeypatch.setattr(config, "LLM_MODELO", "modelo-principal")
+    monkeypatch.setattr(config, "LLM_JUEZ_PROVEEDOR", None)
+    monkeypatch.setattr(config, "LLM_JUEZ_MODELO", None)
+
+
+def test_sin_configurar_el_juez_es_el_principal(principal_ollama):
+    assert config.configuracion_juez() == ("ollama", "modelo-principal")
+    juez = config.crear_llm_juez()
+    assert type(juez).__name__ == "ChatOllama"
+    assert juez.model == "modelo-principal"
+
+
+def test_el_juez_puede_ser_otro_proveedor(principal_ollama, monkeypatch):
+    monkeypatch.setattr(config, "LLM_JUEZ_PROVEEDOR", "groq")
+    monkeypatch.setattr(config, "LLM_JUEZ_MODELO", "modelo-juez")
+    monkeypatch.setenv("GROQ_API_KEY", "clave-inventada")
+    juez = config.crear_llm_juez()
+    assert type(juez).__name__ == "ChatGroq"
+    assert juez.model_name == "modelo-juez"
+    assert config.crear_llm().model == "modelo-principal"    # el principal no cambia
+
+
+def test_el_juez_puede_ser_otro_modelo_del_mismo_proveedor(principal_ollama, monkeypatch):
+    monkeypatch.setattr(config, "LLM_JUEZ_MODELO", "modelo-juez")
+    assert config.configuracion_juez() == ("ollama", "modelo-juez")
+
+
+def test_proveedor_del_juez_sin_modelo_falla(principal_ollama, monkeypatch):
+    monkeypatch.setattr(config, "LLM_JUEZ_PROVEEDOR", "groq")
+    with pytest.raises(RuntimeError, match="LLM_JUEZ_MODELO"):
+        config.crear_llm_juez()
+
+
+# --- Nada que no sea público hacia un proveedor externo ----------------------
+
+PUBLICO = ("texto", {"fuente": "11-git.md", "confidencialidad": "publico"}, 0.9)
+RESTRINGIDO = ("texto", {"fuente": "06-k8s-secrets.md", "confidencialidad": "restringido"}, 0.9)
+SIN_ETIQUETA = ("texto", {"fuente": "x.md"}, 0.9)
+
+
+def test_local_puede_recibir_lo_restringido():
+    config.comprobar_envio([PUBLICO, RESTRINGIDO], "ollama")
+
+
+def test_externo_puede_recibir_lo_publico():
+    config.comprobar_envio([PUBLICO], "groq")
+
+
+@pytest.mark.parametrize("trozo", [RESTRINGIDO, SIN_ETIQUETA])
+def test_externo_no_recibe_nada_que_no_sea_publico(trozo):
+    with pytest.raises(PermissionError, match=trozo[1]["fuente"]):
+        config.comprobar_envio([PUBLICO, trozo], "groq")
+
+
+def test_un_proveedor_desconocido_cuenta_como_externo():
+    assert config.es_externo("otro")
+    with pytest.raises(PermissionError):
+        config.comprobar_envio([RESTRINGIDO], "otro")

@@ -111,6 +111,7 @@ def responder(pregunta, k=5, rerank=True, acceso=None):
     acceso: niveles que puede ver quien pregunta (None = solo lo público, ver retrieve.buscar)."""
     t0 = time.perf_counter()
     resultados = buscar(pregunta, k=k, rerank=rerank, acceso=acceso)
+    config.comprobar_envio(resultados, config.LLM_PROVEEDOR)   # antes de que salga nada
     t1 = time.perf_counter()
     cruda, tokens = llamar_llm(construir_prompt(pregunta, resultados))
     t2 = time.perf_counter()

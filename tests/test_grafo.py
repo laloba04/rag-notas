@@ -174,3 +174,32 @@ def test_un_nivel_de_acceso_desconocido_es_un_error_y_no_busca():
         responder("hola", app=construir_grafo(dependencias(llamadas)), trazar=False,
                   acceso=("pubico",))
     assert llamadas.buscar == 0
+
+
+RESTRINGIDO = ("1 MiB", {"fuente": "06-k8s-secrets.md", "seccion": "Límites",
+                         "confidencialidad": "restringido"}, 0.9)
+
+
+def test_el_grafo_no_pasa_lo_restringido_a_un_proveedor_externo():
+    llamadas = Llamadas()
+    generados = []
+    dep = dependencias(llamadas, docs=(RESTRINGIDO,), proveedores_con_fragmentos=("groq",))
+    dep.generar = lambda p, docs: generados.append(docs) or "1 MiB [1]"
+    with pytest.raises(PermissionError, match="06-k8s-secrets.md"):
+        ejecutar(dep)
+    assert generados == []
+
+
+def test_el_grafo_si_pasa_lo_restringido_a_un_proveedor_local():
+    dep = dependencias(Llamadas(), docs=(RESTRINGIDO,), proveedores_con_fragmentos=("ollama",))
+    assert ejecutar(dep)["respuesta"] == "Usa git stash [1]."
+
+
+def test_el_bloqueo_queda_en_la_traza(tmp_path, monkeypatch):
+    fichero = tmp_path / "trazas.jsonl"
+    monkeypatch.setattr(config, "FICHERO_TRAZAS", str(fichero))
+    dep = dependencias(Llamadas(), docs=(RESTRINGIDO,), proveedores_con_fragmentos=("groq",))
+    with pytest.raises(PermissionError):
+        responder("¿Tamaño máximo de un Secret?", app=construir_grafo(dep))
+    traza = json.loads(fichero.read_text(encoding="utf-8"))
+    assert traza["error"] == "PermissionError" and traza["ruta"] == ["bloqueado"]

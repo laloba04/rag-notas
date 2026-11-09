@@ -16,6 +16,14 @@ LLM_PROVEEDOR = os.environ.get("LLM_PROVEEDOR", "ollama")
 LLM_MODELO = os.environ.get("LLM_MODELO")            # p. ej. "qwen2.5:14b"
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 PROVEEDORES = ("ollama", "groq")
+# Proveedores que corren en nuestra red. Cualquier otro (incluido uno desconocido) se trata
+# como externo: falla en cerrado.
+PROVEEDORES_LOCALES = ("ollama",)
+
+# LLM juez (lo usa la evaluación de respuestas). Si no se define, es el mismo que el principal.
+# Si se define el proveedor, el modelo es obligatorio: un nombre de Ollama no vale en Groq.
+LLM_JUEZ_PROVEEDOR = os.environ.get("LLM_JUEZ_PROVEEDOR")
+LLM_JUEZ_MODELO = os.environ.get("LLM_JUEZ_MODELO")
 
 # Temperatura baja en todos los nodos: queremos fidelidad al contexto, no creatividad.
 TEMPERATURA = float(os.environ.get("LLM_TEMPERATURA", "0.1"))
@@ -60,6 +68,9 @@ NIVELES_ACCESO = ("publico", "restringido")
 # Mínimo privilegio: si quien llama no dice nada, solo ve lo público. Va fijo en el código
 # y no en .env a propósito: una línea olvidada en .env no debe poder abrir todo el corpus.
 ACCESO_POR_DEFECTO = ("publico",)
+# Lo único que puede salir hacia un proveedor externo. Si algún fragmento tiene otro nivel (o
+# ninguno), no se envía nada y salta un error. Fijo en el código por la misma razón.
+NIVELES_PARA_EXTERNOS = ("publico",)
 
 # --- Prompt injection ---
 # Contexto delimitado y marcado como datos no confiables, instrucción de no obedecerlo y
@@ -71,35 +82,76 @@ MITIGAR_INJECTION = True
 FICHERO_TRAZAS = os.environ.get("FICHERO_TRAZAS", "logs/trazas.jsonl")
 
 
-def comprobar_llm():
-    """Falla con un mensaje claro si falta el proveedor, el modelo o la clave en .env."""
-    if not LLM_PROVEEDOR or not LLM_MODELO:
+def comprobar_llm(proveedor=None, modelo=None):
+    """Falla con un mensaje claro si falta el proveedor, el modelo o la clave en .env.
+    Sin argumentos comprueba el LLM principal."""
+    proveedor = proveedor or LLM_PROVEEDOR
+    modelo = modelo or LLM_MODELO
+    if not proveedor or not modelo:
         raise RuntimeError(
             "Falta configurar el LLM: define LLM_PROVEEDOR y LLM_MODELO en .env "
             "(mira .env.example).")
-    if LLM_PROVEEDOR not in PROVEEDORES:
+    if proveedor not in PROVEEDORES:
         raise RuntimeError(
-            f"Proveedor de LLM no soportado: {LLM_PROVEEDOR!r}. Opciones: {', '.join(PROVEEDORES)}")
-    if LLM_PROVEEDOR == "groq" and not os.environ.get("GROQ_API_KEY"):
+            f"Proveedor de LLM no soportado: {proveedor!r}. Opciones: {', '.join(PROVEEDORES)}")
+    if proveedor == "groq" and not os.environ.get("GROQ_API_KEY"):
         raise RuntimeError("Falta GROQ_API_KEY en .env (mira .env.example).")
 
 
-def crear_llm():
-    """Devuelve el modelo de chat de LangChain según .env. Es el único sitio que conoce a los
-    proveedores; cada paquete se importa solo si se usa, para no cargar lo que no hace falta."""
-    comprobar_llm()
-    if LLM_PROVEEDOR == "groq":
+def crear_llm(proveedor=None, modelo=None):
+    """Devuelve el modelo de chat de LangChain según .env (sin argumentos, el principal). Es el
+    único sitio que conoce a los proveedores; cada paquete se importa solo si se usa."""
+    proveedor = proveedor or LLM_PROVEEDOR
+    modelo = modelo or LLM_MODELO
+    comprobar_llm(proveedor, modelo)
+    if proveedor == "groq":
         from langchain_groq import ChatGroq
         return ChatGroq(
-            model=LLM_MODELO,
+            model=modelo,
             api_key=os.environ["GROQ_API_KEY"],
             temperature=TEMPERATURA,
             timeout=TIMEOUT_LLM_S,
         )
     from langchain_ollama import ChatOllama
     return ChatOllama(
-        model=LLM_MODELO,
+        model=modelo,
         base_url=OLLAMA_URL,
         temperature=TEMPERATURA,
         client_kwargs={"timeout": TIMEOUT_LLM_S},
     )
+
+
+def configuracion_juez():
+    """(proveedor, modelo) del LLM juez. Sin LLM_JUEZ_* en .env, el mismo que el principal."""
+    if not LLM_JUEZ_PROVEEDOR and not LLM_JUEZ_MODELO:
+        return LLM_PROVEEDOR, LLM_MODELO
+    return LLM_JUEZ_PROVEEDOR or LLM_PROVEEDOR, LLM_JUEZ_MODELO
+
+
+def crear_llm_juez():
+    """El modelo de chat del juez, con la misma fábrica que el principal."""
+    proveedor, modelo = configuracion_juez()
+    if not modelo:
+        raise RuntimeError("Falta LLM_JUEZ_MODELO en .env: es obligatorio si defines "
+                           "LLM_JUEZ_PROVEEDOR (mira .env.example).")
+    return crear_llm(proveedor, modelo)
+
+
+def es_externo(proveedor):
+    """¿Los datos salen de nuestra red al usar este proveedor?"""
+    return proveedor not in PROVEEDORES_LOCALES
+
+
+def comprobar_envio(docs, proveedor):
+    """Antes de mandar fragmentos a un LLM: si el proveedor es externo y alguno no es público
+    (o no tiene etiqueta), no se manda nada. Es independiente del filtro de búsqueda: aunque
+    alguien pida acceso total, lo restringido no sale de casa.
+    docs: [(texto, metadatos, puntuación)], como los devuelve retrieve.buscar."""
+    if not es_externo(proveedor):
+        return
+    bloqueados = sorted({meta.get("fuente", "?") for _, meta, _ in docs
+                         if meta.get("confidencialidad") not in NIVELES_PARA_EXTERNOS})
+    if bloqueados:
+        raise PermissionError(
+            f"No se envían fragmentos no públicos al proveedor externo {proveedor!r}: "
+            f"{', '.join(bloqueados)}. Usa un proveedor local o acceso solo público.")

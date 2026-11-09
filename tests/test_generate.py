@@ -61,3 +61,14 @@ def test_el_llm_se_crea_una_vez_y_se_reutiliza(monkeypatch):
     generate.llamar_llm("uno")
     generate.llamar_llm("dos")
     assert len(creados) == 1
+
+
+def test_no_envia_lo_restringido_a_un_proveedor_externo(con_llm, monkeypatch):
+    restringido = ("1 MiB", {"fuente": "06-k8s-secrets.md", "seccion": "Límites",
+                             "confidencialidad": "restringido"}, 0.9)
+    monkeypatch.setattr(generate, "buscar", lambda *a, **k: [restringido])
+    monkeypatch.setattr(generate.config, "LLM_PROVEEDOR", "groq")
+    falso = con_llm(AIMessage(content="1 MiB [1]"))
+    with pytest.raises(PermissionError, match="06-k8s-secrets.md"):
+        generate.responder("¿Tamaño máximo de un Secret?", acceso=("publico", "restringido"))
+    assert falso.recibido is None       # el LLM no llegó a recibir nada
