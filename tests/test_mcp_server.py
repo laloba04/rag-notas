@@ -130,6 +130,17 @@ def test_el_acceso_es_publico_aunque_el_modelo_lo_pida(busqueda_falsa, grafo_fal
     assert set(grafo_falso[0]) == {("publico",)}
 
 
+def test_la_salida_es_solo_texto_sin_copia_en_json(busqueda_falsa, grafo_falso):
+    # Sin structured_output=False, el cliente recibiría {"result": "..."} y lo enseñaría al
+    # modelo en vez del texto con el aviso y el delimitador.
+    herramientas = anyio.run(mcp_server.servidor.list_tools)
+    assert all(t.output_schema is None for t in herramientas)
+    for nombre in ("buscar_documentacion", "preguntar"):
+        r = anyio.run(mcp_server.servidor.call_tool, nombre, {"pregunta": "x"})
+        assert r.structured_content is None
+        assert [c.type for c in r.content] == ["text"] and r.content[0].text.startswith("AVISO")
+
+
 def test_el_cliente_mcp_se_trata_como_externo():
     assert config.es_externo(config.CLIENTE_MCP)
 
