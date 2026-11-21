@@ -1,0 +1,629 @@
+[
+  {
+    "configuracion": "grafo_reranker",
+    "id": 23,
+    "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+    "respuesta_de_referencia": "401 indica que faltan credenciales válidas; 403 que las credenciales son válidas pero no dan acceso a ese recurso.",
+    "respuesta": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria para acceder al recurso, mientras que el código 403 `Forbidden` se usa cuando las credenciales son válidas pero no permiten el acceso al recurso debido a restricciones específicas. La fuente proporciona esta información en relación con los códigos de estado HTTP y su significado en el contexto de la autenticación [1].",
+    "contexto": [
+      {
+        "texto": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)\nSi el servidor proxy recibe unas credenciales válidas que no son adecuadas para acceder a un determinado recurso, el servidor respondera con el código de estado 403 `Forbidden`. Diferente al código de estado 401 `Unauthorized` o 407 `Proxy Authentication Required`, donde la autenticación es imposible para ese usuario.",
+        "fuente": "20-http-autenticacion.md",
+        "seccion": "Autenticación HTTP > El marco general de autenticación HTTP > Prohibición de Acceso (Access Forbbiden)",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9855
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "El código de estado 401 `Unauthorized` indica que la autenticación es necesaria para acceder al recurso.",
+          "respaldada": false
+        },
+        {
+          "texto": "El código 403 `Forbidden` se usa cuando las credenciales son válidas pero no permiten el acceso al recurso debido a restricciones específicas.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 2,
+      "respaldadas": 1,
+      "fidelidad": 0.5,
+      "correccion": "incorrecta",
+      "motivo": "La respuesta describe 401 como simplemente 'la autenticación es necesaria', lo cual no coincide con la documentación que indica que 401 se usa cuando la autenticación es imposible o faltan credenciales válidas. Sólo la afirmación sobre 403 está respaldada. Por lo tanto, la respuesta no es correcta respecto a la referencia.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 8,
+    "pregunta": "¿Qué es un Pod en Kubernetes?",
+    "respuesta_de_referencia": "La unidad de computación desplegable más pequeña de Kubernetes: un grupo de uno o más contenedores con almacenamiento y red compartidos.",
+    "respuesta": "Un _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores, con almacenamiento y red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre copubicados, coprogramados y ejecutados en un contexto compartido [1]. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazadas.\n\nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial [4].\n\nAdemás, las aplicaciones dentro de un Pod también tienen acceso a volúmenes compartidos, que se definen como parte del Pod y están disponibles para ser montados en el sistema de archivos de cada aplicación [5]. En términos de Docker, un Pod se modela como un grupo de contenedores de Docker con namespaces y volúmenes de sistemas de archivos compartidos.",
+    "contexto": [
+      {
+        "texto": "Pods > ¿Qué és un Pod?\nUn _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores (como contenedores Docker), con almacenamiento/red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre coubicados, coprogramados y ejecutados en un contexto compartido. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazados. Antes de la llegada de los contenedores, ejecutarse en la misma máquina física o virtual significaba ser ejecutado en el mismo host lógico.  \nMientras que Kubernetes soporta más runtimes de contenedores a parte de Docker, este último es el más conocido y ayuda a describir Pods en términos de Docker.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > ¿Qué és un Pod?",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9996
+      },
+      {
+        "texto": "Pods > API\nPod es un recurso de nivel superior en la API REST de Kubernetes.\nLa definición de objeto de API Pod\ndescribe el objeto en detalle.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > API",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9976
+      },
+      {
+        "texto": "Pods\nLos _Pods_ son las unidades de computación desplegables más pequeñas que se pueden crear y gestionar en Kubernetes.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9946
+      },
+      {
+        "texto": "Pods > ¿Qué és un Pod?\nEl contexto compartido de un Pod es un conjunto de namespaces de Linux, cgroups y, potencialmente, otras facetas de aislamiento, las mismas cosas que aíslan un contenedor Docker. Dentro del contexto de un Pod, las aplicaciones individuales pueden tener más subaislamientos aplicados.  \nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial.\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > ¿Qué és un Pod?",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9758
+      },
+      {
+        "texto": "Pods > ¿Qué és un Pod?\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.  \nLas aplicaciones dentro de un Pod también tienen acceso a volúmenes compartidos, que se definen como parte de un Pod y están disponibles para ser montados en el sistema de archivos de cada aplicación.  \nEn términos de Docker, un Pod se modela como un grupo de contenedores de Docker con namespaces y volúmenes de sistemas de archivos compartidos.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > ¿Qué és un Pod?",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9139
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "Un Pod es un grupo de uno o más contenedores con almacenamiento y red compartidos y especificaciones de ejecución.",
+          "respaldada": true
+        },
+        {
+          "texto": "Los contenidos de un Pod están siempre copubicados, coprogramados y ejecutados en un contexto compartido.",
+          "respaldada": true
+        },
+        {
+          "texto": "Un Pod modela un host lógico específico de la aplicación y contiene contenedores entrelazados.",
+          "respaldada": true
+        },
+        {
+          "texto": "Los contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse mediante localhost.",
+          "respaldada": true
+        },
+        {
+          "texto": "Los contenedores del mismo Pod pueden comunicarse mediante IPC estándar como semáforos SystemV o memoria compartida POSIX.",
+          "respaldada": true
+        },
+        {
+          "texto": "Los contenedores en Pods diferentes tienen IP distintas y no pueden comunicarse por IPC sin configuración especial.",
+          "respaldada": true
+        },
+        {
+          "texto": "Las aplicaciones dentro de un Pod tienen acceso a volúmenes compartidos definidos en el Pod.",
+          "respaldada": true
+        },
+        {
+          "texto": "En términos de Docker, un Pod se modela como un grupo de contenedores Docker con namespaces y volúmenes compartidos.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 8,
+      "respaldadas": 8,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente incluye la definición esencial del Pod (unidad de computación más pequeña, grupo de contenedores con almacenamiento y red compartidos) y añade información adicional que está respaldada por los documentos, sin contradecir la respuesta de referencia.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 2,
+    "pregunta": "¿Cómo saco un archivo del área de preparación?",
+    "respuesta_de_referencia": "Con git reset HEAD <archivo>.",
+    "respuesta": "Para sacar un archivo del área de preparación, debes usar el comando `git reset HEAD <archivo>`.\n\nPor ejemplo:\n```\n$ git reset HEAD CONTRIBUTING.md\n```\n\nEsto deshace la preparación del archivo en cuestión [5].",
+    "contexto": [
+      {
+        "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nLas siguientes dos secciones demuestran cómo lidiar con los cambios de tu área de preparación y tú directorio de trabajo.\nAfortunadamente, el comando que usas para determinar el estado de esas dos áreas también te recuerda cómo deshacer los cambios en ellas.\nPor ejemplo, supongamos que has cambiado dos archivos y que quieres confirmarlos como dos cambios separados, pero accidentalmente has escrito `git add *` y has preparado ambos.\n¿Cómo puedes sacar del área de preparación uno de ellos?\nEl comando `git status` te recuerda cómo:  \n```\n$ git add .\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)",
+        "fuente": "11-git-deshacer-cambios.md",
+        "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9698
+      },
+      {
+        "texto": "Guardando cambios en el Repositorio > Eliminar Archivos\nPara eliminar archivos de Git, debes eliminarlos de tus archivos rastreados (o mejor dicho, eliminarlos del área de preparación) y luego confirmar.\nPara ello existe el comando `git rm`, que además elimina el archivo de tu directorio de trabajo de manera que no aparezca la próxima vez como un archivo no rastreado.  \nSi simplemente eliminas el archivo de tu directorio de trabajo, aparecerá en la sección ``Changes not staged for commit'' (esto es, _sin preparar_) en la salida de `git status`:  \n```\n$ rm PROJECTS.md\n$ git status\nOn branch master\nYour branch is up-to-date with 'origin/master'.\nChanges not staged for commit:\n(use \"git add/rm <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)\n\ndeleted:    PROJECTS.md",
+        "fuente": "10-git-guardar-cambios.md",
+        "seccion": "Guardando cambios en el Repositorio > Eliminar Archivos",
+        "confidencialidad": "publico",
+        "puntuacion": 0.8597
+      },
+      {
+        "texto": "Guardando cambios en el Repositorio > Saltar el Área de Preparación\nA pesar de que puede resultar muy útil para ajustar los _commits_ tal como quieres, el área de preparación es a veces un paso más complejo de lo que necesitas para tu flujo de trabajo.\nSi quieres saltarte el área de preparación, Git te ofrece un atajo sencillo.\nAñadiendo la opción `-a` al comando `git commit` harás que Git prepare automáticamente todos los archivos rastreados antes de confirmarlos, ahorrándote el paso de `git add`:  \n```\n$ git status\nOn branch master\nChanges not staged for commit:\n(use \"git add <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)\n\nmodified:   CONTRIBUTING.md",
+        "fuente": "10-git-guardar-cambios.md",
+        "seccion": "Guardando cambios en el Repositorio > Saltar el Área de Preparación",
+        "confidencialidad": "publico",
+        "puntuacion": 0.7741
+      },
+      {
+        "texto": "Guardando cambios en el Repositorio > Eliminar Archivos\ndeleted:    PROJECTS.md\n```  \nCon la próxima confirmación, el archivo habrá desaparecido y no volverá a ser rastreado.\nSi modificaste el archivo y ya lo habías añadido al índice, tendrás que forzar su eliminación con la opción `-f`.\nEsta propiedad existe por seguridad, para prevenir que elimines accidentalmente datos que aun no han sido guardados como una instantánea y que por lo tanto no podrás recuperar luego con Git.  \nOtra cosa que puedas querer hacer es mantener el archivo en tu directorio de trabajo pero eliminarlo del área de preparación.\nEn otras palabras, quisieras mantener el archivo en tu disco duro pero sin que Git lo siga rastreando.",
+        "fuente": "10-git-guardar-cambios.md",
+        "seccion": "Guardando cambios en el Repositorio > Eliminar Archivos",
+        "confidencialidad": "publico",
+        "puntuacion": 0.6068
+      },
+      {
+        "texto": "Deshacer Cosas > Deshacer un Archivo Preparado\nrenamed:    README.md -> README\nmodified:   CONTRIBUTING.md\n```  \nJusto debajo del texto ``Changes to be committed'' (``Cambios a ser confirmados'', en inglés), verás que dice que uses `git reset HEAD <file>...` para deshacer la preparación.\nPor lo tanto, usemos el consejo para deshacer la preparación del archivo `CONTRIBUTING.md`:  \n```\n$ git reset HEAD CONTRIBUTING.md\nUnstaged changes after reset:\nMCONTRIBUTING.md\n$ git status\nOn branch master\nChanges to be committed:\n(use \"git reset HEAD <file>...\" to unstage)\n\nrenamed:    README.md -> README\n\nChanges not staged for commit:\n(use \"git add <file>...\" to update what will be committed)\n(use \"git checkout -- <file>...\" to discard changes in working directory)",
+        "fuente": "11-git-deshacer-cambios.md",
+        "seccion": "Deshacer Cosas > Deshacer un Archivo Preparado",
+        "confidencialidad": "publico",
+        "puntuacion": 0.2242
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "Usar git reset HEAD <archivo> para sacar un archivo del área de preparación.",
+          "respaldada": true
+        },
+        {
+          "texto": "Ejemplo: git reset HEAD CONTRIBUTING.md.",
+          "respaldada": true
+        },
+        {
+          "texto": "El comando deshace la preparación del archivo.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 3,
+      "respaldadas": 3,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta reproduce exactamente la instrucción del documento y coincide con la respuesta de referencia, sin añadir información contradictoria.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "grafo_llm",
+    "id": 8,
+    "pregunta": "¿Qué es un Pod en Kubernetes?",
+    "respuesta_de_referencia": "La unidad de computación desplegable más pequeña de Kubernetes: un grupo de uno o más contenedores con almacenamiento y red compartidos.",
+    "respuesta": "Un _Pod_ en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar. Esencialmente, un Pod (como una vaina biológica) agrupa uno o más contenedores con almacenamiento compartido, red compartida y especificaciones sobre cómo ejecutar los contenedores [1]. Los contenedores dentro de un Pod comparten la misma dirección IP y puerto, pueden comunicarse entre sí a través de `localhost` y utilizan IPC estándar como semáforos SystemV o memoria compartida POSIX para intercambiar datos [3].\n\nEl contexto compartido en un Pod incluye namespaces de Linux y cgroups, proporcionando un entorno similar al que ofrece Docker para los contenedores [3].",
+    "contexto": [
+      {
+        "texto": "Pods > ¿Qué és un Pod?\nUn _Pod_ (como en una vaina de ballenas o vaina de guisantes) es un grupo de uno o más contenedores (como contenedores Docker), con almacenamiento/red compartidos, y unas especificaciones de cómo ejecutar los contenedores. Los contenidos de un Pod son siempre coubicados, coprogramados y ejecutados en un contexto compartido. Un Pod modela un \"host lógico\" específico de la aplicación: contiene uno o más contenedores de aplicaciones relativamente entrelazados. Antes de la llegada de los contenedores, ejecutarse en la misma máquina física o virtual significaba ser ejecutado en el mismo host lógico.  \nMientras que Kubernetes soporta más runtimes de contenedores a parte de Docker, este último es el más conocido y ayuda a describir Pods en términos de Docker.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > ¿Qué és un Pod?",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9996
+      },
+      {
+        "texto": "Pods\nLos _Pods_ son las unidades de computación desplegables más pequeñas que se pueden crear y gestionar en Kubernetes.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9946
+      },
+      {
+        "texto": "Pods > ¿Qué és un Pod?\nEl contexto compartido de un Pod es un conjunto de namespaces de Linux, cgroups y, potencialmente, otras facetas de aislamiento, las mismas cosas que aíslan un contenedor Docker. Dentro del contexto de un Pod, las aplicaciones individuales pueden tener más subaislamientos aplicados.  \nLos contenedores dentro de un Pod comparten dirección IP y puerto, y pueden encontrarse a través de `localhost`. También pueden comunicarse entre sí mediante comunicaciones estándar entre procesos, como semáforos de SystemV o la memoria compartida POSIX. Los contenedores en diferentes Pods tienen direcciones IP distintas y no pueden comunicarse por IPC sin configuración especial.\nEstos contenedores normalmente se comunican entre sí a través de las direcciones IP del Pod.",
+        "fuente": "03-k8s-pods.md",
+        "seccion": "Pods > ¿Qué és un Pod?",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9758
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "Un Pod en Kubernetes es la unidad de computación desplegable más pequeña que puede crearse y gestionar.",
+          "respaldada": true
+        },
+        {
+          "texto": "Un Pod agrupa uno o más contenedores con almacenamiento compartido, red compartida y especificaciones sobre cómo ejecutar los contenedores.",
+          "respaldada": true
+        },
+        {
+          "texto": "Los contenedores dentro de un Pod comparten la misma dirección IP y puerto, pueden comunicarse entre sí a través de localhost y utilizan IPC estándar como semáforos SystemV o memoria compartida POSIX para intercambiar datos.",
+          "respaldada": true
+        },
+        {
+          "texto": "El contexto compartido en un Pod incluye namespaces de Linux y cgroups, proporcionando un entorno similar al que ofrece Docker para los contenedores.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 4,
+      "respaldadas": 4,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente coincide con la referencia y añade información adicional que está respaldada por los documentos, sin contradecirla.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 20,
+    "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+    "respuesta_de_referencia": "Permite pedir que la cookie no se envíe en solicitudes cross-site, lo que da cierta protección contra ataques CSRF.",
+    "respuesta": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, donde Site es definido por el dominio registrable [1].",
+    "contexto": [
+      {
+        "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nLas cookies `SameSite` permiten a los servidores requerir que una cookie no sea enviada con solicitudes cross-site (donde Site es definido por el dominio registrabe), lo que proporciona algo de protección contra ataques cross-site request forgery (CSRF).  \nLas cookies `SameSite` son relativamente nuevas y soportadas por los principales navegadores.  \nAquí hay un ejemplo:  \n```\nSet-Cookie: key=value; SameSite=Strict\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9981
+      },
+      {
+        "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`\n- : Si una cookie same-site tiene este atributo, el navegador sólo enviará cookies si la solicitud se originó en el sitio web que estableció la cookie. Si la solicitud se originó desde una URL diferente que la URL del location actual, no se incluirá ninguna cookie etiquetada con el atributo `Strict`.\n- `Lax`\n- : Si el atributo se establece en Lax, las cookies same-site se retienen en (sub)peticiones cross-site, tales como llamadas para cargar imágenes o frames, pero se enviarán cuando un usuario navegue a la URL desde un sitio externo, por ejemplo, siguiendo un enlace.",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9897
+      },
+      {
+        "texto": "HTTP cookies > Rastreo y privacidad > Cookies de terceros\n- Los servidores pueden (y deberían) configurar el atributo SameSite para especificar si se pueden enviar o no cookies de terceros.\n- Las cookies que tienen un estado de partición independiente (CHIPS) les permiten a los desarrolladores habilitar sus cookies en el almacenamiento particionado, con un contenedor de cookies separado por sitio de nivel superior. Esto permite que los usos válidos sin seguimiento de cookies de terceros sigan funcionando en navegadores que no permiten el uso de cookies para el seguimiento de terceros.",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Rastreo y privacidad > Cookies de terceros",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9655
+      },
+      {
+        "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nEl comportamiento por defecto de este flag si no está establecido, o no está soportado por el navegador, es incluir las cookies en cualquier solicitud, incluyendo solicitudes corss-origin.",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+        "confidencialidad": "publico",
+        "puntuacion": 0.4895
+      },
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes con credenciales\n#### Cookies de terceros  \nTenga en cuenta que las Cookies establecidas en las respuestas CORS están sujetas a la políticas normales sobre Cookies de terceros. En el ejemplo anterior, la página se carga desde `foo.example` pero la Cookie de la línea 19 es enviada por `bar.other`, por lo que no se guardaría si el navegador del usuario está configurado para rechazar todas las Cookies de terceros.  \nLa Cookie en la solicitud anterior (línea 10) también puede ser suprimida en las políticas normales sobre Cookies de terceros. Por lo tanto, la política de Cookies aplicada puede anular la capacidad descrita en este capítulo, impidiéndole realizar solicitudes con credenciales.  \nSe aplicaría la política de Cookies en torno al atributo Cookies del mismo sitio",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes con credenciales",
+        "confidencialidad": "publico",
+        "puntuacion": 0.0195
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "El atributo SameSite de las cookies proporciona protección contra ataques CSRF.",
+          "respaldada": true
+        },
+        {
+          "texto": "Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, donde Site es definido por el dominio registrable.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 2,
+      "respaldadas": 2,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente coincide con la referencia, indicando que SameSite impide el envío de cookies en solicitudes cross-site y brinda protección contra CSRF, sin omitir información esencial.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 18,
+    "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+    "respuesta_de_referencia": "OPTIONS.",
+    "respuesta": "El navegador utiliza el método HTTP `OPTIONS` para realizar la solicitud de verificación previa (preflight) en CORS [2].",
+    "contexto": [
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS)\n**El intercambio de recursos de origen cruzado** (CORS, por sus siglas en inglés), es un mecanismo basado en cabeceras HTTP que permite a un servidor indicar cualquier dominio, esquema o puerto con un origen distinto del suyo desde el que un navegador debería permitir la carga de recursos. CORS también se basa en un mecanismo por el cual los navegadores realizan una solicitud de \"verificación previa\" al servidor que aloja el recurso de origen cruzado, con el fin de comprobar que el servidor permitirá la solicitud real. En esa comprobación previa, el navegador envía cabeceras que indican el método HTTP y las cabeceras que se utilizarán en la solicitud real.",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS)",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9897
+      },
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nVary: Accept-Encoding, Origin\nKeep-Alive: timeout=2, max=100\nConnection: Keep-Alive\n```  \nLas primeras diez líneas representan la solicitud de verificación previa con el método `OPTIONS`. El navegador determina que necesita enviar esto basándose en los parámetros de petición que el fragmento de código JavaScript de arriba ha usado, para que el servidor pueda responder si es aceptable enviar la petición con los parámetros de solicitud reales. OPTIONS es un método HTTP/1.1 que se utiliza para determinar con más detalle la información de los servidores y es un método seguro, lo que significa que no se puede utilizar para cambiar el recurso. Observe que junto con la solicitud OPTIONS, se envían otras dos cabeceras de solicitud (líneas nueve y diez respectivamente):  \n```http",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9802
+      },
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente\nA diferencia de las solicitudes simples, para las \"solicitudes verificadas previamente\" el navegador envía primero una petición HTTP utilizando el método OPTIONS al recurso en el otro origen, para determinar si la solicitud real es segura de enviar. Este tipo de solicitudes entre orígenes se verifican previamente porque pueden afectar a los datos del usuario.  \nA continuación se muestra un ejemplo de solicitud que se comprobará previamente:  \n```js\nconst xhr = new XMLHttpRequest();\nxhr.open(\"POST\", \"https://bar.other/doc\");\nxhr.setRequestHeader(\"X-PINGOTHER\", \"pingpong\");\nxhr.setRequestHeader(\"Content-Type\", \"text/xml\");\nxhr.onreadystatechange = handler;\nxhr.send(\"Arun\");\n```",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS) > Ejemplos de escenarios de control de acceso > Solicitudes verificadas previamente",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9665
+      },
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de respuesta HTTP > Access-Control-Allow-Methods\nLa cabecera Access-Control-Allow-Methods especifica el método o métodos permitidos al acceder al recurso. Se utiliza en respuesta a una solicitud de verificación previa. las condiciones bajo las que una solicitud es verificada previamente se han explicado anteriormente.  \n```http\nAccess-Control-Allow-Methods: [, ]*\n```  \nMás arriba se ofrece un ejemplo de solicitud de verificación previa, incluido un ejemplo que envía esta cabecera al navegador.",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de respuesta HTTP > Access-Control-Allow-Methods",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9591
+      },
+      {
+        "texto": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method\nLa cabecera de solicitud Access-Control-Request-Method se utiliza cuando se emite una solicitud de verificación previa para que el servidor sepa qué método HTTP se utilizará cuando se realice la solicitud real.  \n```http\nAccess-Control-Request-Method:\n```  \nPuede encontrar ejemplos de este uso arriba",
+        "fuente": "17-http-cors.md",
+        "seccion": "Intercambio de recursos de origen cruzado (CORS) > Las cabeceras de solicitud HTTP > Access-Control-Request-Method",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9325
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "El navegador utiliza el método HTTP OPTIONS para realizar la solicitud de verificación previa (preflight) en CORS.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 1,
+      "respaldadas": 1,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta coincide exactamente con la referencia (OPTIONS) y está respaldada por los documentos que indican que la solicitud de verificación previa usa el método OPTIONS.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 17,
+    "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+    "respuesta_de_referencia": "No, es un protocolo sin estado. Las cookies permiten mantener sesiones con estado.",
+    "respuesta": "No, HTTP es un protocolo sin estado, lo que significa que no guarda ningún dato entre dos peticiones en la misma sesión [1]. Sin embargo, el uso de cookies permite guardar datos con respecto a la sesión de comunicación, creando así un contexto común para cada sesión de comunicación [1].",
+    "contexto": [
+      {
+        "texto": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados\nHTTP es un protocolo sin estado, es decir: no guarda ningún dato entre dos peticiones en la mísma sesión. Esto crea problemáticas, en caso de que los usuarios requieran interactuar con determinadas páginas Web de forma ordenada y coherente, por ejemplo, para el uso de \"cestas de la compra\" en páginas que utilizan en comercio electrónico. Pero, mientras HTTP ciertamente es un protocolo sin estado, el uso de HTTP cookies, si permite guardar datos con respecto a la sesión de comunicación. Usando la capacidad de ampliación del protocolo HTTP, las cookies permiten crear un contexto común para cada sesión de comunicación.",
+        "fuente": "16-http-vision-general.md",
+        "seccion": "Generalidades del protocolo HTTP > Características clave del protocolo HTTP > HTTP es un protocolo con sesiones, pero sin estados",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9864
+      },
+      {
+        "texto": "HTTP cookies\nUna cookie HTTP, cookie web o cookie de navegador es una pequeña pieza de datos que un servidor envía a el navegador web del usuario. El navegador guarda estos datos y los envía de regreso junto con la nueva petición al mismo servidor. Las cookies se usan generalmente para decirle al servidor que dos peticiones tienen su origen en el mismo navegador web lo que permite, por ejemplo, mantener la sesión de un usuario abierta. Las cookies permiten recordar la información de estado en vista a que el protocolo HTTP es un protocolo sin estado.  \nLas cookies se utilizan principalmente con tres propósitos:  \n- Gestión de Sesiones\n- : Inicios de sesión, carritos de compras, puntajes de juegos o cualquier otra cosa que el servidor deba recordar\n- Personalización",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies",
+        "confidencialidad": "publico",
+        "puntuacion": 0.8865
+      },
+      {
+        "texto": "HTTP caching > Visión general\nLa caché HTTP almacena una respuesta asociada con una solicitud y reutiliza la respuesta almacenada para solicitudes posteriores.  \nHay varias ventajas de reusabilidad. En primer lugar, dado que no es necesario enviar la solicitu al servidor origen, cuanto más cerca están el cliente y la caché, más rápida será la respuesta. El ejemplo más típico es cuando el navegador almacena una caché para las solicitudes.  \nAdemás, cuando una respuesta es reutilizable, el servidor de origen no necesita procesar la solicitud, por lo que no necesita parsear y enrutar la solicitud, restaurar la sesión en función de la cookie, consultar los resultados de la base de datos o renderizar la plantilla. Eso reduce la carga en el servidor.",
+        "fuente": "19-http-cache.md",
+        "seccion": "HTTP caching > Visión general",
+        "confidencialidad": "publico",
+        "puntuacion": 0.8614
+      },
+      {
+        "texto": "Generalidades del protocolo HTTP > Arquitectura de los sistemas basados en HTTP\nHTTP es un protocolo basado en el principio de cliente-servidor: las peticiones son enviadas por una entidad: el agente del usuario (o un proxy a petición de uno). La mayoría de las veces el agente del usuario (cliente) es un navegador Web, pero podría ser cualquier otro programa, como por ejemplo un programa-robot, que explore la Web, para adquirir datos de su estructura y contenido para uso de un buscador de Internet.  \nCada petición individual se envía a un servidor, el cuál la gestiona y responde. Entre cada _petición_ y _respuesta_, hay varios intermediarios, normalmente denominados proxies, los cuales realizan distintas funciones, como: gateways o caches.",
+        "fuente": "16-http-vision-general.md",
+        "seccion": "Generalidades del protocolo HTTP > Arquitectura de los sistemas basados en HTTP",
+        "confidencialidad": "publico",
+        "puntuacion": 0.7214
+      },
+      {
+        "texto": "Generalidades del protocolo HTTP\nHTTP, de sus siglas en inglés: \"Hypertext Transfer Protocol\", es el nombre de un protocolo el cual nos permite realizar una petición de datos y recursos, como pueden ser documentos HTML. Es la base de cualquier intercambio de datos en la Web, y un protocolo de estructura cliente-servidor, esto quiere decir que una petición de datos es iniciada por el elemento que recibirá los datos (el cliente), normalmente un navegador Web. Así, una página web completa resulta de la unión de distintos sub-documentos recibidos, como, por ejemplo: un documento que especifique el estilo de maquetación de la página web (CSS), el texto, las imágenes, vídeos, scripts, etc...",
+        "fuente": "16-http-vision-general.md",
+        "seccion": "Generalidades del protocolo HTTP",
+        "confidencialidad": "publico",
+        "puntuacion": 0.4946
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "HTTP es un protocolo sin estado y no guarda datos entre peticiones",
+          "respaldada": true
+        },
+        {
+          "texto": "El uso de cookies permite guardar datos de sesión creando un contexto común",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 2,
+      "respaldadas": 2,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente coincide con la referencia: indica que HTTP es sin estado y que las cookies permiten mantener información de sesión.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 9,
+    "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+    "respuesta_de_referencia": "Como máximo el 25% (maxUnavailable), y como máximo un 25% por encima del número deseado (maxSurge).",
+    "respuesta": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%. Esto se puede ver en los documentos [1] y [2]. Ambas fuentes indican consistentemente este valor predeterminado.",
+    "contexto": [
+      {
+        "texto": "Deployment > Escribir una especificación de Deployment > Estrategia\n`.spec.strategy.rollingUpdate.maxUnavailable` es un campo opcional que indica el número máximo\nde Pods que pueden no estar disponibles durante el proceso de actualización. El valor puede ser un número absoluto (por ejemplo, 5)\no un porcentaje de los Pods deseados (por ejemplo, 10%). El número absoluto se calcula a partir del porcentaje\ncon redondeo a la baja. El valor no puede ser 0 si `.spec.strategy.rollingUpdate.maxSurge` es 0. El valor predeterminado es 25%.  \nPor ejemplo, cuando este valor es 30%, el ReplicaSet viejo puede escalarse al 70% de los\nPods deseados de forma inmediata tras comenzar el proceso de actualización. Una vez que los Pods están listos,\nel ReplicaSet viejo puede reducirse aún mas, seguido de un escalado del nuevo ReplicaSet,",
+        "fuente": "04-k8s-deployments.md",
+        "seccion": "Deployment > Escribir una especificación de Deployment > Estrategia",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9964
+      },
+      {
+        "texto": "Deployment > Actualizar un Deployment\nkubectl get pods\n```\n```\nNAME                                READY     STATUS    RESTARTS   AGE\nnginx-deployment-1564180365-khku8   1/1       Running   0          14s\nnginx-deployment-1564180365-nacti   1/1       Running   0          14s\nnginx-deployment-1564180365-z9gth   1/1       Running   0          14s\n```  \nLa próxima vez que quieras actualizar estos Pods, sólo necesitas actualizar la plantilla Pod del Deployment otra vez.  \nEl Deployment permite garantizar que sólo un número determinado de Pods puede eliminarse mientras se están actualizando.\nPor defecto, garantiza que al menos el 25% menos del número deseado de Pods se está ejecutando (máx. 25% no disponible).",
+        "fuente": "04-k8s-deployments.md",
+        "seccion": "Deployment > Actualizar un Deployment",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9947
+      },
+      {
+        "texto": "Deployment > Actualizar un Deployment\nEl Deployment también permite garantizar que sólo un número determinado de Pods puede crearse por encima del número deseado de\nPods. Por defecto, garantiza que al menos el 25% más del número deseado de Pods se está ejecutando (máx. 25% de aumento).  \nPor ejemplo, si miras detenidamente el Deployment de arriba, verás que primero creó un Pod,\nluego eliminó algunos viejos Pods y creó otros nuevos. No elimina los viejos Pods hasta que un número suficiente de\nnuevos Pods han arrancado, y no crea nuevos Pods hasta que un número suficiente de viejos Pods se han eliminado.\nDe esta forma, asegura que el número de Pods disponibles siempre es al menos 2, y el número de Pods totales es cómo máximo 4.  \n```shell\nkubectl describe deployments\n```\n```\nName:                   nginx-deployment",
+        "fuente": "04-k8s-deployments.md",
+        "seccion": "Deployment > Actualizar un Deployment",
+        "confidencialidad": "publico",
+        "puntuacion": 0.992
+      },
+      {
+        "texto": "Deployment > Escribir una especificación de Deployment > Tiempo mínimo para considerar el Pod disponible\n`.spec.minReadySeconds` es un campo opcional que indica el número mínimo de segundos en que\nun Pod recién creado debería estar listo sin que falle ninguno de sus contenedores, para que se considere disponible.\nPor defecto su valor es 0 (el Pod se considera disponible en el momento que está listo). Para aprender más acerca de\ncuándo un Pod se considera que está listo, ver las pruebas de contenedor.",
+        "fuente": "04-k8s-deployments.md",
+        "seccion": "Deployment > Escribir una especificación de Deployment > Tiempo mínimo para considerar el Pod disponible",
+        "confidencialidad": "publico",
+        "puntuacion": 0.8459
+      },
+      {
+        "texto": "Deployment > Escribir una especificación de Deployment > Estrategia\nel ReplicaSet viejo puede reducirse aún mas, seguido de un escalado del nuevo ReplicaSet,\nasegurándose que el número total de Pods disponibles en todo momento durante la actualización\nes de al menos el 70% de los Pods deseados.  \n##### Número máximo de pods por encima del número deseado  \n`.spec.strategy.rollingUpdate.maxSurge` es un campo opcional que indica el número máximo de Pods\nque puede crearse por encima del número deseado de Pods. El valor puede ser un número absoluto (por ejemplo, 5)\no un porcentaje de los Pods deseados (por ejemplo, 10%). El valor no puede ser 0 si `MaxUnavailable` es 0.\nEl número absoluto se calcula a partir del porcentaje con redondeo al alza. El valor predeterminado es 25%.",
+        "fuente": "04-k8s-deployments.md",
+        "seccion": "Deployment > Escribir una especificación de Deployment > Estrategia",
+        "confidencialidad": "publico",
+        "puntuacion": 0.784
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "Por defecto, el número máximo de Pods que pueden quedar no disponibles durante la actualización de un Deployment es del 25%.",
+          "respaldada": true
+        },
+        {
+          "texto": "Esto se puede ver en los documentos [1] y [2]. Ambas fuentes indican consistentemente este valor predeterminado.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 2,
+      "respaldadas": 2,
+      "fidelidad": 1.0,
+      "correccion": "parcial",
+      "motivo": "La respuesta menciona correctamente que el valor predeterminado de maxUnavailable es 25%, pero omite la información del valor predeterminado de maxSurge (también 25%) que está incluida en la respuesta de referencia.",
+      "intentos": 2
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "grafo_llm",
+    "id": 20,
+    "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+    "respuesta_de_referencia": "Permite pedir que la cookie no se envíe en solicitudes cross-site, lo que da cierta protección contra ataques CSRF.",
+    "respuesta": "El atributo `SameSite` de las cookies proporciona protección contra ataques cross-site request forgery (CSRF). Según [1] y [2], este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, lo cual ayuda a prevenir estos tipos de ataques.",
+    "contexto": [
+      {
+        "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\nLas cookies `SameSite` permiten a los servidores requerir que una cookie no sea enviada con solicitudes cross-site (donde Site es definido por el dominio registrabe), lo que proporciona algo de protección contra ataques cross-site request forgery (CSRF).  \nLas cookies `SameSite` son relativamente nuevas y soportadas por los principales navegadores.  \nAquí hay un ejemplo:  \n```\nSet-Cookie: key=value; SameSite=Strict\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9981
+      },
+      {
+        "texto": "HTTP cookies > Creando cookies > Cookies `SameSite`\n```  \nEl atributo same-site puede tomar uno de los dos valores (case-insensitive):  \n- `Strict`\n- : Si una cookie same-site tiene este atributo, el navegador sólo enviará cookies si la solicitud se originó en el sitio web que estableció la cookie. Si la solicitud se originó desde una URL diferente que la URL del location actual, no se incluirá ninguna cookie etiquetada con el atributo `Strict`.\n- `Lax`\n- : Si el atributo se establece en Lax, las cookies same-site se retienen en (sub)peticiones cross-site, tales como llamadas para cargar imágenes o frames, pero se enviarán cuando un usuario navegue a la URL desde un sitio externo, por ejemplo, siguiendo un enlace.",
+        "fuente": "18-http-cookies.md",
+        "seccion": "HTTP cookies > Creando cookies > Cookies `SameSite`",
+        "confidencialidad": "publico",
+        "puntuacion": 0.9897
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "El atributo SameSite de las cookies proporciona protección contra ataques cross-site request forgery (CSRF).",
+          "respaldada": true
+        },
+        {
+          "texto": "Este atributo permite que los servidores requieran que una cookie no sea enviada con solicitudes cross-site, lo cual ayuda a prevenir estos tipos de ataques.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 2,
+      "respaldadas": 2,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente coincide con la referencia: indica que SameSite impide el envío de cookies en solicitudes cross-site y brinda protección contra CSRF, sin añadir información contradictoria.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  },
+  {
+    "configuracion": "actual",
+    "id": 7,
+    "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+    "respuesta_de_referencia": "Es el primero en ejecutarse, antes de escribir el mensaje de confirmación. Se usa para inspeccionar lo que se va a confirmar, por ejemplo ejecutar pruebas o revisar el código.",
+    "respuesta": "El punto de enganche `pre-commit` se activa incluso antes de que teclées el mensaje de confirmación. Se utiliza principalmente para inspeccionar la instantánea (snapshot) que vas a confirmar, para asegurar que las pruebas se ejecutan y revisar cualquier aspecto del código que necesites inspeccionar, como por ejemplo lanzar `lint` o revisar los espacios en blanco [1].",
+    "contexto": [
+      {
+        "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\nLos primeros cuatro puntos de enganche están relacionados con el proceso de\nconfirmación de cambios.  \nPrimero se activa el punto de enganche `pre-commit`, incluso antes de que\nteclees el mensaje de confirmación. Se suele utilizar para inspeccionar\nla instantánea (snapshot) que vas a confirmar, para ver si has olvidado\nalgo, para asegurar que las pruebas se ejecutan, o para revisar cualquier\naspecto que necesites inspeccionar en el código. Saliendo con un valor\nde retorno distinto de cero, se aborta la confirmación de cambios. Aunque\nsiempre puedes saltártelo con la orden `git commit --no-verify`. Puede ser\nútil para realizar tareas tales como revisar el estilo del código\n(lanzando `lint` o algo equivalente), revisar los espacios en blanco de",
+        "fuente": "15-git-hooks.md",
+        "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+        "confidencialidad": "publico",
+        "puntuacion": 0.3975
+      },
+      {
+        "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente\nEl punto `pre-rebase` se activa antes de cualquier reorganización y puede\nabortarla si retorna con un código de salida distinto de cero. Puedes usarlo\npara impedir reorganizaciones de cualquier confirmación de cambios ya enviada\n(push) a algún servidor.  El script de ejemplo para `pre-rebase` hace\nprecisamente eso, aunque asumiendo que `next` es el nombre de la rama\npublicada. Si lo vas a utilizar, tendrás que modificarlo para que se ajuste al\nnombre que tenga tu rama publicada.  \nEl punto de enganche `post-rewrite` se ejecuta con los comandos que reemplazan\nconfirmaciones de cambio, como `git commit --amend` y `git rebase` (pero no con\n`git filter-branch`). Su único argumento es el comando que disparará la\nreescritura, y recibe una lista de reescrituras por la entrada estándar",
+        "fuente": "15-git-hooks.md",
+        "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Otros puntos de enganche del lado cliente",
+        "confidencialidad": "publico",
+        "puntuacion": 0.0573
+      },
+      {
+        "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\n(lanzando `lint` o algo equivalente), revisar los espacios en blanco de\nrelleno (el script de ejemplo hace exactamente eso), o revisar si todos\nlos nuevos métodos llevan la adecuada documentación.  \nEl punto de enganche `prepare-commit-msg` se activa antes de arrancar\nel editor del mensaje de confirmación de cambios, pero después de crearse\nel mensaje por defecto. Te permite editar el mensaje por defecto, antes\nde que lo vea el autor de la confirmación de cambios. Este punto de\nenganche recibe varias entradas: la ubicación (path) del archivo temporal\ndonde se almacena el mensaje de confirmación, el tipo de confirmación y la\nclave SHA-1 si estamos enmendando un `commit` existente. Este punto de enganche\nno tiene mucha utilidad para las confirmaciones de cambios normales; pero sí",
+        "fuente": "15-git-hooks.md",
+        "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+        "confidencialidad": "publico",
+        "puntuacion": 0.0283
+      },
+      {
+        "texto": "Puntos de enganche en Git\nAl igual que en otros sistemas de control de versiones, Git también cuenta\ncon mecanismos para lanzar scripts de usuario cuando suceden ciertas acciones\nimportantes, llamados puntos de enganche (hooks). Hay dos grupos de esos\npuntos de lanzamiento: los del lado\ncliente y los del lado servidor. Los puntos de enganche del lado cliente están relacionados\ncon operaciones tales como la confirmación de cambios (commit) o la fusión\n(merge). Los del lado servidor están relacionados con operaciones tales como\nla recepción de contenidos enviados (push) a un servidor. Estos puntos de\nenganche pueden utilizarse para multitud de aplicaciones. Vamos a ver unas\npocas de ellas.",
+        "fuente": "15-git-hooks.md",
+        "seccion": "Puntos de enganche en Git",
+        "confidencialidad": "publico",
+        "puntuacion": 0.0235
+      },
+      {
+        "texto": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios\ndel proyecto o el mensaje de confirmación antes de permitir continuar. En\nla última parte de este capítulo, veremos cómo podemos utilizar este punto\nde enganche para revisar si el mensaje de confirmación es conforme a un\ndeterminado patrón obligatorio.  \nDespués de completar todo el proceso de confirmación de cambios, es cuando\nse lanza el punto de enganche `post-commit`. Este no recibe ningún parámetro,\npero podemos obtener fácilmente la última confirmación de cambios con el\ncomando `git log -1 HEAD`. Habitualmente, este script final se suele utilizar\npara realizar notificaciones o tareas similares.",
+        "fuente": "15-git-hooks.md",
+        "seccion": "Puntos de enganche en Git > Puntos de enganche del lado cliente > Puntos en el flujo de trabajo de confirmación de cambios",
+        "confidencialidad": "publico",
+        "puntuacion": 0.0021
+      }
+    ],
+    "veredicto": {
+      "estado": "juzgada",
+      "afirmaciones": [
+        {
+          "texto": "El punto de enganche `pre-commit` se activa incluso antes de que teclées el mensaje de confirmación.",
+          "respaldada": true
+        },
+        {
+          "texto": "Se utiliza principalmente para inspeccionar la instantánea (snapshot) que vas a confirmar.",
+          "respaldada": true
+        },
+        {
+          "texto": "Se utiliza para asegurar que las pruebas se ejecutan.",
+          "respaldada": true
+        },
+        {
+          "texto": "Se utiliza para revisar cualquier aspecto del código que necesites inspeccionar, como por ejemplo lanzar `lint` o revisar los espacios en blanco.",
+          "respaldada": true
+        }
+      ],
+      "n_afirmaciones": 4,
+      "respaldadas": 4,
+      "fidelidad": 1.0,
+      "correccion": "correcta",
+      "motivo": "La respuesta del asistente coincide con la referencia: indica que pre-commit se ejecuta antes de escribir el mensaje de confirmación y se usa para inspeccionar la snapshot, ejecutar pruebas y revisar código, sin contradicciones ni omisiones esenciales.",
+      "intentos": 1
+    },
+    "de_acuerdo": null,
+    "comentario": ""
+  }
+]

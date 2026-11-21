@@ -1,0 +1,172 @@
+{
+  "configuracion": "vectorial+reranker",
+  "recall@1": 0.652,
+  "recall@3": 0.87,
+  "recall@5": 0.913,
+  "recall@10": 0.913,
+  "mrr@10": 0.757,
+  "latencia_media_s": 8.488,
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo rehago la última confirmación si me he equivocado en el mensaje?",
+      "puesto": 1,
+      "segundos": 8.635
+    },
+    {
+      "id": 2,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo saco un archivo del área de preparación?",
+      "puesto": 1,
+      "segundos": 8.397
+    },
+    {
+      "id": 3,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un fast-forward al fusionar ramas?",
+      "puesto": 1,
+      "segundos": 8.464
+    },
+    {
+      "id": 4,
+      "tipo": "factual",
+      "pregunta": "¿Cuál es la regla de oro del rebase?",
+      "puesto": null,
+      "segundos": 8.426
+    },
+    {
+      "id": 5,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo recupero los cambios que guardé con git stash?",
+      "puesto": 1,
+      "segundos": 8.542
+    },
+    {
+      "id": 6,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo veo qué borraría git clean sin borrar nada?",
+      "puesto": 4,
+      "segundos": 8.557
+    },
+    {
+      "id": 7,
+      "tipo": "factual",
+      "pregunta": "¿Cuándo se ejecuta el hook pre-commit y para qué se usa?",
+      "puesto": 1,
+      "segundos": 7.723
+    },
+    {
+      "id": 8,
+      "tipo": "factual",
+      "pregunta": "¿Qué es un Pod en Kubernetes?",
+      "puesto": 3,
+      "segundos": 6.909
+    },
+    {
+      "id": 9,
+      "tipo": "numerico",
+      "pregunta": "Por defecto, ¿cuántos Pods pueden quedar no disponibles durante la actualización de un Deployment?",
+      "puesto": 2,
+      "segundos": 9.315
+    },
+    {
+      "id": 10,
+      "tipo": "codigo_exacto",
+      "pregunta": "¿Cómo vuelvo a una revisión anterior de un Deployment?",
+      "puesto": 1,
+      "segundos": 10.225
+    },
+    {
+      "id": 11,
+      "tipo": "factual",
+      "pregunta": "¿Puedo guardar contraseñas en un ConfigMap?",
+      "puesto": 1,
+      "segundos": 8.935
+    },
+    {
+      "id": 12,
+      "tipo": "restringido",
+      "pregunta": "¿Qué tamaño máximo puede tener un Secret?",
+      "puesto": 1,
+      "segundos": 8.644
+    },
+    {
+      "id": 13,
+      "tipo": "multi_hop",
+      "pregunta": "¿Qué tipo de base de datos usa Kubernetes para guardar los Secrets?",
+      "puesto": null,
+      "segundos": 8.986
+    },
+    {
+      "id": 14,
+      "tipo": "numerico",
+      "pregunta": "¿Cuántos caracteres puede tener como máximo el valor de una etiqueta en Kubernetes?",
+      "puesto": 1,
+      "segundos": 8.898
+    },
+    {
+      "id": 15,
+      "tipo": "factual",
+      "pregunta": "Si no hay ninguna NetworkPolicy, ¿un Pod acepta conexiones entrantes?",
+      "puesto": 1,
+      "segundos": 7.925
+    },
+    {
+      "id": 16,
+      "tipo": "factual",
+      "pregunta": "¿Cuáles son las 4C de la seguridad cloud native?",
+      "puesto": 1,
+      "segundos": 9.4
+    },
+    {
+      "id": 17,
+      "tipo": "factual",
+      "pregunta": "¿HTTP guarda información entre una petición y la siguiente?",
+      "puesto": 1,
+      "segundos": 7.481
+    },
+    {
+      "id": 18,
+      "tipo": "factual",
+      "pregunta": "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?",
+      "puesto": 3,
+      "segundos": 8.1
+    },
+    {
+      "id": 19,
+      "tipo": "factual",
+      "pregunta": "¿Para qué sirve el atributo HttpOnly de una cookie?",
+      "puesto": 2,
+      "segundos": 8.349
+    },
+    {
+      "id": 20,
+      "tipo": "factual",
+      "pregunta": "¿Qué protege el atributo SameSite de las cookies?",
+      "puesto": 1,
+      "segundos": 8.458
+    },
+    {
+      "id": 21,
+      "tipo": "factual",
+      "pregunta": "¿Qué directiva de Cache-Control obliga a validar siempre con el servidor antes de reutilizar una respuesta?",
+      "puesto": 2,
+      "segundos": 8.985
+    },
+    {
+      "id": 22,
+      "tipo": "factual",
+      "pregunta": "¿La autenticación HTTP Basic cifra las credenciales?",
+      "puesto": 1,
+      "segundos": 7.607
+    },
+    {
+      "id": 23,
+      "tipo": "factual",
+      "pregunta": "¿Qué diferencia hay entre los códigos 401 y 403 en autenticación?",
+      "puesto": 1,
+      "segundos": 8.268
+    }
+  ]
+}

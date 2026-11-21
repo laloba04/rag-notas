@@ -50,14 +50,18 @@ Diagrama generado con `app.get_graph().draw_mermaid()` (`python scripts/dibujar_
 
 ### Recuperación
 
-Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta. Esta tabla y la de respuestas miden calidad, así que se calculan con acceso total (también lo restringido); el filtro por permisos se mide aparte, en [Seguridad](#seguridad). Al añadir el filtro se repitió la evaluación con acceso total y los puestos de las 23 preguntas salieron idénticos en las 4 configuraciones (`eval/resultados/2026-11-03_1040` a `_1046`).
+Evaluada sobre las 23 preguntas del conjunto que tienen respuesta en el corpus. Un acierto es que alguno de los k primeros fragmentos recuperados sea del documento esperado y contenga el texto de la respuesta. Esta tabla y la de respuestas miden calidad, así que se calculan con acceso total (también lo restringido); el filtro por permisos se mide aparte, en [Seguridad](#seguridad). Al añadir el filtro se repitió la evaluación con acceso total y los puestos de las 23 preguntas salieron idénticos en las 4 configuraciones (`eval/resultados/2026-11-03_1040` a `_1046`). Se repitió otra vez al añadir el MRR, con el LLM ya configurable, y de nuevo con los mismos puestos en las 23 preguntas (`eval/resultados/2026-11-21_1033` a `_1040`, de donde sale esta tabla).
 
-| Configuración | Recall@1 | Recall@3 | Recall@5 | Recall@10 | Latencia media (CPU) |
-|---|---|---|---|---|---|
-| Solo vectorial | 0,57 | 0,87 | 0,91 | 0,91 | 0,12 s |
-| Vectorial + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 10,11 s |
-| Híbrida (vectorial + BM25, RRF) | 0,52 | 0,83 | 0,83 | 0,91 | 0,12 s |
-| Híbrida + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 8,44 s |
+**MRR@10** (Mean Reciprocal Rank) usa la misma definición de acierto: es la media de 1/puesto del primer fragmento correcto (1 si sale primero, 0,5 si sale segundo, 0 si no está entre los 10 primeros). El recall@5 dice si el fragmento correcto llega al LLM; el MRR, además, lo arriba que llega.
+
+| Configuración | Recall@1 | Recall@3 | Recall@5 | Recall@10 | MRR@10 | Latencia media (CPU) |
+|---|---|---|---|---|---|---|
+| Solo vectorial | 0,57 | 0,87 | 0,91 | 0,91 | 0,72 | 0,11 s |
+| Vectorial + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 0,76 | 8,49 s |
+| Híbrida (vectorial + BM25, RRF) | 0,52 | 0,83 | 0,83 | 0,91 | 0,67 | 0,11 s |
+| Híbrida + reranker (25 candidatos) | 0,65 | 0,87 | 0,91 | 0,91 | 0,76 | 8,82 s |
+
+El MRR confirma lo que dicen los recall: el reranker sube el fragmento correcto (de 0,72 a 0,76) y la híbrida sin reranker lo baja (de 0,72 a 0,67). Con 23 preguntas, una diferencia de 0,04 equivale a unas dos preguntas que pasan del 2.º al 1.er puesto: orienta, no es concluyente.
 
 Por tipo de pregunta (recall@5): las configuraciones con reranker y la solo vectorial sacan comandos literales 5/5, cifras 2/2, factuales 13/14 y multi-hop 0/1. La híbrida sin reranker baja a cifras 1/2 y factuales 12/14.
 
@@ -70,7 +74,7 @@ Por tipo de pregunta (recall@5): las configuraciones con reranker y la solo vect
 
 **Qué aporta la búsqueda híbrida: nada en este corpus.**
 
-- **Con reranker, el resultado es idéntico**: el fragmento correcto queda en el mismo puesto en las 23 preguntas. BM25 añade candidatos, pero el reranker nunca los prefiere a los de la búsqueda vectorial. La diferencia de latencia (10,11 s frente a 8,44 s) no se debe a la híbrida: las dos pasan 25 candidatos al reranker, así que es variación entre ejecuciones.
+- **Con reranker, el resultado es idéntico**: el fragmento correcto queda en el mismo puesto en las 23 preguntas. BM25 añade candidatos, pero el reranker nunca los prefiere a los de la búsqueda vectorial. La diferencia de latencia no se debe a la híbrida: las dos pasan 25 candidatos al reranker, así que es variación entre ejecuciones. El 3 de noviembre, la vectorial con reranker tardó 10,11 s y la híbrida 8,44 s; el 21 de noviembre, 8,49 s y 8,82 s.
 - **Sin reranker, empeora**: recall@5 baja de 0,91 a 0,83. Mejora 2 preguntas de comandos (recuperar lo guardado con `git stash` y volver a una revisión anterior de un Deployment pasan del 2.º al 1.er puesto), pero empeora 7. BM25 premia palabras sueltas: en "¿Qué método HTTP usa el navegador en la verificación previa (preflight) de CORS?" el fragmento correcto pasa del 3.er al 7.º puesto.
 - **Los comandos literales no la necesitaban**: la búsqueda vectorial ya los encontraba todos (5/5) en el 1.er o 2.º puesto. El modelo de embeddings capta bien `--amend`, `git stash` o `kubectl` porque aparecen escritos igual en la pregunta y en el texto.
 - **No arregla la pregunta del rebase**: el fragmento correcto solo comparte con la pregunta las palabras "la" y "de", y BM25 lo deja en el puesto 305 de 610. Las palabras exactas no ayudan cuando el documento dice "reorganizar" y la pregunta, "rebase".
@@ -79,17 +83,45 @@ Por eso está desactivada por defecto (`HIBRIDA=false` en `config.py`; se activa
 
 ### Respuestas: pipeline directo frente al grafo
 
-Las 28 preguntas, con `qwen2.5:14b` y las mitigaciones de prompt injection activas (`eval/resultados/2026-11-07_1840` a `_1854`). Aquí el recall@5 se mide sobre los fragmentos que de verdad recibe el LLM: en el grafo, los que superan la evaluación de relevancia.
+Las 28 preguntas, generadas con `qwen2.5:14b` en local y con las mitigaciones de prompt injection activas (`eval/resultados/2026-11-21_1056` a `_1109`). Aquí el recall@5 se mide sobre los fragmentos que de verdad recibe el LLM: en el grafo, los que superan la evaluación de relevancia.
 
 | Configuración | Recall@5 | "No lo tengo" en las 5 sin respuesta | "No lo tengo" en las 23 con respuesta | Latencia media | Latencia mediana |
 |---|---|---|---|---|---|
-| Pipeline directo | 0,91 | 5/5 | 1/23 | 11,87 s | 11,04 s |
-| Grafo, evaluación con reranker (umbral 0,5) | 0,87 | 5/5 | 2/23 | 14,3 s | 12,22 s |
-| Grafo, evaluación con LLM juez | 0,87 | 5/5 | 2/23 | 17,03 s | 14,72 s |
+| Pipeline directo | 0,91 | 5/5 | 1/23 | 12,13 s | 10,1 s |
+| Grafo, evaluación con reranker (umbral 0,5) | 0,87 | 5/5 | 2/23 | 12,93 s | 11,25 s |
+| Grafo, evaluación con LLM juez | 0,87 | 5/5 | 2/23 | 15,33 s | 13,4 s |
+
+Las preguntas que acaban en "No lo tengo" son las mismas que en la ejecución anterior (`2026-11-07_1840` a `_1854`): la multi-hop (13) en el pipeline directo; la del rebase (4) y la 13 en el grafo con reranker; la 4 y la del ConfigMap (11) en el grafo con LLM juez. Ninguna salida bloqueada por la validación.
+
+#### Fidelidad y corrección (juez LLM)
+
+Un LLM juez (`juez.py`) lee cada respuesta junto con los fragmentos que recibió el generador y, en una sola llamada con salida estructurada, devuelve:
+
+- **Fidelidad:** separa la respuesta en afirmaciones y dice si cada una está en los fragmentos. Una afirmación cierta que no está en los fragmentos cuenta como **no respaldada**: se mide si el modelo se ciñe al contexto, no si sabe.
+- **Corrección:** compara con la respuesta de referencia del conjunto (correcta, parcial o incorrecta).
+
+El juez es `openai/gpt-oss-120b` en Groq, un modelo distinto del que genera, para que no se evalúe a sí mismo (`juez_igual_a_generador: false` en el JSON). Solo se juzgan las respuestas a las 23 preguntas con respuesta que no dicen "No lo tengo". Las que tienen fragmentos restringidos en el contexto no se envían a Groq y quedan **sin juzgar** (ver [Seguridad](#nada-restringido-hacia-un-proveedor-externo)). Resultados: `eval/resultados/2026-11-21_1114` a `_1121` (`_juez_*`).
+
+| Configuración | Juzgadas | Fidelidad media | Todas las afirmaciones respaldadas | Correctas | Parciales | Incorrectas | Sin juzgar (restringido) | "No lo tengo" (no se juzga) |
+|---|---|---|---|---|---|---|---|---|
+| Pipeline directo | 21 | 0,98 | 20/21 | 17 | 4 | 0 | 1 | 1 |
+| Grafo, evaluación con reranker | 20 | 0,96 | 18/20 | 17 | 2 | 1 | 1 | 2 |
+| Grafo, evaluación con LLM juez | 20 | 0,96 | 18/20 | 17 | 3 | 0 | 1 | 2 |
+
+Ninguna respuesta quedó sin juzgar por error: 2 llamadas recibieron un 429 de Groq y pasaron al reintentar.
+
+**Acuerdo con la revisión humana: pendiente.** Hay una muestra de 10 veredictos elegidos al azar (semilla fija) en `eval/revision/2026-11-21_1121_muestra_juez.json`, a la espera de revisarla a mano. Hasta entonces, estas cifras son la opinión de un LLM.
+
+Qué se ve en los veredictos:
+
+- **El modelo se ciñe al contexto.** En las tres configuraciones, casi todas las afirmaciones están en los fragmentos.
+- **Las "parciales" son casi siempre las mismas preguntas** (9, 14, 22, 23), y en varias el juez penaliza que falte algo de la respuesta de referencia que la pregunta no pedía. Por ejemplo, en la 9 se pregunta por `maxUnavailable` y la referencia también menciona `maxSurge`. Es un sesgo de cómo está escrita la referencia, además del juez.
+- **El juez no es estable en los casos dudosos.** La pregunta 23 (401 frente a 403) recibe "parcial", "incorrecta" y "correcta" en las tres configuraciones. Las tres respuestas no son idénticas, pero por eso hace falta la revisión humana.
+- **El recall subestima una respuesta.** En la pregunta del rebase, el pipeline directo responde bien, y el juez la da por correcta y respaldada, con un fragmento que no contiene el `texto_esperado`, así que el recall la cuenta como fallo. No he cambiado el conjunto de evaluación después de verlo.
 
 **Ramas del grafo** (28 preguntas): con reranker, 23 acaban en `generar` y 5 en `sin_respuesta`, y 7 pasan por `reescribir`. Con LLM juez, 22 en `generar` y 6 en `sin_respuesta`, y 6 pasan por `reescribir`. Ninguna pregunta del conjunto va a `responder_directo`, y no hubo errores ni cortes por límite.
 
-**Pregunta trampa** ("¿Cuál es la última versión estable de Kubernetes?", el modelo conoce una respuesta por su entrenamiento): en las tres configuraciones acaba en "No lo tengo en la documentación." En el grafo recorre `decidir → recuperar → evaluar → reescribir → recuperar → evaluar → sin_respuesta`, sin pasar por `responder_directo`.
+**Pregunta trampa** ("¿Cuál es la última versión estable de Kubernetes?", el modelo conoce una respuesta por su entrenamiento): en las tres configuraciones acaba en "No lo tengo en la documentación.", sin pasar por `responder_directo`. Con LLM juez, el grafo recorre `decidir → recuperar → evaluar → reescribir → recuperar → evaluar → sin_respuesta`. Con reranker, tras la reescritura algún fragmento supera el umbral y acaba en `generar`, pero el propio LLM responde "No lo tengo" (igual en las ejecuciones del 7 y del 21 de noviembre).
 
 **Latencia media por nodo** (de las trazas, medida el 2026-10-24, antes de las mitigaciones):
 
@@ -105,7 +137,7 @@ Fragmentos medios que pasan la evaluación (misma medición): de 5 a 2,17 con re
 
 **Conclusiones:**
 
-- **En este corpus, el grafo no mejora al pipeline directo.** El pipeline directo ya dice "No lo tengo" en las 5 preguntas sin respuesta, y el filtro de relevancia del grafo a veces descarta el fragmento bueno. Con reranker, en "¿Cómo veo qué borraría git clean sin borrar nada?" el fragmento con la respuesta queda por debajo de 0,5. Con LLM juez, en "¿Puedo guardar contraseñas en un ConfigMap?" el juez descarta los cinco fragmentos.
+- **En este corpus, el grafo no mejora al pipeline directo**, tampoco según el juez: las tres configuraciones tienen 17 respuestas correctas. El pipeline directo ya dice "No lo tengo" en las 5 preguntas sin respuesta, y el filtro de relevancia del grafo a veces deja sin respuesta una pregunta que el pipeline directo responde bien: la del rebase en las dos variantes del grafo, y "¿Puedo guardar contraseñas en un ConfigMap?" con LLM juez.
 - **La reescritura no arregla la pregunta del rebase.** Una reformulación genérica no llega a "reorganizar".
 - **Las diferencias de una pregunta no son significativas.** Entre dos ejecuciones idénticas del pipeline directo, con temperatura 0,1, los "No lo tengo" en preguntas con respuesta pasaron de 2/23 a 1/23.
 - Lo que aporta el grafo y no mide este conjunto: no busca ni gasta tiempo con saludos (en las pruebas, una respuesta directa tarda ~1 s frente a ~12 s), y deja trazado por qué responde lo que responde.
@@ -148,11 +180,11 @@ Es una sola pregunta y una sola ejecución por caso: comprueba que el nivel de a
 
 El filtro anterior decide qué puede ver quien pregunta. Con un LLM por API hay una segunda pregunta: qué puede salir de la red. Son controles distintos: aunque alguien tenga acceso total, lo restringido no se envía a Groq.
 
-- **Se comprueba fragmento a fragmento, justo antes de enviar** (`config.comprobar_envio`): en el pipeline directo, nada más buscar; en el grafo, en el nodo `recuperar`, antes de que los fragmentos lleguen al juez de relevancia o al generador.
+- **Se comprueba fragmento a fragmento, justo antes de enviar** (`config.comprobar_envio`): en el pipeline directo, nada más buscar; en el grafo, en el nodo `recuperar`, antes de que los fragmentos lleguen al juez de relevancia o al generador; y en el **juez de la evaluación** (`juez.juzgar`), que también recibe los fragmentos. Sin esta última comprobación, la evaluación (que se hace con acceso total) habría enviado el documento restringido a Groq a través del juez. En la evaluación, esas preguntas quedan como "sin juzgar (restringido)" y no cuentan en los porcentajes.
 - **Falla en cerrado y con error.** Si el proveedor es externo y algún fragmento no es `publico` (o no tiene etiqueta), no se envía nada y salta un `PermissionError` que nombra el documento. Quitar en silencio los fragmentos restringidos daría una respuesta peor sin que nadie supiera por qué. Un proveedor desconocido cuenta como externo.
 - **Fijo en `config.py`** (`NIVELES_PARA_EXTERNOS`), no en `.env`, por la misma razón que el acceso por defecto.
 - **Queda en la traza** del grafo (`ruta: ["bloqueado"]`), que guarda también el proveedor de cada respuesta.
-- **Probado de punta a punta:** con Groq y acceso total, la pregunta 12 da el error y no se llama a Groq; con acceso público, responde "No lo tengo en la documentación.". Los tests lo cubren en `config`, en el pipeline directo y en el grafo, comprobando que el LLM no recibe nada.
+- **Probado de punta a punta:** con Groq y acceso total, la pregunta 12 da el error y no se llama a Groq; con acceso público, responde "No lo tengo en la documentación.". Los tests lo cubren en `config`, en el pipeline directo, en el grafo y en el juez, comprobando que el LLM no recibe nada. Si se quita la comprobación del juez, fallan 3 tests.
 - **Límite:** protege los documentos, no lo que escribe el usuario. La pregunta sí llega a Groq.
 
 ### Prompt injection indirecta
@@ -251,11 +283,14 @@ La clave solo va en `.env`, que no se sube al repositorio. Si falta, el programa
 | Proveedor y modelo del LLM solo en `.env`, con una sola fábrica (`config.crear_llm()`) para Ollama y Groq | Cambiar de modelo o de proveedor no toca el código, y el pipeline directo y el grafo no pueden usar LLM distintos por error. Si falta el modelo o la clave, el programa falla con un mensaje claro. Ollama por defecto: los datos solo salen de la red si se elige así |
 | Comprobación de cada fragmento antes de enviarlo a un proveedor externo | El filtro de la búsqueda depende del acceso de quien pregunta; esto depende de adónde van los datos. Con acceso total y Groq, lo restringido no sale, y se avisa con un error en vez de quitarlo en silencio |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (90 tests en ~1 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM y el bloqueo hacia proveedores externos) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (124 tests en ~2 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas y el juez) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
 | Validación de salida por estructura (cita válida o "No lo tengo"), no por palabras prohibidas | Buscar la palabra del ataque bajaría el contador de la prueba sin proteger de nada. En caso de duda, falla en cerrado |
+| Juez propio con salida estructurada (Pydantic), no Ragas | Una sola llamada por respuesta devuelve fidelidad (afirmación a afirmación) y corrección. Ragas hace varias llamadas por respuesta, y con el límite de tokens por minuto del plan gratuito de Groq sería mucho más lento; además, el juez propio se puede leer y explicar entero |
+| Juez distinto del generador (Groq `gpt-oss-120b` frente a `qwen2.5:14b` local) | Un modelo que se juzga a sí mismo tiende a darse por bueno. Si el juez es el mismo, la evaluación lo avisa y lo apunta en el JSON (`juez_igual_a_generador`) |
+| Un error del juez nunca es un veredicto | Ante un 429 o un error transitorio se reintenta (respetando `retry-after` o con espera exponencial). Si sigue fallando, la respuesta queda "sin juzgar", fuera de los porcentajes y contada aparte. Antes de calcular nada se comprueba que no hay veredictos vacíos o con error mezclados con los válidos |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
 
 ## Stack
@@ -265,7 +300,10 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · Ollama 
 ## Limitaciones
 
 - Conjunto de evaluación pequeño (23 preguntas con respuesta): los números orientan, no son concluyentes.
-- De las respuestas se mide si dicen "No lo tengo", no si su contenido es correcto (falta un juez de fidelidad al contexto).
+- La fidelidad y la corrección las mide un LLM juez, y un juez LLM tiene sesgos conocidos: tiende a premiar las respuestas largas y las escritas en su propio estilo. Para reducirlo, el juez es un modelo distinto del que genera y el prompt le dice que la longitud no cuenta, pero eso no elimina el sesgo.
+- Del juez solo se revisa a mano una muestra de 10 veredictos, elegidos al azar con semilla fija; el resto no se ha comprobado.
+- Son 23 preguntas con respuesta y una sola ejecución: una o dos respuestas de diferencia no son significativas.
+- Con el juez externo, las preguntas con fragmentos restringidos en el contexto no se juzgan (no se envían a Groq), así que esas respuestas no tienen nota de fidelidad.
 - El conjunto no tiene saludos ni preguntas sobre la conversación, así que la rama `responder_directo` solo se ha probado a mano y en los tests.
 - El cambio de `decidir` se hizo tras ver un fallo en este mismo conjunto de evaluación, que también se usa para medirlo.
 - Los permisos son por documento y de dos niveles (`publico` / `restringido`), y quien llama declara su nivel: no hay autenticación de usuarios. En un sistema real, el nivel saldría de la identidad autenticada (p. ej. los grupos del usuario), nunca de lo que diga la petición.
@@ -293,6 +331,8 @@ python generate.py --acceso=publico,restringido "¿Qué tamaño máximo puede te
 python evaluate.py                # tabla de recuperación, 4 configuraciones (~8 min en CPU)
 python evaluate.py --grafo        # pipeline directo frente al grafo (~25 min)
 python evaluate.py --permisos     # filtro por permisos: búsqueda y respuestas con acceso público y total
+python evaluate.py --juzgar       # juez de fidelidad y corrección sobre los últimos resultados de --grafo
+python evaluate.py --acuerdo eval/revision/<fichero>.json  # % de acuerdo con el juez, tras revisar la muestra a mano
 python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin mitigaciones (~6 min)
 python -m pytest                  # tests sin LLM ni modelos (~1 s)
 ```
@@ -306,11 +346,13 @@ generate.py            prompt, llamada al LLM y comprobación de citas
 grafo.py               capa agéntica y correctiva con LangGraph, límites y trazas
 config.py              fábrica del LLM (Ollama o Groq, desde .env), LLM juez, permisos y límites del grafo
 evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
+juez.py                juez de fidelidad y corrección: salida estructurada, reintentos y muestra para revisar
 tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones y de la fábrica del LLM
 docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
 eval/resultados/       resultados de cada evaluación, con fecha
+eval/revision/         muestras de veredictos del juez para revisar a mano
 extra/                 documentos trampa para la prueba de prompt injection
 scripts/               descarga del corpus, diagrama del grafo y prueba de prompt injection
 ```
