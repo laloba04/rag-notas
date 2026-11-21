@@ -19,6 +19,9 @@ PROVEEDORES = ("ollama", "groq")
 # Proveedores que corren en nuestra red. Cualquier otro (incluido uno desconocido) se trata
 # como externo: falla en cerrado.
 PROVEEDORES_LOCALES = ("ollama",)
+# Destino de lo que devuelve el servidor MCP (mcp_server.py): lo lee el modelo del cliente, que
+# no controlamos y puede correr fuera de la red. No está en PROVEEDORES_LOCALES: es externo.
+CLIENTE_MCP = "cliente_mcp"
 
 # LLM juez (lo usa la evaluación de respuestas). Si no se define, es el mismo que el principal.
 # Si se define el proveedor, el modelo es obligatorio: un nombre de Ollama no vale en Groq.
