@@ -42,6 +42,28 @@ def neutralizar(texto):
                   flags=re.IGNORECASE)
 
 
+def atributo(valor):
+    """Valor seguro para un atributo de <documento>: la fuente y la sección salen del
+    documento, así que tampoco son de fiar."""
+    return neutralizar(str(valor)).replace('"', "'")
+
+
+def documentos_delimitados(resultados, extra=None):
+    """Los trozos numerados dentro de <documentos_no_confiables>, con las etiquetas que traigan
+    neutralizadas. La usan el prompt de generación y el servidor MCP (mcp_server.py).
+    extra: función (metadatos, puntuación) -> {atributo: valor} con atributos adicionales."""
+    def etiqueta(n, meta, puntuacion):
+        atributos = {"numero": n, "fuente": meta["fuente"], "seccion": meta["seccion"]}
+        atributos |= extra(meta, puntuacion) if extra else {}
+        return "<documento " + " ".join(f'{k}="{atributo(v)}"' for k, v in atributos.items()) + ">"
+
+    documentos = "\n".join(
+        f"{etiqueta(n, meta, puntuacion)}\n{neutralizar(texto)}\n</documento>"
+        for n, (texto, meta, puntuacion) in enumerate(resultados, start=1)
+    )
+    return f"<documentos_no_confiables>\n{documentos}\n</documentos_no_confiables>"
+
+
 def construir_prompt(pregunta, resultados):
     """Numera los trozos con su fuente y sección, y añade la pregunta al final."""
     if not config.MITIGAR_INJECTION:
@@ -50,17 +72,7 @@ def construir_prompt(pregunta, resultados):
             for n, (texto, meta, _) in enumerate(resultados, start=1)
         )
         return f"CONTEXTO:\n{contexto}\n\nPREGUNTA: {pregunta}"
-
-    def atributo(valor):        # la sección sale del documento: tampoco es de fiar
-        return neutralizar(valor).replace('"', "'")
-
-    documentos = "\n".join(
-        f'<documento numero="{n}" fuente="{atributo(meta["fuente"])}" seccion="{atributo(meta["seccion"])}">\n'
-        f"{neutralizar(texto)}\n</documento>"
-        for n, (texto, meta, _) in enumerate(resultados, start=1)
-    )
-    return (f"<documentos_no_confiables>\n{documentos}\n</documentos_no_confiables>"
-            f"\n\nPREGUNTA: {pregunta}")
+    return f"{documentos_delimitados(resultados)}\n\nPREGUNTA: {pregunta}"
 
 
 _llm = None
