@@ -33,8 +33,8 @@
       "motivo": "La respuesta describe 401 como simplemente 'la autenticación es necesaria', lo cual no coincide con la documentación que indica que 401 se usa cuando la autenticación es imposible o faltan credenciales válidas. Sólo la afirmación sobre 403 está respaldada. Por lo tanto, la respuesta no es correcta respecto a la referencia.",
       "intentos": 1
     },
-    "de_acuerdo": null,
-    "comentario": ""
+    "de_acuerdo": false,
+    "comentario": "duda: la etiqueta ❌ de la afirmación 1 es correcta (el fragmento dice \"imposible\", no \"necesaria\"), pero la nota \"incorrecta\" no se ajusta a C: la respuesta no contradice la referencia y responde a la pregunta; como mucho sería \"parcial\"."
   },
   {
     "configuracion": "actual",
@@ -122,7 +122,7 @@
       "motivo": "La respuesta del asistente incluye la definición esencial del Pod (unidad de computación más pequeña, grupo de contenedores con almacenamiento y red compartidos) y añade información adicional que está respaldada por los documentos, sin contradecir la respuesta de referencia.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -191,7 +191,7 @@
       "motivo": "La respuesta reproduce exactamente la instrucción del documento y coincide con la respuesta de referencia, sin añadir información contradictoria.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -250,7 +250,7 @@
       "motivo": "La respuesta del asistente coincide con la referencia y añade información adicional que está respaldada por los documentos, sin contradecirla.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -315,7 +315,7 @@
       "motivo": "La respuesta del asistente coincide con la referencia, indicando que SameSite impide el envío de cookies en solicitudes cross-site y brinda protección contra CSRF, sin omitir información esencial.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -376,7 +376,7 @@
       "motivo": "La respuesta coincide exactamente con la referencia (OPTIONS) y está respaldada por los documentos que indican que la solicitud de verificación previa usa el método OPTIONS.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -441,7 +441,7 @@
       "motivo": "La respuesta del asistente coincide con la referencia: indica que HTTP es sin estado y que las cookies permiten mantener información de sesión.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -506,8 +506,8 @@
       "motivo": "La respuesta menciona correctamente que el valor predeterminado de maxUnavailable es 25%, pero omite la información del valor predeterminado de maxSurge (también 25%) que está incluida en la respuesta de referencia.",
       "intentos": 2
     },
-    "de_acuerdo": null,
-    "comentario": ""
+    "de_acuerdo": false,
+    "comentario": "duda: el juez marca \"parcial\" por omitir maxSurge, pero según C maxSurge no es esencial (la pregunta solo pide Pods no disponibles); la respuesta es \"correcta\"."
   },
   {
     "configuracion": "grafo_llm",
@@ -550,7 +550,7 @@
       "motivo": "La respuesta del asistente coincide con la referencia: indica que SameSite impide el envío de cookies en solicitudes cross-site y brinda protección contra CSRF, sin añadir información contradictoria.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   },
   {
@@ -623,7 +623,7 @@
       "motivo": "La respuesta del asistente coincide con la referencia: indica que pre-commit se ejecuta antes de escribir el mensaje de confirmación y se usa para inspeccionar la snapshot, ejecutar pruebas y revisar código, sin contradicciones ni omisiones esenciales.",
       "intentos": 1
     },
-    "de_acuerdo": null,
+    "de_acuerdo": true,
     "comentario": ""
   }
 ]

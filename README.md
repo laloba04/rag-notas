@@ -110,7 +110,14 @@ El juez es `openai/gpt-oss-120b` en Groq, un modelo distinto del que genera, par
 
 Ninguna respuesta quedó sin juzgar por error: 2 llamadas recibieron un 429 de Groq y pasaron al reintentar.
 
-**Acuerdo con la revisión humana: pendiente.** Hay una muestra de 10 veredictos elegidos al azar (semilla fija) en `eval/revision/2026-11-21_1121_muestra_juez.json`, a la espera de revisarla a mano. Hasta entonces, estas cifras son la opinión de un LLM.
+**Acuerdo con la revisión humana: 8 de 10 (80 %).** Se revisaron a mano 10 veredictos elegidos al azar (semilla fija), con un único `true`/`false` por veredicto que cubre fidelidad y corrección juntas (`eval/revision/2026-11-21_1121_muestra_juez.json`, con `python evaluate.py --acuerdo`). Las marcas se pusieron antes de fijar el criterio por escrito; los comentarios de los dos desacuerdos se escribieron después, con este criterio: lo esencial es lo que la pregunta pide, no todo lo que añade la referencia.
+
+Los **dos desacuerdos son por la nota de corrección**, y van en la misma dirección: el juez es más severo de lo que debería.
+
+- **Pregunta 23 (401 frente a 403), grafo con reranker.** Sí estoy de acuerdo en que una afirmación no está respaldada: el fragmento dice "imposible", no "necesaria". Pero la nota "incorrecta" no corresponde, porque la respuesta no contradice la referencia y responde a la pregunta; como mucho sería "parcial".
+- **Pregunta 9 (`maxUnavailable`), pipeline directo.** El juez la pone "parcial" por no mencionar `maxSurge`, que la pregunta no pide. Debería ser "correcta".
+
+Con 10 casos, 80 % es una orientación, no una medida precisa del juez. Los dos fallos confirman el sesgo descrito antes: la columna de parciales (y la incorrecta) probablemente sobrestima los errores.
 
 Qué se ve en los veredictos:
 
