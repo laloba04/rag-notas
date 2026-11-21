@@ -122,8 +122,8 @@
       "motivo": "La respuesta del asistente incluye la definición esencial del Pod (unidad de computación más pequeña, grupo de contenedores con almacenamiento y red compartidos) y añade información adicional que está respaldada por los documentos, sin contradecir la respuesta de referencia.",
       "intentos": 1
     },
-    "de_acuerdo": true,
-    "comentario": ""
+    "de_acuerdo": false,
+    "comentario": "duda: la respuesta omite \"la unidad de computación desplegable más pequeña\", que forma parte de la definición de la referencia; bajo C sería \"parcial\", no \"correcta\". (Corregido después del primer recuento: esta entrada se marcó al principio como true por error.)"
   },
   {
     "configuracion": "actual",

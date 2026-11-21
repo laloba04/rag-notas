@@ -110,14 +110,15 @@ El juez es `openai/gpt-oss-120b` en Groq, un modelo distinto del que genera, par
 
 Ninguna respuesta quedó sin juzgar por error: 2 llamadas recibieron un 429 de Groq y pasaron al reintentar.
 
-**Acuerdo con la revisión humana: 8 de 10 (80 %).** Se revisaron a mano 10 veredictos elegidos al azar (semilla fija), con un único `true`/`false` por veredicto que cubre fidelidad y corrección juntas (`eval/revision/2026-11-21_1121_muestra_juez.json`, con `python evaluate.py --acuerdo`). Las marcas se pusieron antes de fijar el criterio por escrito; los comentarios de los dos desacuerdos se escribieron después, con este criterio: lo esencial es lo que la pregunta pide, no todo lo que añade la referencia.
+**Acuerdo con la revisión humana: 7 de 10 (70 %).** Se revisaron a mano 10 veredictos elegidos al azar (semilla fija), con un único `true`/`false` por veredicto que cubre fidelidad y corrección juntas (`eval/revision/2026-11-21_1121_muestra_juez.json`, con `python evaluate.py --acuerdo`). Las marcas se pusieron antes de fijar el criterio por escrito; los comentarios de los desacuerdos se escribieron después, con este criterio: lo esencial es lo que la pregunta pide, no todo lo que añade la referencia. **Corrección:** un primer recuento publicado daba 8 de 10; al repasarlo, la entrada de la pregunta 8 estaba marcada como acuerdo por error y se cambió a desacuerdo. El cambio está en el historial de git.
 
-Los **dos desacuerdos son por la nota de corrección**, y van en la misma dirección: el juez es más severo de lo que debería.
+Los **tres desacuerdos son por la nota de corrección**: ningún comentario discrepa de qué afirmaciones están respaldadas.
 
-- **Pregunta 23 (401 frente a 403), grafo con reranker.** Sí estoy de acuerdo en que una afirmación no está respaldada: el fragmento dice "imposible", no "necesaria". Pero la nota "incorrecta" no corresponde, porque la respuesta no contradice la referencia y responde a la pregunta; como mucho sería "parcial".
-- **Pregunta 9 (`maxUnavailable`), pipeline directo.** El juez la pone "parcial" por no mencionar `maxSurge`, que la pregunta no pide. Debería ser "correcta".
+- **Pregunta 23 (401 frente a 403), grafo con reranker. Demasiado severo.** El ❌ de la afirmación es correcto: el fragmento dice "imposible", no "necesaria". Pero la nota "incorrecta" no corresponde, porque la respuesta no contradice la referencia y responde a la pregunta; como mucho sería "parcial".
+- **Pregunta 9 (`maxUnavailable`), pipeline directo. Demasiado severo.** El juez la pone "parcial" por no mencionar `maxSurge`, que la pregunta no pide. Debería ser "correcta".
+- **Pregunta 8 (qué es un Pod), pipeline directo. Demasiado indulgente.** La respuesta omite "la unidad de computación desplegable más pequeña", que es parte de la definición de la referencia: sería "parcial". El juez la da por "correcta", y su justificación afirma que la respuesta incluye esa frase, cuando no la incluye.
 
-Con 10 casos, 80 % es una orientación, no una medida precisa del juez. Los dos fallos confirman el sesgo descrito antes: la columna de parciales (y la incorrecta) probablemente sobrestima los errores.
+Con 10 casos, 70 % es una orientación, no una medida precisa del juez. Lo que sí se ve: ningún desacuerdo es por las etiquetas de fidelidad, pero la nota de corrección falla en los dos sentidos, y la justificación del juez puede afirmar cosas que la respuesta no dice. Las columnas de corrección hay que leerlas con cautela.
 
 Qué se ve en los veredictos:
 
