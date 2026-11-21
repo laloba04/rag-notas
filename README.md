@@ -428,6 +428,15 @@ python scripts/probar_mcp.py      # el servidor MCP por stdio, con cuatro pregun
 python -m pytest                  # tests sin LLM ni modelos (~1 s)
 ```
 
+## Cómo se ha hecho
+
+El código lo he escrito con Claude Code (Anthropic) como asistente. Mi trabajo
+ha sido decidir qué construir y en qué orden, plantear cada etapa, revisar los
+cambios, ejecutar y leer las evaluaciones, y decidir qué contar en este README,
+incluido lo que no funciona. La revisión manual del juez la hice yo, sin
+asistente. Las decisiones de la tabla de decisiones técnicas las puedo explicar
+una a una.
+
 ## Estructura
 
 ```
