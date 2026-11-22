@@ -1,0 +1,13 @@
+# Contexto de la imagen de la API. El Dockerfile copia solo ficheros concretos; esto es una segunda
+# barrera para que nada sensible ni pesado llegue siquiera al contexto de construcción.
+*
+!requirements.txt
+!config.py
+!servicio.py
+!retrieve.py
+!generate.py
+!grafo.py
+!ingest.py
+!api.py
+!data/
+!docker/arrancar-api.sh

@@ -1,0 +1,6 @@
+# Contexto de la imagen del frontend: sin dependencias ni compilados locales (se generan dentro).
+node_modules
+dist
+.angular
+.vscode
+*.log

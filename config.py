@@ -41,7 +41,7 @@ LIMITE_POR_MINUTO = int(os.environ.get("LIMITE_POR_MINUTO", "10"))
 # peticiones al día en esta cuenta) y entre 2 y 4 llamadas al LLM por pregunta con el grafo,
 # 200 preguntas deja margen. Se cuenta en memoria: vuelve a 0 al reiniciar el proceso.
 LIMITE_PREGUNTAS_DIA = int(os.environ.get("LIMITE_PREGUNTAS_DIA", "200"))
-# IP de los proxies de confianza (separadas por comas). Solo si la petición llega desde uno de
+# IP o redes (CIDR) de los proxies de confianza, separadas por comas. Solo si la petición llega desde uno de
 # ellos se lee la IP real de X-Forwarded-For; si no, esa cabecera se ignora, porque cualquiera
 # puede escribirla y saltarse así el límite por IP.
 PROXIES_DE_CONFIANZA = {p.strip() for p in os.environ.get("PROXIES_DE_CONFIANZA", "").split(",")

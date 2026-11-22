@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
   </head>
   <body>
-    <app-root></app-root>
+    <!-- nginx cambia el valor de ngCspNonce por uno aleatorio en cada petición (ver nginx.conf): Angular
+         lo pone en sus <style> y la CSP solo deja aplicar los estilos que lo llevan. -->
+    <app-root ngCspNonce="CSP_NONCE"></app-root>
   </body>
 </html>

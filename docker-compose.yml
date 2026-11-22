@@ -1,0 +1,81 @@
+# rag-notas en contenedores: API (FastAPI) + frontend (Angular servido por nginx).
+#   docker compose up -d --build            # http://127.0.0.1:8080 (otro puerto: PUERTO_WEB=8088)
+#   docker compose --profile ollama up -d   # además, Ollama en un contenedor (opcional)
+# La configuración del LLM sale del .env del host al arrancar; no entra en ninguna imagen.
+
+name: rag-notas
+
+services:
+  api:
+    build: .
+    image: rag-notas-api:local
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Lo que depende de docker-compose va aquí y tiene prioridad sobre el .env.
+      # Solo nginx (IP fija) es proxy de confianza. No toda la red: desde el host se puede
+      # llegar a la API por la puerta de enlace (172.30.0.1) y escribir un X-Forwarded-For falso.
+      PROXIES_DE_CONFIANZA: 172.30.0.10
+      # El navegador habla con nginx en el mismo origen, así que no hace falta CORS: ningún origen.
+      CORS_ORIGENES: ""
+      CARGAR_MODELOS_AL_ARRANCAR: "true"
+    # Sin "ports": la API no es accesible desde fuera, solo a través de nginx.
+    volumes:
+      - modelos:/modelos           # embeddings y reranker (~4,3 GB); se descargan la primera vez
+      - chroma:/app/chroma         # la colección; si está vacía, se indexa data/ al arrancar
+      - logs:/app/logs             # trazas del grafo
+    read_only: true                # solo se escribe en los volúmenes y en /tmp
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      interna:
+        ipv4_address: 172.30.0.20
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    image: rag-notas-web:local
+    # Solo en 127.0.0.1: la aplicación no se abre a la red local.
+    ports:
+      - "127.0.0.1:${PUERTO_WEB:-8080}:8080"
+    depends_on:
+      - api
+    read_only: true
+    tmpfs:
+      - /tmp                       # nginx-unprivileged guarda aquí el pid y las cachés
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      interna:
+        ipv4_address: 172.30.0.10
+    restart: unless-stopped
+
+  # Opcional: Ollama en un contenedor (CPU). Con él, en .env: OLLAMA_URL=http://ollama:11434
+  # y después: docker compose exec ollama ollama pull <modelo>
+  ollama:
+    image: ollama/ollama:0.40.15@sha256:0e59999e0e8f9fd4e704bd788a89b7e4cad399367fb1365f8c102ac662288761
+    profiles: [ollama]
+    # Sin "ports": solo lo usa la API por la red interna.
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      interna:
+        ipv4_address: 172.30.0.30
+    restart: unless-stopped
+
+volumes:
+  modelos:
+  chroma:
+  logs:
+  ollama:
+
+networks:
+  interna:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

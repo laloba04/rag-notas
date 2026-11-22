@@ -490,3 +490,14 @@ def test_la_respuesta_dice_si_la_salida_se_bloqueo(cliente, falsos):
     assert cuerpo["salida_bloqueada"] is True and cuerpo["no_lo_tengo"] is True
     falsos[1].update(respuesta="Usa git stash [1].", fuentes=[PUBLICO], salida_bloqueada=False)
     assert cliente.post("/preguntar", json={"pregunta": "x"}).json()["salida_bloqueada"] is False
+
+
+def test_proxies_de_confianza_admite_redes(monkeypatch):
+    class Peticion:
+        def __init__(self, ip, xff):
+            self.client = type("C", (), {"host": ip})()
+            self.headers = {"x-forwarded-for": xff}
+    monkeypatch.setattr(config, "PROXIES_DE_CONFIANZA", {"172.30.0.0/24", "no-es-una-ip"})
+    assert api.ip_cliente(Peticion("172.30.0.7", "6.6.6.6, 1.2.3.4")) == "1.2.3.4"
+    assert api.ip_cliente(Peticion("172.31.0.7", "1.2.3.4")) == "172.31.0.7"      # fuera de la red
+    assert api.ip_cliente(Peticion("testclient", "1.2.3.4")) == "testclient"     # no es una IP

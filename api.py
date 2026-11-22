@@ -21,6 +21,7 @@ Uso (desde la raíz del repo, con el entorno activado):
     uvicorn api:app                 # http://127.0.0.1:8000 (documentación en /docs)
 """
 import asyncio
+import ipaddress
 import json
 import logging
 import re
@@ -134,16 +135,32 @@ class Limitador:
 LIMITADOR = Limitador(config.LIMITE_POR_MINUTO, config.LIMITE_PREGUNTAS_DIA)
 
 
+def es_proxy(ip):
+    """¿La IP es de un proxy de confianza? PROXIES_DE_CONFIANZA admite IP sueltas y redes
+    (p. ej. 172.30.0.0/24, la red interna de docker-compose, donde la IP de nginx cambia)."""
+    try:
+        direccion = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    for entrada in config.PROXIES_DE_CONFIANZA:
+        try:
+            if direccion in ipaddress.ip_network(entrada, strict=False):
+                return True
+        except ValueError:
+            log.error("Entrada no válida en PROXIES_DE_CONFIANZA: %r", entrada)
+    return False
+
+
 def ip_cliente(request):
     """IP de quien llama. X-Forwarded-For solo cuenta si la conexión viene de un proxy de
     confianza; entonces se toma el primer salto, desde la derecha, que no sea un proxy (los de
     la izquierda los puede escribir cualquiera)."""
     ip = request.client.host if request.client else "desconocida"
-    if ip not in config.PROXIES_DE_CONFIANZA:
+    if not es_proxy(ip):
         return ip
     saltos = [s.strip() for s in request.headers.get("x-forwarded-for", "").split(",") if s.strip()]
     for salto in reversed(saltos):
-        if salto not in config.PROXIES_DE_CONFIANZA:
+        if not es_proxy(salto):
             return salto
     return ip
 
