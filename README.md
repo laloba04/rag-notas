@@ -407,6 +407,8 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · 
 - Con Groq no hay evaluación: todas las tablas son de `qwen2.5:14b` en local. Con el plan gratuito, una evaluación completa necesitaría esperar entre llamadas por el límite de tokens por minuto.
 - La prueba de prompt injection mide el LLM del pipeline, no el modelo del asistente que usa el servidor MCP: cómo reacciona ese modelo a un documento trampa no está medido.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
+- Docker Engine instalado como snap (Ubuntu) no ejecuta nada en un contenedor con `no-new-privileges` ("exec ...: operation not permitted"), ni siquiera la imagen base de Python, y a veces tampoco deja parar contenedores ("cannot stop container: permission denied"). `docker-compose.yml` mantiene esa opción. Para probar con el snap, se usa un `docker-compose.snap.yml` local (no se sube) que la quita: `docker compose -f docker-compose.yml -f docker-compose.snap.yml up -d`. Con Docker Desktop no pasa (comprobado); con el Docker de los repositorios oficiales no se ha probado.
+- En el primer arranque con Docker, mientras se descargan los modelos y se indexa `data/` (unos 7 min medidos), la API todavía no escucha: nginx devuelve 502 y la web dice que no puede conectar con la API.
 
 ## Ejecutarlo en local
 
@@ -433,6 +435,42 @@ python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin m
 python scripts/probar_mcp.py      # el servidor MCP por stdio, con cuatro preguntas (necesita el LLM)
 python -m pytest                  # tests sin LLM ni modelos (~1 s)
 ```
+
+## Ejecutarlo con Docker
+
+```bash
+cp .env.example .env              # LLM: proveedor, modelo y dirección de Ollama o clave de Groq
+docker compose up -d --build      # http://127.0.0.1:8080 (otro puerto: PUERTO_WEB=8088 docker compose up -d)
+docker compose --profile ollama up -d   # opcional: Ollama en un contenedor (en .env, OLLAMA_URL=http://ollama:11434)
+```
+
+- **Dos imágenes.** `api` es Python con FastAPI, tiene dos etapas (dependencias y ejecución) y corre como un usuario sin privilegios. `web` compila Angular con Node y lo sirve con `nginx-unprivileged`. Las imágenes base están fijadas por digest.
+- **Solo nginx da la cara.** La API no publica puertos: solo es accesible a través de nginx (`/api/`), por la red interna de compose. nginx escucha únicamente en `127.0.0.1`. El navegador habla con un solo origen, así que no hace falta CORS.
+- **Ni el `.env` ni la clave de Groq entran en la imagen.** La configuración llega por variables de entorno al arrancar el contenedor.
+- **Los modelos van en un volumen.** Los modelos de embeddings y del reranker ocupan 4,3 GB y se descargan en el primer arranque. La alternativa era meterlos en la imagen al construirla, pero cada construcción la haría crecer otros 4,3 GB. La colección de Chroma también va en un volumen. Si está vacía, el contenedor indexa `data/` antes de arrancar la API.
+- **El límite por IP sigue funcionando detrás de nginx.** nginx sustituye la cabecera `X-Forwarded-For` por la IP real de quien conecta. La API solo la cree si la petición viene de la IP fija de nginx (`PROXIES_DE_CONFIANZA`), no de toda la red: desde el propio equipo se puede llegar a la API por la puerta de enlace de la red de Docker. Comprobado: con un `X-Forwarded-For` distinto en cada petición, la décima del minuto da 429 igual.
+- **Contenedores endurecidos.** Sistema de archivos de solo lectura (salvo volúmenes y `/tmp`), sin capacidades de Linux (`cap_drop: ALL`) y con `no-new-privileges`.
+- **CSP estricta en nginx.** Solo se permite contenido del propio origen y no hay `'unsafe-inline'`. Angular mete `<style>` en la página, así que nginx genera un nonce distinto en cada petición. Comprobado en Chrome: la aplicación no provoca ninguna violación, y un `<style>` sin nonce, añadido a propósito como control, queda bloqueado.
+
+### Medidas
+
+Medido el 2026-11-22 en el portátil (CPU, Docker Engine 29.8.0), con Ollama `qwen2.5:14b` en el sobremesa.
+
+| Medida | Valor | Cómo se ha medido |
+|---|---|---|
+| Imagen de la API | 1,81 GB | `docker images rag-notas-api:local` |
+| Imagen del frontend | 60,3 MB | `docker images rag-notas-web:local` |
+| Construcción de las dos imágenes, la primera vez (imágenes base ya descargadas) | 2 min 58 s | `time docker compose build` |
+| Volumen de modelos / colección | 4,3 GB / 7,2 MB | `docker compose exec api du -sh /modelos /app/chroma` |
+| Arranque en frío (volúmenes vacíos) hasta `/salud` con `"estado": "ok"` | 456 s | `docker compose up -d` y `/api/salud` cada segundo; incluye descargar el modelo de embeddings (2,2 GB) e indexar `data/` |
+| Arranque en frío hasta `"modelos_cargados": true` | 706,5 s | lo mismo; incluye descargar el reranker |
+| Arranque con volúmenes llenos hasta `/salud` ok | 3,2 s | reinicio del proceso de la API (SIGTERM, lo relanza `restart: unless-stopped`) y `/api/salud` cada segundo |
+| Arranque con volúmenes llenos hasta modelos cargados | 27,2 s | lo mismo |
+| RAM de la API en reposo, con los modelos cargados | 1,32 GiB | `docker stats --no-stream`, 20 s después de cargar los modelos |
+| RAM de la API durante una consulta (grafo, 15,6 s) | 1,80 GiB como máximo observado | `docker stats --no-stream` en bucle (~2 s por muestra) durante `POST /api/preguntar` |
+| RAM del frontend (nginx) | 14,6 MiB | `docker stats --no-stream` |
+
+Los tiempos en frío dependen sobre todo de la velocidad de descarga desde Hugging Face. La RAM de la consulta es el máximo de 8 muestras, así que el pico real puede ser algo mayor.
 
 ## Cómo se ha hecho
 
