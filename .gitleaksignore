@@ -1,0 +1,12 @@
+# Falsos positivos revisados el 2026-11-22. Huella exacta (commit:fichero:regla:línea): cualquier
+# otro secreto, incluso en estos mismos ficheros, sigue haciendo fallar el CI.
+
+# Cadenas de un test de permisos ("Los Secrets individuales están limitados a 1MiB...").
+7d66b02536a7a3e1df9c80761d388801c40c65c7:tests/test_permisos.py:generic-api-key:18
+7d66b02536a7a3e1df9c80761d388801c40c65c7:tests/test_permisos.py:generic-api-key:19
+
+# Ejemplos de la documentación oficial de Kubernetes (corpus): valores de muestra en base64,
+# p. ej. "MWYyZDFlMmU2N2Rm" = "1f2d1e2e67df".
+53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:127
+53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:324
+53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:819

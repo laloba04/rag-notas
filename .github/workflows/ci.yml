@@ -1,0 +1,129 @@
+# CI de rag-notas. En cada push a main y en cada pull request: tests de Python, tests y build de
+# Angular, búsqueda de secretos en todo el historial, build de las dos imágenes y análisis con Trivy.
+# Además, cada lunes, un análisis programado de las imágenes: detecta vulnerabilidades publicadas
+# después del último push, aunque no se haya tocado el código.
+#
+# La evaluación (evaluate.py) no está aquí: necesita los modelos (4,3 GB), tarda minutos en CPU y la
+# de respuestas llama al LLM (cuota de Groq o un Ollama al que GitHub no llega). Se ejecuta a mano y
+# sus resultados se guardan en eval/resultados/.
+#
+# Acciones fijadas por commit (no por etiqueta, que se puede mover) y herramientas por digest.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"        # lunes, 06:17 UTC
+  workflow_dispatch:
+
+# Mínimo privilegio: el token de GitHub del workflow solo puede leer el repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIVY_IMAGEN: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+  GITLEAKS_IMAGEN: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+
+jobs:
+  python:
+    name: Tests de Python
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0   # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      # Sin .env, sin chroma/ y sin modelos: los tests usan dobles y colecciones en memoria.
+      - run: python -m pytest -q
+
+  web:
+    name: Tests y build de Angular
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx ng test --watch=false
+      - run: npx ng build
+
+  secretos:
+    name: Secretos (Gitleaks)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          fetch-depth: 0              # todo el historial: un secreto borrado sigue en los commits viejos
+          persist-credentials: false
+      # Falsos positivos revisados uno a uno en .gitleaksignore (huella exacta).
+      - run: >-
+          docker run --rm -v "$PWD:/repo:ro" "$GITLEAKS_IMAGEN"
+          git /repo --redact --no-banner --gitleaks-ignore-path /repo/.gitleaksignore
+
+  imagenes:
+    name: Imágenes y Trivy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build de las imágenes
+        run: |
+          docker build -t rag-notas-api:ci .
+          docker build -t rag-notas-web:ci web
+          docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep ':ci'
+      - name: Configuración de los Dockerfiles (falla con HIGH o CRITICAL)
+        run: >-
+          docker run --rm -v "$PWD:/repo:ro" "$TRIVY_IMAGEN"
+          config --quiet --severity HIGH,CRITICAL --exit-code 1 /repo
+      # Falla con vulnerabilidades HIGH o CRITICAL que ya tengan arreglo. Las excepciones, con motivo,
+      # condición y fecha de caducidad, están en .trivyignore.yaml.
+      - name: Vulnerabilidades con arreglo (falla con HIGH o CRITICAL)
+        run: |
+          mkdir -p "$HOME/.cache/trivy"
+          for imagen in rag-notas-api:ci rag-notas-web:ci; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$HOME/.cache/trivy:/root/.cache/trivy" -v "$PWD:/repo:ro" "$TRIVY_IMAGEN" \
+              image --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+              --ignorefile /repo/.trivyignore.yaml --exit-code 1 "$imagen"
+          done
+      # Informe completo (también lo que aún no tiene arreglo) en el resumen de la ejecución. No falla.
+      - name: Informe completo en el resumen
+        if: always()
+        run: |
+          for imagen in rag-notas-api:ci rag-notas-web:ci; do
+            echo "### $imagen (HIGH y CRITICAL, con y sin arreglo)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$HOME/.cache/trivy:/root/.cache/trivy" -v "$PWD:/repo:ro" "$TRIVY_IMAGEN" \
+              image --quiet --skip-db-update --scanners vuln --severity HIGH,CRITICAL \
+              --ignorefile /repo/.trivyignore.yaml --format table "$imagen" >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
