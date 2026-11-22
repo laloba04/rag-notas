@@ -83,7 +83,8 @@ class Traza(BaseModel):
 
 class Respuesta(BaseModel):
     respuesta: str
-    no_lo_tengo: bool           # "No lo tengo en la documentación." es un resultado válido
+    no_lo_tengo: bool           # la respuesta es exactamente "No lo tengo…" (un resultado válido)
+    salida_bloqueada: bool      # la validación de salida la cambió por "No lo tengo…"
     modo: str
     citas: list[Fragmento]      # los fragmentos que cita la respuesta con [n]
     traza: Optional[Traza]      # solo en modo grafo
@@ -170,6 +171,14 @@ def fragmentos(docs):
             for n, (texto, meta, p) in enumerate(docs, start=1)]
 
 
+def es_no_lo_tengo(respuesta):
+    """¿La respuesta es solo "No lo tengo en la documentación." (con o sin citas [n])? Que la
+    frase aparezca dentro de una respuesta más larga no cuenta: ahí hay contenido que enseñar."""
+    def normalizar(texto):
+        return re.sub(r"\[\d+\]", "", texto).strip().rstrip(".").strip().lower()
+    return normalizar(respuesta) == normalizar(config.NO_LO_TENGO)
+
+
 def buscar_sync(pregunta, k):
     import retrieve
     servicio.comprobar_coleccion()
@@ -216,7 +225,7 @@ def preguntar_sync(pregunta, modo, cancelado, avisar=None):
     # Lo que vio el generador y las fuentes: ninguno puede ser no público.
     servicio.comprobar_salida(docs + [(None, m, None) for m in fuentes], config.CLIENTE_API)
     respuesta = r["respuesta"]
-    no_lo_tengo = config.NO_LO_TENGO.lower().rstrip(".") in respuesta.lower()
+    no_lo_tengo = es_no_lo_tengo(respuesta)
     # Citas: solo los fragmentos que la respuesta cita con [n], con el número del prompt. Si la
     # salida se bloqueó o no hubo generación (sin fuentes), o si la respuesta es "No lo tengo",
     # no hay citas: enseñar el resto del contexto haría creer que la respuesta se apoya en él.
@@ -230,7 +239,7 @@ def preguntar_sync(pregunta, modo, cancelado, avisar=None):
                       error=r.get("error"))
     return Respuesta(
         respuesta=respuesta,
-        no_lo_tengo=no_lo_tengo,
+        no_lo_tengo=no_lo_tengo, salida_bloqueada=bool(r.get("salida_bloqueada", False)),
         modo=modo, citas=citas, traza=traza, segundos=round(time.perf_counter() - t0, 2))
 
 

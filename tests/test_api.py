@@ -471,3 +471,22 @@ def test_modelos_cargados_solo_tras_una_busqueda_completa(cliente, falsos, monke
     assert cliente.get("/salud").json()["modelos_cargados"] is False
     cliente.post("/buscar", json={"pregunta": "x"})
     assert cliente.get("/salud").json()["modelos_cargados"] is True
+
+
+@pytest.mark.parametrize("respuesta, esperado", [
+    (config.NO_LO_TENGO, True),
+    (f"{config.NO_LO_TENGO} [1]", True),
+    ("no lo tengo en la documentación", True),
+    (f"Cache-Control controla la caché [1]. Sobre HTTP/3: {config.NO_LO_TENGO}", False),
+    ("Usa git stash [1].", False),
+])
+def test_no_lo_tengo_solo_si_es_la_respuesta_entera(respuesta, esperado):
+    assert api.es_no_lo_tengo(respuesta) is esperado
+
+
+def test_la_respuesta_dice_si_la_salida_se_bloqueo(cliente, falsos):
+    falsos[1].update(respuesta=config.NO_LO_TENGO, fuentes=[], salida_bloqueada=True)
+    cuerpo = cliente.post("/preguntar", json={"pregunta": "x"}).json()
+    assert cuerpo["salida_bloqueada"] is True and cuerpo["no_lo_tengo"] is True
+    falsos[1].update(respuesta="Usa git stash [1].", fuentes=[PUBLICO], salida_bloqueada=False)
+    assert cliente.post("/preguntar", json={"pregunta": "x"}).json()["salida_bloqueada"] is False
