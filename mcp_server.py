@@ -20,7 +20,6 @@ y puede correr fuera de la red. Se trata como un proveedor externo:
 import logging
 import os
 import sys
-import threading
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -32,10 +31,11 @@ from mcp.types import ToolAnnotations
 from pydantic import Field
 
 import config
+import servicio
 from generate import atributo, documentos_delimitados
+from servicio import K_MAX, K_MIN
 
 RAIZ = Path(__file__).resolve().parent
-K_MIN, K_MAX = 1, 10
 
 log = logging.getLogger("rag-notas.mcp")
 
@@ -66,85 +66,56 @@ SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 # en JSON ({"result": "..."}) y el cliente la enseña en lugar del texto. El modelo debe leer el
 # aviso y el delimitador tal cual, igual que el LLM del pipeline.
 
-# Las herramientas síncronas se ejecutan en hilos: el cerrojo evita cargar los modelos dos
-# veces si llegan dos llamadas a la vez (y los modelos no se comparten entre hilos).
-_cerrojo = threading.Lock()
+# Las herramientas síncronas se ejecutan en hilos: el cerrojo (servicio.CERROJO) evita cargar
+# los modelos dos veces si llegan dos llamadas a la vez.
+_cerrojo = servicio.CERROJO
 
 
 # ---------------------------------------------------------------------------
-# Comprobaciones y errores (mensajes claros para el modelo, no trazas de Python)
+# Comprobaciones y errores: las de servicio.py, con su mensaje convertido en ToolError (el modelo
+# lo lee; el SDK no le enseña ninguna traza)
 # ---------------------------------------------------------------------------
+
+@contextmanager
+def como_tool_error():
+    try:
+        yield
+    except servicio.ErrorServicio as e:
+        raise ToolError(str(e)) from None
+
 
 def comprobar_salida(docs):
-    """Falla en cerrado: si algún fragmento no es público, no se devuelve nada. El mensaje
-    para el modelo no nombra los documentos; el detalle va al log (stderr)."""
-    try:
-        config.comprobar_envio(docs, config.CLIENTE_MCP)
-    except PermissionError as e:
-        log.error("Salida bloqueada: %s", e)
-        raise ToolError("Bloqueado: la salida contenía fragmentos no públicos y no se devuelve "
-                        "nada. Es un error de configuración del servidor, no de la pregunta.") from None
+    with como_tool_error():
+        servicio.comprobar_salida(docs, config.CLIENTE_MCP)
 
 
 def comprobar_pregunta(pregunta):
-    if not pregunta or not pregunta.strip():
-        raise ToolError("La pregunta está vacía: escribe la pregunta en español.")
-    return pregunta.strip()
+    with como_tool_error():
+        return servicio.comprobar_pregunta(pregunta)
 
 
 def limitar_k(k):
     """k dentro de [K_MIN, K_MAX]. Devuelve (k usado, nota para el modelo o "")."""
-    usado = min(max(k, K_MIN), K_MAX)
-    nota = f"(k={k} está fuera del rango {K_MIN}-{K_MAX}; se usa k={usado}.)\n\n" if usado != k else ""
+    usado, cambiado = servicio.limitar_k(k)
+    nota = f"(k={k} está fuera del rango {K_MIN}-{K_MAX}; se usa k={usado}.)\n\n" if cambiado else ""
     return usado, nota
 
 
 def comprobar_coleccion():
-    """La colección "docs" existe y tiene fragmentos. Carga el modelo de embeddings la primera vez."""
-    import chromadb.errors
-    import retrieve
-    try:
-        n = retrieve.coleccion().count()
-    except chromadb.errors.NotFoundError:
-        raise ToolError("No existe la colección de documentos: hay que ejecutar "
-                        "'python ingest.py' en el servidor.") from None
-    if n == 0:
-        raise ToolError("La colección de documentos está vacía: hay que ejecutar "
-                        "'python ingest.py' en el servidor.")
+    with como_tool_error():
+        servicio.comprobar_coleccion()
 
 
 def comprobar_llm():
-    """El LLM está configurado y, si es Ollama, responde. Así un equipo apagado da un mensaje
-    claro en 3 s en vez de esperar al timeout de la generación."""
-    try:
-        config.comprobar_llm()
-    except RuntimeError as e:
-        raise ToolError(f"El LLM del servidor no está configurado: {e}") from None
-    if config.LLM_PROVEEDOR == "ollama":
-        import httpx
-        try:
-            httpx.get(f"{config.OLLAMA_URL}/api/tags", timeout=3).raise_for_status()
-        except httpx.HTTPError:
-            raise ToolError(error_ollama()) from None
-
-
-def error_ollama():
-    return (f"No se puede conectar con el LLM (Ollama en {config.OLLAMA_URL}): puede que el "
-            "equipo esté apagado. La herramienta buscar_documentacion sigue funcionando sin LLM.")
+    # Por stdio, quien lee el mensaje está en este mismo equipo: puede ver la URL de Ollama.
+    with como_tool_error():
+        servicio.comprobar_llm(mostrar_url=True)
 
 
 @contextmanager
 def errores_claros():
-    """Traduce los fallos previsibles a un ToolError con un mensaje para el modelo. Lo demás
-    llega como un error genérico (el SDK no le enseña la traza) y la traza va a stderr."""
-    try:
+    with como_tool_error(), servicio.errores_claros(mostrar_url=True):
         yield
-    except ToolError:
-        raise
-    except ConnectionError:         # el cliente de Ollama la lanza si no puede conectar
-        raise ToolError(error_ollama()) from None
-    except TimeoutError:
-        raise ToolError("El LLM ha tardado demasiado en responder; prueba otra vez.") from None
 
 
 # ---------------------------------------------------------------------------

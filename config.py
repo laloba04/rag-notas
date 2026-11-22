@@ -22,6 +22,37 @@ PROVEEDORES_LOCALES = ("ollama",)
 # Destino de lo que devuelve el servidor MCP (mcp_server.py): lo lee el modelo del cliente, que
 # no controlamos y puede correr fuera de la red. No está en PROVEEDORES_LOCALES: es externo.
 CLIENTE_MCP = "cliente_mcp"
+# Lo mismo para lo que devuelve la API web (api.py): lo lee quien esté al otro lado de internet.
+CLIENTE_API = "cliente_api"
+
+# --- API web (api.py) y servidor MCP ---
+VERSION = "1.0.0"
+# Pregunta más larga que se acepta. Las del golden set no pasan de ~110 caracteres; 500 deja
+# margen para una pregunta real y corta prompts enormes que solo gastan cuota.
+LONGITUD_MAX_PREGUNTA = 500
+# Orígenes del frontend que pueden llamar a la API desde el navegador, separados por comas.
+# Nunca "*": un comodín dejaría a cualquier web usar la API (y la cuota) desde el navegador
+# de quien la visite.
+CORS_ORIGENES = [o.strip() for o in os.environ.get("CORS_ORIGENES", "http://localhost:4200").split(",")
+                 if o.strip() and o.strip() != "*"]
+# Peticiones por minuto y por IP a /buscar y /preguntar.
+LIMITE_POR_MINUTO = int(os.environ.get("LIMITE_POR_MINUTO", "10"))
+# Tope diario de /preguntar para todo el servidor, sea cual sea la IP. Con Groq (1000
+# peticiones al día en esta cuenta) y entre 2 y 4 llamadas al LLM por pregunta con el grafo,
+# 200 preguntas deja margen. Se cuenta en memoria: vuelve a 0 al reiniciar el proceso.
+LIMITE_PREGUNTAS_DIA = int(os.environ.get("LIMITE_PREGUNTAS_DIA", "200"))
+# IP de los proxies de confianza (separadas por comas). Solo si la petición llega desde uno de
+# ellos se lee la IP real de X-Forwarded-For; si no, esa cabecera se ignora, porque cualquiera
+# puede escribirla y saltarse así el límite por IP.
+PROXIES_DE_CONFIANZA = {p.strip() for p in os.environ.get("PROXIES_DE_CONFIANZA", "").split(",")
+                        if p.strip()}
+# Tiempo máximo de una petición a la API (búsqueda + grafo completo, incluida la espera a que
+# termine otra petición). Por encima, 504.
+TIMEOUT_PETICION_S = float(os.environ.get("TIMEOUT_PETICION_S", "180"))
+# Cargar los modelos al arrancar la API, en segundo plano (~20 s en CPU). Desactivado por defecto:
+# en local, la API arranca al momento y la primera consulta tarda más. En un despliegue conviene
+# activarlo para que el primer visitante no espere la carga.
+CARGAR_MODELOS_AL_ARRANCAR = os.environ.get("CARGAR_MODELOS_AL_ARRANCAR", "false").lower() == "true"
 
 # LLM juez (lo usa la evaluación de respuestas). Si no se define, es el mismo que el principal.
 # Si se define el proveedor, el modelo es obligatorio: un nombre de Ollama no vale en Groq.
