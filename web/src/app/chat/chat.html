@@ -1,0 +1,152 @@
+<header class="cabecera">
+  <h1>rag-notas</h1>
+  <p>Preguntas sobre la documentación en español de Kubernetes, Git (Pro Git) y HTTP (MDN).</p>
+</header>
+
+@if (sinConexion()) {
+  <p class="aviso aviso--error" role="alert">
+    No se puede conectar con la API. Comprueba que está arrancada.
+  </p>
+} @else if (salud(); as s) {
+  @if (!s.coleccion.ok) {
+    <p class="aviso aviso--error" role="alert">
+      El servidor no tiene documentos indexados: hay que ejecutar <code>python ingest.py</code>.
+    </p>
+  } @else if (!s.llm.ok) {
+    <p class="aviso" role="status">
+      El LLM no está disponible ahora mismo: las preguntas darán error hasta que vuelva.
+    </p>
+  } @else if (!s.modelos_cargados) {
+    <p class="aviso" role="status">
+      La primera pregunta puede tardar medio minuto o más: el servidor carga los modelos al
+      recibirla.
+    </p>
+  }
+}
+
+<main class="conversacion" aria-live="polite">
+  @for (turno of turnos(); track $index; let i = $index) {
+    <article class="turno">
+      <p class="turno__pregunta">{{ turno.pregunta }}</p>
+
+      @switch (turno.estado) {
+        @case ('pensando') {
+          <div class="turno__pensando" role="status">
+            <span class="punto"></span>
+            @if (turno.nodos.length) {
+              {{ NODOS[turno.nodos[turno.nodos.length - 1]] ?? turno.nodos[turno.nodos.length - 1] }}…
+            } @else {
+              Pensando…
+            }
+          </div>
+        }
+        @case ('error') {
+          <p class="turno__error" role="alert">{{ turno.error }}</p>
+        }
+        @case ('cancelado') {
+          <p class="turno__nota">Pregunta cancelada.</p>
+        }
+        @case ('hecho') {
+          @if (turno.respuesta; as r) {
+            @if (r.no_lo_tengo) {
+              <p class="turno__no-lo-tengo">
+                <strong>{{ r.respuesta }}</strong>
+                @if (r.salida_bloqueada) {
+                  <span>El modelo dio una respuesta que no citaba ningún fragmento, y se ha
+                    descartado: es la validación de salida contra la prompt injection.</span>
+                } @else {
+                  <span>Con los fragmentos que ha recuperado, el modelo no ha encontrado la
+                    respuesta, y no se la inventa.</span>
+                }
+              </p>
+            } @else {
+              <div class="turno__respuesta">
+                @for (parte of turno.partes; track $index) {
+                  @if (esCita(parte)) {
+                    <button
+                      type="button"
+                      class="cita"
+                      [class.cita--abierta]="turno.citaAbierta === parte.cita.numero"
+                      [attr.aria-expanded]="turno.citaAbierta === parte.cita.numero"
+                      [attr.aria-label]="'Ver la fuente ' + parte.cita.numero + ': ' + parte.cita.documento"
+                      (click)="alternarCita(i, parte.cita.numero)"
+                    ><span class="visualmente-oculto">[</span>{{ parte.cita.numero }}<span class="visualmente-oculto">]</span></button>
+                  } @else {
+                    <span>{{ parte.texto }}</span>
+                  }
+                }
+              </div>
+            }
+
+            @if (citaAbierta(turno); as c) {
+              <aside class="fragmento" aria-label="Fragmento citado">
+                <p class="fragmento__origen">
+                  [{{ c.numero }}] <strong>{{ c.documento }}</strong> · {{ c.seccion }}
+                  @if (urlSegura(c.url); as url) {
+                    · <a [href]="url" target="_blank" rel="noopener noreferrer">original</a>
+                  }
+                </p>
+                <pre class="fragmento__texto">{{ c.texto }}</pre>
+              </aside>
+            }
+
+            <p class="turno__pie">
+              {{ r.modo === 'grafo' ? 'Grafo' : 'Pipeline directo' }} · {{ r.segundos }} s
+            </p>
+
+            @if (r.traza; as traza) {
+              <details class="traza">
+                <summary>Cómo ha razonado ({{ traza.ruta.length }} pasos)</summary>
+                <ol>
+                  @for (nodo of traza.ruta; track $index; let p = $index) {
+                    <li>
+                      <code>{{ nodo }}</code> {{ NODOS[nodo] ?? '' }}
+                      @if (latencia(turno, p) !== undefined) {
+                        <span class="traza__s">{{ latencia(turno, p) }} s</span>
+                      }
+                    </li>
+                  }
+                </ol>
+                @if (traza.pregunta_reescrita) {
+                  <p>Pregunta reformulada: «{{ traza.pregunta_reescrita }}»</p>
+                }
+              </details>
+            }
+          }
+        }
+      }
+    </article>
+  } @empty {
+    <p class="vacio">
+      Prueba con «¿Cómo deshago el último commit?» o «¿Para qué sirve la cabecera
+      Cache-Control?».
+    </p>
+  }
+</main>
+
+<form class="formulario" (submit)="$event.preventDefault(); enviar()">
+  <label class="visualmente-oculto" for="pregunta">Pregunta</label>
+  <textarea
+    id="pregunta"
+    rows="2"
+    [maxLength]="LONGITUD_MAX"
+    placeholder="Escribe tu pregunta (Intro para enviar)"
+    [value]="pregunta()"
+    (input)="escribir($event)"
+    (keydown)="teclear($event)"
+  ></textarea>
+  <div class="formulario__controles">
+    <label>
+      Modo
+      <select [value]="modo()" (change)="modo.set($any($event.target).value)">
+        <option value="grafo">Grafo (decide, evalúa, reintenta)</option>
+        <option value="directo">Pipeline directo</option>
+      </select>
+    </label>
+    @if (ocupado()) {
+      <button type="button" class="boton boton--secundario" (click)="detener()">Cancelar</button>
+    } @else {
+      <button type="submit" class="boton" [disabled]="!pregunta().trim()">Preguntar</button>
+    }
+  </div>
+</form>
