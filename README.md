@@ -1,10 +1,12 @@
 # rag-notas
 
+[![CI](https://github.com/laloba04/rag-notas/actions/workflows/ci.yml/badge.svg)](https://github.com/laloba04/rag-notas/actions/workflows/ci.yml)
+
 Asistente de preguntas y respuestas sobre documentación técnica en español, construido con RAG (Retrieval-Augmented Generation): busca en los documentos los fragmentos relevantes para cada pregunta y responde a partir de ellos.
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo. Un servidor MCP expone la búsqueda y el grafo como herramientas para cualquier asistente compatible, con el acceso fijo a lo público.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo. Un servidor MCP expone la búsqueda y el grafo como herramientas para cualquier asistente compatible, con el acceso fijo a lo público. Una API con FastAPI (con el progreso del grafo por SSE) y un frontend en Angular permiten usarlo desde el navegador. Todo se ejecuta con Docker (nginx delante y docker-compose), y un CI en GitHub Actions pasa los tests, busca secretos con Gitleaks y analiza las imágenes con Trivy.
 
 ## Arquitectura
 
@@ -13,6 +15,10 @@ Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el pro
 - **Pipeline directo** (`generate.py`): búsqueda vectorial → reranker → LLM con citas.
 - **Grafo** (`grafo.py`, LangGraph): decide si la pregunta necesita buscar, evalúa si lo recuperado es relevante y, si no lo es, reformula la pregunta una vez antes de responder "No lo tengo en la documentación."
 - **Servidor MCP** (`mcp_server.py`): la búsqueda y el grafo como dos herramientas para un asistente externo ([ver más abajo](#usarlo-desde-un-asistente-mcp)).
+- **API web** (`api.py`, FastAPI): `/buscar`, `/preguntar` (con el progreso del grafo por SSE) y `/salud`. Comparte con el MCP las comprobaciones de `servicio.py` ([ver más abajo](#usarlo-desde-la-web)).
+- **Frontend** (`web/`, Angular): chat con citas pulsables y la traza del grafo.
+- **Docker** (`Dockerfile`, `web/Dockerfile`, `docker-compose.yml`): nginx sirve el frontend y reenvía `/api/` a la API, que no publica puertos ([ver más abajo](#ejecutarlo-con-docker)).
+- **CI** (`.github/workflows/ci.yml`, GitHub Actions): tests, Gitleaks y Trivy ([ver más abajo](#integración-continua)).
 
 ```mermaid
 graph TD;
@@ -235,7 +241,7 @@ Resultados en `eval/resultados/2026-11-07_1834_injection.json`.
 
 - Son 6 ataques, un modelo y una pregunta, y las repeticiones salen casi idénticas por la temperatura baja. Esto indica que el sistema resiste estos ataques, no otros.
 - El mismo modelo que recibe el ataque es el que debe ignorarlo: las capas 1 y 2 dependen de que obedezca. Un ataque que obedeciera *y* citara pasaría también la capa 3.
-- `filtrar_datos` no funcionó en ningún caso, así que la defensa contra esa fuga no está puesta a prueba. La validación no la frenaría: la respuesta llevaría cita. Hoy el riesgo es bajo porque la salida se imprime en un terminal; en una interfaz web que pintara Markdown habría que bloquear las imágenes y los enlaces externos.
+- `filtrar_datos` no funcionó en ningún caso, así que la defensa contra esa fuga no está puesta a prueba. La validación no la frenaría: la respuesta llevaría cita. Ahora hay interfaz web, y lo que la protege es esto: el frontend no interpreta Markdown ni usa `innerHTML`, sino que pinta la respuesta y los fragmentos como texto (Angular los escapa), así que una imagen en Markdown no se convierte en imagen, y una etiqueta `<img>` dentro de un fragmento se ve como texto y no se carga (lo comprueba un test). Las URL de las fuentes solo se convierten en enlace si empiezan por `https://` (`urlSegura`). Con Docker, la CSP de nginx tiene `img-src 'self'` y `connect-src 'self'`: el navegador no carga imágenes de otros servidores ni les hace peticiones desde la página. Con `ng serve`, en desarrollo, no hay CSP. Lo que sigue sin probar: el ataque `filtrar_datos` no se ha lanzado contra la web.
 - El nodo del LLM juez (`METODO_EVALUACION=llm`, no es el valor por defecto) recibe los fragmentos sin delimitar, y esta prueba no lo cubre.
 - El mejor control sigue siendo reducir lo que puede hacer el modelo: aquí no tiene herramientas ni acceso a datos más allá de lo que ya filtró la búsqueda, así que un ataque con éxito puede engañar a quien lee, pero no actuar. Por MCP cambia, porque el que lee es un asistente que sí puede tener herramientas ([ver más abajo](#el-servidor-mcp-una-salida-hacia-fuera)). También importa quién puede añadir documentos al índice.
 
@@ -288,6 +294,31 @@ GROQ_API_KEY=tu_clave
 ```
 
 La clave solo va en `.env`, que no se sube al repositorio. Si falta, el programa se para con un mensaje que dice cuál.
+
+## Usarlo desde la web
+
+La API (`api.py`) envuelve lo que ya existe (`retrieve.buscar`, `grafo.responder`, `generate.responder`) sin reimplementarlo. Ejecutada sin Docker, la documentación interactiva está en `http://127.0.0.1:8000/docs`. Detrás de nginx esa página no carga: pide `/openapi.json` fuera de `/api/`.
+
+| Ruta | Qué hace |
+|---|---|
+| `POST /buscar` `{"pregunta", "k"}` | Búsqueda con reranker, sin LLM. `k` entre 1 y 10 (por defecto 5) |
+| `POST /preguntar` `{"pregunta", "modo"}` | Respuesta con citas; `modo` es `"grafo"` (por defecto) o `"directo"`. En modo grafo incluye la traza (nodos, segundos de cada uno y pregunta reformulada). Con `Accept: text/event-stream` responde por SSE: un evento `nodo` al terminar cada nodo del grafo y, al final, `respuesta` (o `error`) |
+| `GET /salud` | Estado de la colección y del LLM, y si los modelos están cargados. No hace cola detrás de una consulta en curso |
+
+- **El streaming es del progreso, no de los tokens.** La respuesta solo se envía cuando ha pasado la validación de salida: mandar los tokens según se generan enseñaría una respuesta con prompt injection antes de poder bloquearla.
+- **Cancelación al desconectarse.** Si el cliente cierra la conexión, el grafo se para al terminar el nodo en curso (una llamada al LLM a medias no se puede interrumpir). En modo directo no hay nodos: la consulta termina aunque nadie vaya a leerla.
+- **Acceso siempre público.** No hay autenticación, así que el nivel de acceso nunca sale de la petición: un campo `acceso` en el cuerpo da 422. Antes de devolver nada, todos los fragmentos pasan por el mismo bloqueo que el MCP (`config.comprobar_envio` con `config.CLIENTE_API`).
+- **Límites.** `LIMITE_POR_MINUTO` peticiones por minuto y por IP a `/buscar` y `/preguntar` (por defecto 10: se admiten 10 y la 11.ª da 429 con `Retry-After`), y `LIMITE_PREGUNTAS_DIA` preguntas al día para todo el servidor (por defecto 200), que protege la cuota del LLM. Los dos se cuentan en memoria y vuelven a cero al reiniciar. Cada petición tiene como mucho `TIMEOUT_PETICION_S` (180 s); si se pasa, 504.
+- **Errores sin detalles internos:** `{"error": "...", "tipo": "..."}`, sin trazas ni direcciones internas.
+
+El frontend (`web/`, Angular) muestra el último nodo del grafo mientras piensa, la respuesta con las citas `[n]` pulsables (cada una abre el fragmento citado y el enlace a su documento), "No lo tengo" como resultado válido (y si fue la validación la que descartó la respuesta) y un panel plegable con la traza del grafo. Permite elegir el modo y cancelar una pregunta en curso.
+
+Sin Docker, en dos terminales (desde la raíz del repo, con el entorno activado y `chroma/` creado con `python ingest.py`):
+
+```bash
+uvicorn api:app                                   # API en http://127.0.0.1:8000 (documentación en /docs)
+cd web && nvm use && npm ci && npm start          # frontend en http://localhost:4200; reenvía /api a la API
+```
 
 ## Usarlo desde un asistente (MCP)
 
@@ -372,7 +403,7 @@ Pod es un recurso de nivel superior en la API REST de Kubernetes. [...]
 | Proveedor y modelo del LLM solo en `.env`, con una sola fábrica (`config.crear_llm()`) para Ollama y Groq | Cambiar de modelo o de proveedor no toca el código, y el pipeline directo y el grafo no pueden usar LLM distintos por error. Si falta el modelo o la clave, el programa falla con un mensaje claro. Ollama por defecto: los datos solo salen de la red si se elige así |
 | Comprobación de cada fragmento antes de enviarlo a un proveedor externo | El filtro de la búsqueda depende del acceso de quien pregunta; esto depende de adónde van los datos. Con acceso total y Groq, lo restringido no sale, y se avisa con un error en vez de quitarlo en silencio |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (151 tests en ~3 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez y el servidor MCP) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (211 tests de Python en ~5 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez, el servidor MCP y la API; el frontend tiene 21 más, con Vitest, en ~4 s) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
@@ -387,10 +418,16 @@ Pod es un recurso de nivel superior en la API REST de Kubernetes. [...]
 | `k` fuera de 1-10 se ajusta y se avisa en la salida, en vez de dar error | Un modelo que pide `k=50` recibe algo útil y sabe qué ha pasado; el límite evita respuestas enormes que llenen el contexto del asistente |
 | El docstring de cada herramienta dice qué cubre la documentación y qué no | Es la descripción que ve el modelo para decidir cuándo usarla: si no dice que solo hay Kubernetes, Git y HTTP, la llamará para cualquier cosa |
 | Evaluación por contenido (`texto_esperado`), no por id de fragmento | Se puede cambiar el troceado sin rehacer el conjunto de evaluación |
+| SSE en vez de WebSocket para el progreso | La comunicación va en un solo sentido (del servidor al navegador) y es HTTP normal: pasa por nginx sin configuración especial |
+| Un solo origen: nginx sirve el frontend y reenvía `/api/` a la API | Sin CORS que abrir, y la API no publica puertos |
+| Proxy de confianza por IP fija (la de nginx), no por red | Desde el host se llega a la API por la puerta de enlace de la red de Docker: confiar en toda la red dejaría falsear `X-Forwarded-For` y saltarse el límite por IP |
+| Modelos en un volumen, no en la imagen | Son 4,3 GB: en la imagen, cada construcción y cada subida los repetiría. A cambio, el primer arranque los descarga (~10 min medidos) |
+| CSP con nonce para los estilos de Angular | Sin `'unsafe-inline'`, que permitiría estilos inyectados; nginx genera un nonce distinto en cada petición |
+| El CI falla solo con vulnerabilidades que tienen arreglo | Lo que no tiene arreglo no se resuelve actualizando: bloquear por ello dejaría el CI en rojo sin nada que hacer. Se ve en el informe y las excepciones caducan |
 
 ## Stack
 
-Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · Ollama · Groq · pytest
+Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · Ollama · Groq · FastAPI · pytest · Angular · Vitest · nginx · Docker · GitHub Actions · Gitleaks · Trivy
 
 ## Limitaciones
 
@@ -408,6 +445,9 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · 
 - La prueba de prompt injection mide el LLM del pipeline, no el modelo del asistente que usa el servidor MCP: cómo reacciona ese modelo a un documento trampa no está medido.
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 - Docker Engine instalado como snap (Ubuntu) no ejecuta nada en un contenedor con `no-new-privileges` ("exec ...: operation not permitted"), ni siquiera la imagen base de Python, y a veces tampoco deja parar contenedores ("cannot stop container: permission denied"). `docker-compose.yml` mantiene esa opción. Para probar con el snap, se usa un `docker-compose.snap.yml` local (no se sube) que la quita: `docker compose -f docker-compose.yml -f docker-compose.snap.yml up -d`. Con Docker Desktop no pasa (comprobado); con el Docker de los repositorios oficiales no se ha probado.
+- Trivy (2026-11-22) encuentra en la imagen de la API 50 vulnerabilidades HIGH de Debian 13 y 4 de chromadb 1.5.9 (2 CRITICAL) que aún no tienen arreglo. Las de chromadb afectan al servidor HTTP de Chroma (su API REST y la autorización entre inquilinos), que este proyecto no arranca: Chroma va embebido en el proceso (`PersistentClient`). Las de Debian no se han revisado una a una.
+- nginx 1.30.6 tiene 6 vulnerabilidades HIGH o CRITICAL arregladas en 1.30.7, que salió el 2026-11-18 y aún no tiene imagen. Ninguna se aplica a esta configuración (mail, HTTP/2, HTTP/3, TLS en nginx, SSI o mirror): son excepciones en `.trivyignore.yaml` que caducan el 2026-12-02.
+- GitHub desactiva los workflows programados de un repositorio público tras 60 días sin actividad: el análisis semanal deja de ejecutarse si el repositorio se queda quieto.
 - En el primer arranque con Docker, mientras se descargan los modelos y se indexa `data/` (unos 7 min medidos), la API todavía no escucha: nginx devuelve 502 y la web dice que no puede conectar con la API.
 
 ## Ejecutarlo en local
@@ -433,7 +473,8 @@ python evaluate.py --juzgar       # juez de fidelidad y corrección sobre los ú
 python evaluate.py --acuerdo eval/revision/<fichero>.json  # % de acuerdo con el juez, tras revisar la muestra a mano
 python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin mitigaciones (~6 min)
 python scripts/probar_mcp.py      # el servidor MCP por stdio, con cuatro preguntas (necesita el LLM)
-python -m pytest                  # tests sin LLM ni modelos (~1 s)
+python -m pytest                  # 211 tests sin LLM ni modelos (~5 s)
+(cd web && npx ng test --watch=false)  # 21 tests del frontend con Vitest (~4 s)
 ```
 
 ## Ejecutarlo con Docker
@@ -444,33 +485,56 @@ docker compose up -d --build      # http://127.0.0.1:8080 (otro puerto: PUERTO_W
 docker compose --profile ollama up -d   # opcional: Ollama en un contenedor (en .env, OLLAMA_URL=http://ollama:11434)
 ```
 
-- **Dos imágenes.** `api` es Python con FastAPI, tiene dos etapas (dependencias y ejecución) y corre como un usuario sin privilegios. `web` compila Angular con Node y lo sirve con `nginx-unprivileged`. Las imágenes base están fijadas por digest.
+- **Dos imágenes.** `api` es Python con FastAPI sobre Debian 13 (trixie), tiene dos etapas (dependencias y ejecución) y corre como un usuario sin privilegios. `web` compila Angular con Node y lo sirve con `nginx-unprivileged` (Alpine). Las imágenes base están fijadas por digest, y al construir se instalan los parches de seguridad del sistema publicados después (`apt-get upgrade` / `apk upgrade`).
 - **Solo nginx da la cara.** La API no publica puertos: solo es accesible a través de nginx (`/api/`), por la red interna de compose. nginx escucha únicamente en `127.0.0.1`. El navegador habla con un solo origen, así que no hace falta CORS.
 - **Ni el `.env` ni la clave de Groq entran en la imagen.** La configuración llega por variables de entorno al arrancar el contenedor.
 - **Los modelos van en un volumen.** Los modelos de embeddings y del reranker ocupan 4,3 GB y se descargan en el primer arranque. La alternativa era meterlos en la imagen al construirla, pero cada construcción la haría crecer otros 4,3 GB. La colección de Chroma también va en un volumen. Si está vacía, el contenedor indexa `data/` antes de arrancar la API.
-- **El límite por IP sigue funcionando detrás de nginx.** nginx sustituye la cabecera `X-Forwarded-For` por la IP real de quien conecta. La API solo la cree si la petición viene de la IP fija de nginx (`PROXIES_DE_CONFIANZA`), no de toda la red: desde el propio equipo se puede llegar a la API por la puerta de enlace de la red de Docker. Comprobado: con un `X-Forwarded-For` distinto en cada petición, la décima del minuto da 429 igual.
+- **El límite por IP sigue funcionando detrás de nginx.** nginx sustituye la cabecera `X-Forwarded-For` por la IP real de quien conecta. La API solo la cree si la petición viene de la IP fija de nginx (`PROXIES_DE_CONFIANZA`), no de toda la red: desde el propio equipo se puede llegar a la API por la puerta de enlace de la red de Docker. Comprobado con `LIMITE_POR_MINUTO=10`: con un `X-Forwarded-For` distinto en cada petición, se admiten las 10 primeras del minuto y la 11.ª y la 12.ª dan 429.
 - **Contenedores endurecidos.** Sistema de archivos de solo lectura (salvo volúmenes y `/tmp`), sin capacidades de Linux (`cap_drop: ALL`) y con `no-new-privileges`.
 - **CSP estricta en nginx.** Solo se permite contenido del propio origen y no hay `'unsafe-inline'`. Angular mete `<style>` en la página, así que nginx genera un nonce distinto en cada petición. Comprobado en Chrome: la aplicación no provoca ninguna violación, y un `<style>` sin nonce, añadido a propósito como control, queda bloqueado.
 
 ### Medidas
 
-Medido el 2026-11-22 en el portátil (CPU, Docker Engine 29.8.0), con Ollama `qwen2.5:14b` en el sobremesa.
+Medido el 2026-11-22 en el portátil (CPU, Docker Engine 29.8.0), con la API sobre Debian 13 y Ollama `qwen2.5:14b` en el sobremesa.
 
 | Medida | Valor | Cómo se ha medido |
 |---|---|---|
-| Imagen de la API | 1,81 GB | `docker images rag-notas-api:local` |
-| Imagen del frontend | 60,3 MB | `docker images rag-notas-web:local` |
-| Construcción de las dos imágenes, la primera vez (imágenes base ya descargadas) | 2 min 58 s | `time docker compose build` |
+| Imagen de la API | 1,83 GB | `docker images rag-notas-api:local` |
+| Imagen del frontend | 72,4 MB | `docker images rag-notas-web:local` |
+| Construcción de las dos imágenes, sin caché (imágenes base ya descargadas) | 3 min 11 s | `time docker compose build --no-cache` |
 | Volumen de modelos / colección | 4,3 GB / 7,2 MB | `docker compose exec api du -sh /modelos /app/chroma` |
-| Arranque en frío (volúmenes vacíos) hasta `/salud` con `"estado": "ok"` | 456 s | `docker compose up -d` y `/api/salud` cada segundo; incluye descargar el modelo de embeddings (2,2 GB) e indexar `data/` |
-| Arranque en frío hasta `"modelos_cargados": true` | 706,5 s | lo mismo; incluye descargar el reranker |
-| Arranque con volúmenes llenos hasta `/salud` ok | 3,2 s | reinicio del proceso de la API (SIGTERM, lo relanza `restart: unless-stopped`) y `/api/salud` cada segundo |
-| Arranque con volúmenes llenos hasta modelos cargados | 27,2 s | lo mismo |
-| RAM de la API en reposo, con los modelos cargados | 1,32 GiB | `docker stats --no-stream`, 20 s después de cargar los modelos |
-| RAM de la API durante una consulta (grafo, 15,6 s) | 1,80 GiB como máximo observado | `docker stats --no-stream` en bucle (~2 s por muestra) durante `POST /api/preguntar` |
-| RAM del frontend (nginx) | 14,6 MiB | `docker stats --no-stream` |
+| Arranque en frío (volúmenes vacíos) hasta `/salud` con `"estado": "ok"` | 410,1 s | `docker compose up -d` y `/api/salud` cada segundo; incluye descargar el modelo de embeddings e indexar `data/` (610 fragmentos) |
+| Arranque en frío hasta `"modelos_cargados": true` | 620,6 s | lo mismo; incluye descargar el reranker |
+| Arranque con volúmenes llenos hasta `/salud` ok | 3,3 s | `docker compose stop api`, `docker compose start api` y `/api/salud` cada segundo |
+| Arranque con volúmenes llenos hasta modelos cargados | 26,9 s | lo mismo |
+| Memoria residente de la API en reposo, con los modelos cargados | 3,60 GiB (1,08 GiB propios del proceso + 2,53 GiB de los pesos, mapeados desde `/modelos`) | `VmRSS`, `RssAnon` y `RssFile` de `/proc/1/status` en el contenedor, y `/proc/1/smaps` para ver a qué ficheros corresponde |
+| Memoria residente de la API durante una consulta (grafo, 10,4 s) | 3,87 GiB como máximo | `VmRSS` cada 0,2 s (52 muestras) durante `POST /api/preguntar` |
+| RAM del frontend (nginx) | 13,9 MiB | `docker stats --no-stream` |
 
-Los tiempos en frío dependen sobre todo de la velocidad de descarga desde Hugging Face. La RAM de la consulta es el máximo de 8 muestras, así que el pico real puede ser algo mayor.
+**`docker stats` no sirve para medir la API.** Los pesos de los modelos se leen mapeando los ficheros a memoria, y el kernel le cuenta esas páginas al contenedor que las cargó primero. Justo después de descargarlos, `docker stats` daba 3,23 GiB; tras reiniciar la API, con los ficheros ya en la caché del sistema, 1,05 GiB, aunque el proceso tenía los mismos 3,60 GiB residentes. Las cifras de RAM publicadas antes en este README (1,32 GiB en reposo y 1,80 GiB en una consulta) salían de `docker stats` y se quedaban cortas por este motivo. Para decidir cuánta memoria necesita la API en un servidor nuevo, la cifra a tener en cuenta es la residente: 3,87 GiB como máximo medido. No se ha probado cómo se comporta con un límite de memoria más bajo.
+
+Los tiempos en frío dependen sobre todo de la velocidad de descarga desde Hugging Face.
+
+## Integración continua
+
+`.github/workflows/ci.yml` se ejecuta en cada push a `main` y en cada pull request:
+
+| Trabajo | Qué hace | Falla si… |
+|---|---|---|
+| Tests de Python | `pytest` sin `.env`, sin `chroma/` y sin modelos (dobles y colecciones en memoria) | falla algún test |
+| Tests y build de Angular | `npm ci`, `ng test` y `ng build` | falla algún test o el build |
+| Secretos (Gitleaks) | todo el historial, no solo el último commit: un secreto borrado sigue en los commits viejos | aparece un secreto que no está en `.gitleaksignore` |
+| Imágenes y Trivy | construye las dos imágenes, revisa los Dockerfiles (`trivy config`) y las vulnerabilidades de las imágenes | hay un fallo de configuración HIGH o CRITICAL, o una vulnerabilidad HIGH o CRITICAL **que ya tenga arreglo** |
+
+Además, cada lunes se vuelven a construir y analizar las imágenes, para detectar vulnerabilidades publicadas después del último push aunque no haya cambios.
+
+**Política de vulnerabilidades.** Se falla solo con lo que tiene arreglo: lo que no lo tiene no se puede corregir actualizando, y bloquear por ello dejaría el CI en rojo sin nada que hacer. Lo que no tiene arreglo sale en el informe completo del resumen de cada ejecución. Las excepciones van en `.trivyignore.yaml`, solo para lo que no afecta a este proyecto y nunca para tapar algo roto. Cada una lleva el motivo, la condición que la hace válida (p. ej. «mientras nginx no use HTTP/2») y una fecha de caducidad: al caducar, el CI vuelve a fallar y obliga a revisarla. Comprobado: con las excepciones caducadas, o quitando una, Trivy vuelve a fallar con exactamente esas vulnerabilidades.
+
+**Falsos positivos de Gitleaks.** Son 5, cada uno excluido por su huella exacta (commit, fichero, regla y línea) en `.gitleaksignore`: tres valores de ejemplo de la documentación de Kubernetes del corpus y dos cadenas de un test. Comprobado: un secreto nuevo, en una copia del repositorio, sigue haciendo fallar el análisis.
+
+**Cadena de suministro.** Las acciones de GitHub se fijan por commit, no por etiqueta (una etiqueta se puede mover), y Trivy y Gitleaks se ejecutan desde su imagen fijada por digest. El token del workflow solo tiene permiso de lectura.
+
+**La evaluación no está en CI.** `evaluate.py` necesita los modelos (4,3 GB) y tarda minutos en CPU, y la evaluación de respuestas llama al LLM: con Groq gastaría cuota en cada push, y a un Ollama de casa GitHub no llega. Se ejecuta a mano y sus resultados se guardan en `eval/resultados/`.
 
 ## Cómo se ha hecho
 
@@ -492,7 +556,16 @@ config.py              fábrica del LLM (Ollama o Groq, desde .env), LLM juez, p
 evaluate.py            recuperación y respuestas sobre el conjunto de evaluación
 juez.py                juez de fidelidad y corrección: salida estructurada, reintentos y muestra para revisar
 mcp_server.py          servidor MCP (stdio): buscar_documentacion y preguntar, con acceso solo público
-tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM y del servidor MCP
+api.py                 API web (FastAPI): /buscar, /preguntar con SSE del progreso y /salud; límites y cancelación
+servicio.py            comprobaciones comunes de la API y del MCP (pregunta, k, salida, colección, LLM)
+web/                   frontend en Angular (chat, citas y traza), su Dockerfile y la configuración de nginx
+docker/                script de arranque del contenedor de la API (ingesta si no hay colección)
+Dockerfile             imagen de la API
+docker-compose.yml     API + frontend (y Ollama opcional, con el perfil ollama)
+.github/workflows/     CI: tests, Gitleaks y Trivy, y análisis semanal de las imágenes
+.trivyignore.yaml      excepciones de Trivy, con motivo, condición y caducidad
+.gitleaksignore        falsos positivos de Gitleaks, por huella exacta
+tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM, del servidor MCP y de la API
 docs/grafo.md          diagrama del grafo
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
