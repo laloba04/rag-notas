@@ -263,17 +263,43 @@ def guardar_traza(pregunta, estado, total_s, metodo_evaluacion, error=None):
         f.write(json.dumps(traza, ensure_ascii=False) + "\n")
 
 
-def responder(pregunta, app=None, trazar=True, acceso=None):
+def ejecutar(app, inicial, al_pasar):
+    """invoke del grafo; con al_pasar, el mismo recorrido con stream, avisando de cada nodo.
+    Solo se pasa el nombre del nodo: nada de su contenido sale antes de terminar."""
+    limites = {"recursion_limit": config.MAX_PASOS}
+    if al_pasar is None:
+        return app.invoke(inicial, config=limites)
+    # "updates" dice qué nodo acaba de terminar; "values", el estado completo tras cada paso, ya
+    # calculado por LangGraph (así no se repite aquí cómo se combinan los cambios). El último
+    # "values" es lo mismo que devolvería invoke.
+    estado = None
+    for modo, datos in app.stream(inicial, config=limites, stream_mode=["updates", "values"]):
+        if modo == "values":
+            estado = datos
+        else:
+            for nodo in datos:
+                al_pasar(nodo)
+    return estado
+
+
+def responder(pregunta, app=None, trazar=True, acceso=None, al_pasar=None):
     """Ejecuta el grafo con el límite de pasos y devuelve el estado final.
-    acceso: niveles que puede ver quien pregunta (None = config.ACCESO_POR_DEFECTO)."""
+    acceso: niveles que puede ver quien pregunta (None = config.ACCESO_POR_DEFECTO).
+    al_pasar: función opcional que recibe el nombre de cada nodo al terminarlo (para enseñar el
+    progreso). No cambia el recorrido ni el resultado."""
     from retrieve import normalizar_acceso     # no carga modelos: solo valida los niveles
     app = app or app_por_defecto()
     inicial = {"pregunta": pregunta, "pregunta_original": pregunta, "intentos": 0,
                "acceso": normalizar_acceso(acceso)}
     t0 = time.perf_counter()
     error = None
+    recorridos = []             # nodos terminados, para la traza si algo corta el recorrido
+
+    def apuntar(nodo):
+        recorridos.append(nodo)
+        al_pasar(nodo)
     try:
-        estado = app.invoke(inicial, config={"recursion_limit": config.MAX_PASOS})
+        estado = ejecutar(app, inicial, apuntar if al_pasar else None)
     except (GraphRecursionError, TimeoutError) as e:
         # Si algo se sale de los límites, la salida segura es no responder.
         error = type(e).__name__
@@ -283,6 +309,13 @@ def responder(pregunta, app=None, trazar=True, acceso=None):
         if trazar:
             guardar_traza(pregunta, {**inicial, "ruta": ["bloqueado"]},
                           time.perf_counter() - t0, app.metodo_evaluacion, "PermissionError")
+        raise
+    except Exception as e:
+        # Cualquier otro corte (p. ej., la API cancela porque el cliente se fue): también queda
+        # en la traza, con los nodos que llegaron a terminar, y el error sigue hacia arriba.
+        if trazar:
+            guardar_traza(pregunta, {**inicial, "ruta": recorridos + ["interrumpido"]},
+                          time.perf_counter() - t0, app.metodo_evaluacion, type(e).__name__)
         raise
     total = time.perf_counter() - t0
     if trazar:

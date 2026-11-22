@@ -203,3 +203,41 @@ def test_el_bloqueo_queda_en_la_traza(tmp_path, monkeypatch):
         responder("¿Tamaño máximo de un Secret?", app=construir_grafo(dep))
     traza = json.loads(fichero.read_text(encoding="utf-8"))
     assert traza["error"] == "PermissionError" and traza["ruta"] == ["bloqueado"]
+
+
+@pytest.mark.parametrize("decision, docs, tras", [
+    ("buscar", (RELEVANTE,), None),                      # generar
+    ("buscar", (IRRELEVANTE,), None),                    # reescribir y sin_respuesta
+    ("buscar", (IRRELEVANTE,), (RELEVANTE,)),            # reescribir y generar
+    ("directo", (), None),                               # responder_directo
+])
+def test_al_pasar_avisa_de_cada_nodo_sin_cambiar_el_resultado(decision, docs, tras):
+    """El progreso (para la API) usa stream; el resultado tiene que ser el mismo que con invoke."""
+    def app():
+        return construir_grafo(dependencias(Llamadas(), decision=decision, docs=docs,
+                                            docs_tras_reescribir=tras))
+    sin = responder("¿Cómo guardo cambios?", app=app(), trazar=False)
+    vistos = []
+    con = responder("¿Cómo guardo cambios?", app=app(), trazar=False, al_pasar=vistos.append)
+    assert vistos == con["ruta"] == sin["ruta"]
+    quitar = {"latencias", "total_s"}          # los tiempos cambian entre ejecuciones
+    assert {k: v for k, v in con.items() if k not in quitar} == \
+           {k: v for k, v in sin.items() if k not in quitar}
+
+
+def test_si_algo_corta_el_recorrido_queda_en_la_traza(tmp_path, monkeypatch):
+    """La API corta el grafo desde al_pasar cuando el cliente se va: tiene que quedar trazado."""
+    monkeypatch.setattr(config, "FICHERO_TRAZAS", str(tmp_path / "t.jsonl"))
+    app = construir_grafo(dependencias(Llamadas(), docs=(IRRELEVANTE,)))
+
+    class Corte(Exception):
+        pass
+
+    def al_pasar(nodo):
+        if nodo == "evaluar":
+            raise Corte()
+    with pytest.raises(Corte):
+        responder("¿Cómo guardo cambios?", app=app, al_pasar=al_pasar)
+    traza = json.loads((tmp_path / "t.jsonl").read_text())
+    assert traza["ruta"] == ["decidir", "recuperar", "evaluar", "interrumpido"]
+    assert traza["error"] == "Corte"
