@@ -1,7 +1,9 @@
 # Imagen de la API (api.py). Dos etapas: en la primera se instalan las dependencias en un
 # entorno virtual; en la segunda solo se copia ese entorno y el código, sin pip ni cachés.
 # Imagen base fijada por digest: la misma etiqueta puede apuntar a otra imagen mañana.
-ARG PYTHON_IMAGEN=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+# Debian 13 (trixie): con bookworm, Trivy daba 101 vulnerabilidades HIGH/CRITICAL sin arreglo en el
+# sistema; con trixie, 51 (2026-11-22).
+ARG PYTHON_IMAGEN=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 
 # --- Etapa 1: dependencias ---
 FROM ${PYTHON_IMAGEN} AS dependencias
@@ -21,8 +23,11 @@ ENV PATH=/opt/venv/bin:$PATH \
     HF_HUB_DISABLE_TELEMETRY=1 \
     HOME=/tmp
 
-# Usuario sin privilegios: si alguien consiguiera ejecutar código en la API, no sería root.
-RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app \
+# Parches de seguridad del sistema publicados después de la imagen base (el CI falla con los HIGH
+# o CRITICAL que tengan arreglo). Usuario sin privilegios: si alguien consiguiera ejecutar código
+# en la API, no sería root.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/* \
+ && useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app \
  && mkdir -p /app/chroma /app/logs /modelos \
  && chown app:app /app/chroma /app/logs /modelos
 
