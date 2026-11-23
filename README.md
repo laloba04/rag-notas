@@ -4,6 +4,8 @@
 
 Asistente de preguntas y respuestas sobre documentación técnica en español, construido con RAG (Retrieval-Augmented Generation): busca en los documentos los fragmentos relevantes para cada pregunta y responde a partir de ellos.
 
+**Demo grabada:** [laloba04.github.io/rag-notas](https://laloba04.github.io/rag-notas/). Son respuestas reales, grabadas el 23-11-2026, que se reproducen sin API: no se pueden hacer preguntas nuevas ([por qué](#demo-grabada)).
+
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
 
 **Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo. Un servidor MCP expone la búsqueda y el grafo como herramientas para cualquier asistente compatible, con el acceso fijo a lo público. Una API con FastAPI (con el progreso del grafo por SSE) y un frontend en Angular permiten usarlo desde el navegador. Todo se ejecuta con Docker (nginx delante y docker-compose), y un CI en GitHub Actions pasa los tests, busca secretos con Gitleaks y analiza las imágenes con Trivy.
@@ -19,6 +21,7 @@ Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el pro
 - **Frontend** (`web/`, Angular y Tailwind): cada consulta como un informe, con las fuentes en notas al margen y la traza del grafo en cascada.
 - **Docker** (`Dockerfile`, `web/Dockerfile`, `docker-compose.yml`): nginx sirve el frontend y reenvía `/api/` a la API, que no publica puertos ([ver más abajo](#ejecutarlo-con-docker)).
 - **CI** (`.github/workflows/ci.yml`, GitHub Actions): tests, Gitleaks y Trivy ([ver más abajo](#integración-continua)).
+- **Demo grabada** (`scripts/grabar_demo.py`, `.github/workflows/pages.yml`): la web en GitHub Pages, reproduciendo respuestas grabadas de la API real ([ver más abajo](#demo-grabada)).
 
 ```mermaid
 graph TD;
@@ -320,6 +323,23 @@ uvicorn api:app                                   # API en http://127.0.0.1:8000
 cd web && nvm use && npm ci && npm start          # frontend en http://localhost:4200; reenvía /api a la API
 ```
 
+## Demo grabada
+
+La demo pública es la misma web, compilada con la configuración `demo` y publicada en GitHub Pages: [laloba04.github.io/rag-notas](https://laloba04.github.io/rag-notas/). **No hay API detrás.** Reproduce 8 respuestas reales (4 preguntas, en modo grafo y en modo directo), grabadas el 23-11-2026 con `qwen2.5:14b` sobre los 610 fragmentos. Cada paso del grafo aparece en el momento en que llegó al grabarlo. La página lo dice en un aviso fijo y desactiva el campo de pregunta libre.
+
+**Por qué no está desplegada en vivo.** La API necesita unos 4 GiB de RAM residentes y 4,3 GB de modelos ([medidas](#medidas)). Revisé la documentación de cada proveedor el 23-11-2026. Ningún plan gratuito sin tarjeta los cubre: Hugging Face pide un plan de pago para crear Spaces Docker, y Oracle Cloud y Google Cloud piden tarjeta. Render, Koyeb y Railway, según artículos de terceros que no he contrastado con su documentación, dan 512 MB, funcionan con créditos o ya no tienen plan gratuito. Preferí una demo grabada que dice que lo es a un modo recortado que ya no sería el sistema que se evalúa aquí.
+
+- **Grabación** (`scripts/grabar_demo.py`): hace las preguntas por SSE a la pila de Docker, igual que la web. Guarda en `web/demo/grabaciones.json` cada nodo con el momento en que llegó y la respuesta tal cual. Si una respuesta da error, o cita un documento que no es público según su frontmatter, no escribe nada.
+- **Reproducción** (`web/src/app/demo.ts`): sustituye a la API con la misma interfaz y envía los nodos con los retrasos grabados. Una pregunta que no está grabada da error: no se inventa una respuesta. El fichero de grabaciones solo entra en el build `demo`.
+- **CSP en `<meta>`.** GitHub Pages no deja poner cabeceras propias (su documentación no lo contempla), así que la política va en `web/src/index.demo.html`. Va sin nonce, porque no hay servidor que lo cambie en cada petición, y sin `'unsafe-inline'`. Comprobado en el sitio publicado: 0 avisos de CSP, un `<style>` inyectado no se aplica y un `fetch` a otro origen se bloquea. Frente a nginx se pierde `frame-ancestors`, que en `<meta>` se ignora.
+
+Grabarla otra vez (con la pila de Docker arrancada y el LLM accesible):
+
+```bash
+python scripts/grabar_demo.py      # contra http://127.0.0.1:8088/api; --api para otra dirección
+cd web && npx ng build --configuration demo   # sale en web/dist/demo/browser
+```
+
 ## Usarlo desde un asistente (MCP)
 
 `mcp_server.py` es un servidor [MCP](https://modelcontextprotocol.io) (Model Context Protocol), hecho con el SDK oficial de Python. Un asistente compatible lo arranca y puede usar estas dos herramientas cuando le preguntan algo de Kubernetes, Git o HTTP:
@@ -453,6 +473,7 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · 
 - Trivy (2026-11-22) encuentra en la imagen de la API 50 vulnerabilidades HIGH de Debian 13 y 4 de chromadb 1.5.9 (2 CRITICAL) que aún no tienen arreglo. Las de chromadb afectan al servidor HTTP de Chroma (su API REST y la autorización entre inquilinos), que este proyecto no arranca: Chroma va embebido en el proceso (`PersistentClient`). Las de Debian no se han revisado una a una.
 - nginx 1.30.6 tiene 6 vulnerabilidades HIGH o CRITICAL arregladas en 1.30.7, que salió el 2026-11-18 y aún no tiene imagen. Ninguna se aplica a esta configuración (mail, HTTP/2, HTTP/3, TLS en nginx, SSI o mirror): son excepciones en `.trivyignore.yaml` que caducan el 2026-12-02.
 - GitHub desactiva los workflows programados de un repositorio público tras 60 días sin actividad: el análisis semanal deja de ejecutarse si el repositorio se queda quieto.
+- La demo pública es grabada: no hay despliegue en vivo (ver [Demo grabada](#demo-grabada)).
 - En el primer arranque con Docker, mientras se descargan los modelos y se indexa `data/` (unos 7 min medidos), la API todavía no escucha y no se puede preguntar. La web lo avisa ("Arrancando") y vuelve a comprobar sola cada 10 s (ver [Ejecutarlo con Docker](#ejecutarlo-con-docker)). nginx no distingue entre "arrancando" y "caída", así que el aviso cubre los dos casos.
 
 ## Ejecutarlo en local
@@ -536,9 +557,9 @@ Además, cada lunes se vuelven a construir y analizar las imágenes, para detect
 
 **Política de vulnerabilidades.** Se falla solo con lo que tiene arreglo: lo que no lo tiene no se puede corregir actualizando, y bloquear por ello dejaría el CI en rojo sin nada que hacer. Lo que no tiene arreglo sale en el informe completo del resumen de cada ejecución. Las excepciones van en `.trivyignore.yaml`, solo para lo que no afecta a este proyecto y nunca para tapar algo roto. Cada una lleva el motivo, la condición que la hace válida (p. ej. «mientras nginx no use HTTP/2») y una fecha de caducidad: al caducar, el CI vuelve a fallar y obliga a revisarla. Comprobado: con las excepciones caducadas, o quitando una, Trivy vuelve a fallar con exactamente esas vulnerabilidades.
 
-**Falsos positivos de Gitleaks.** Son 5, cada uno excluido por su huella exacta (commit, fichero, regla y línea) en `.gitleaksignore`: tres valores de ejemplo de la documentación de Kubernetes del corpus y dos cadenas de un test. Comprobado: un secreto nuevo, en una copia del repositorio, sigue haciendo fallar el análisis.
+**Falsos positivos de Gitleaks.** Son 6, cada uno excluido por su huella exacta (commit, fichero, regla y línea) en `.gitleaksignore`: tres valores de ejemplo de la documentación de Kubernetes del corpus y tres cadenas de dos tests. Comprobado: un secreto nuevo, en una copia del repositorio, sigue haciendo fallar el análisis.
 
-**Cadena de suministro.** Las acciones de GitHub se fijan por commit, no por etiqueta (una etiqueta se puede mover), y Trivy y Gitleaks se ejecutan desde su imagen fijada por digest. El token del workflow solo tiene permiso de lectura.
+**Cadena de suministro.** Las acciones de GitHub se fijan por commit, no por etiqueta (una etiqueta se puede mover), y Trivy y Gitleaks se ejecutan desde su imagen fijada por digest. El token del workflow solo tiene permiso de lectura. En `pages.yml`, el que publica la demo, solo el trabajo final tiene además `pages: write` e `id-token: write`.
 
 **La evaluación no está en CI.** `evaluate.py` necesita los modelos (4,3 GB) y tarda minutos en CPU, y la evaluación de respuestas llama al LLM: con Groq gastaría cuota en cada push, y a un Ollama de casa GitHub no llega. Se ejecuta a mano y sus resultados se guardan en `eval/resultados/`.
 
@@ -564,11 +585,11 @@ juez.py                juez de fidelidad y corrección: salida estructurada, rei
 mcp_server.py          servidor MCP (stdio): buscar_documentacion y preguntar, con acceso solo público
 api.py                 API web (FastAPI): /buscar, /preguntar con SSE del progreso y /salud; límites y cancelación
 servicio.py            comprobaciones comunes de la API y del MCP (pregunta, k, salida, colección, LLM)
-web/                   frontend en Angular y Tailwind (informes, notas al margen y traza), su Dockerfile y la configuración de nginx
+web/                   frontend en Angular y Tailwind (informes, notas al margen y traza), su Dockerfile, la configuración de nginx y la demo grabada (demo/grabaciones.json)
 docker/                script de arranque del contenedor de la API (ingesta si no hay colección)
 Dockerfile             imagen de la API
 docker-compose.yml     API + frontend (y Ollama opcional, con el perfil ollama)
-.github/workflows/     CI: tests, Gitleaks y Trivy, y análisis semanal de las imágenes
+.github/workflows/     CI (tests, Gitleaks y Trivy, y análisis semanal de las imágenes) y publicación de la demo en GitHub Pages
 .trivyignore.yaml      excepciones de Trivy, con motivo, condición y caducidad
 .gitleaksignore        falsos positivos de Gitleaks, por huella exacta
 tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM, del servidor MCP y de la API
@@ -578,5 +599,5 @@ eval/golden_set.json   preguntas de evaluación
 eval/resultados/       resultados de cada evaluación, con fecha
 eval/revision/         muestras de veredictos del juez para revisar a mano
 extra/                 documentos trampa para la prueba de prompt injection
-scripts/               descarga del corpus, diagrama del grafo, prueba de prompt injection y prueba del servidor MCP
+scripts/               descarga del corpus, diagrama del grafo, prueba de prompt injection, prueba del servidor MCP y grabación de la demo
 ```

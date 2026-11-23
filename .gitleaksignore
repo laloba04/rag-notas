@@ -10,3 +10,7 @@
 53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:127
 53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:324
 53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:819
+
+# Revisado el 2026-11-23. Nombres de fichero en un test de grabar_demo.py
+# ("06-k8s-secrets.md", "99-no-existe.md"): la palabra "secrets" seguida de otra cadena.
+8a919b3f8cbdf3b64cce63e7f1b67dc7c5da39dc:tests/test_grabar_demo.py:generic-api-key:26
