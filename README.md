@@ -10,9 +10,9 @@ Asistente de preguntas y respuestas sobre documentación técnica en español, c
 
 **Demo grabada:** [laloba04.github.io/rag-notas](https://laloba04.github.io/rag-notas/). Son respuestas reales, grabadas el 23-11-2026, que se reproducen sin API: no se pueden hacer preguntas nuevas ([por qué](#demo-grabada)).
 
-> Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
+> Proyecto personal de aprendizaje y portfolio. Cada etapa se implementó primero sin frameworks para entender qué hace, y se midió antes de pasar a la siguiente. El CI sigue revisándolo cada semana: los lunes vuelve a construir las imágenes y las analiza con Trivy, para detectar vulnerabilidades nuevas aunque el código no cambie (GitHub desactiva ese análisis programado si el repositorio pasa 60 días sin actividad).
 
-**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo. Un servidor MCP expone la búsqueda y el grafo como herramientas para cualquier asistente compatible, con el acceso fijo a lo público. Una API con FastAPI (con el progreso del grafo por SSE) y un frontend en Angular permiten usarlo desde el navegador. Todo se ejecuta con Docker (nginx delante y docker-compose), y un CI en GitHub Actions pasa los tests, busca secretos con Gitleaks y analiza las imágenes con Trivy.
+**Estado actual:** ingesta, búsqueda vectorial, reranker, generación de respuestas con citas, una capa agéntica y correctiva con LangGraph y evaluación de recuperación y respuestas. La búsqueda híbrida (vectorial + BM25) está implementada y medida, pero desactivada por defecto porque no mejora. Tiene filtro por permisos en la búsqueda y mitigaciones de prompt injection, medidas con una prueba de 6 ataques. El LLM es local por defecto (Ollama) y, como opción, por API (Groq), sin que ningún fragmento restringido salga hacia el proveedor externo. Un servidor MCP expone la búsqueda y el grafo como herramientas para cualquier asistente compatible, con el acceso fijo a lo público. Una API con FastAPI (con el progreso del grafo por SSE) y un frontend en Angular permiten usarlo desde el navegador. Todo se ejecuta con Docker (nginx delante y docker-compose), y un CI en GitHub Actions pasa los tests, busca secretos con Gitleaks y analiza las imágenes con Trivy. No hay despliegue en vivo: la demo pública es la web reproduciendo respuestas reales grabadas, en GitHub Pages.
 
 ## Arquitectura
 
@@ -26,6 +26,48 @@ Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el pro
 - **Docker** (`Dockerfile`, `web/Dockerfile`, `docker-compose.yml`): nginx sirve el frontend y reenvía `/api/` a la API, que no publica puertos ([ver más abajo](#ejecutarlo-con-docker)).
 - **CI** (`.github/workflows/ci.yml`, GitHub Actions): tests, Gitleaks y Trivy ([ver más abajo](#integración-continua)).
 - **Demo grabada** (`scripts/grabar_demo.py`, `.github/workflows/pages.yml`): la web en GitHub Pages, reproduciendo respuestas grabadas de la API real ([ver más abajo](#demo-grabada)).
+
+Cómo encajan las piezas (la línea de puntos roja marca lo que sale de nuestra red):
+
+```mermaid
+flowchart LR
+    nav["Navegador"]
+    asis["Asistente MCP<br/>(su modelo es externo)"]
+    groq["Groq<br/>LLM externo, opcional"]
+    pages["GitHub Pages<br/>demo grabada, sin API"]
+
+    subgraph red["Nuestra red: aquí está también lo restringido"]
+        nginx["nginx<br/>frontend Angular + CSP"]
+        api["api.py · FastAPI<br/>acceso fijo: público"]
+        mcp["mcp_server.py · stdio<br/>acceso fijo: público"]
+        cli["Línea de comandos<br/>puede pedir lo restringido"]
+        serv["servicio.py<br/>comprobaciones comunes"]
+        resp["grafo.py (LangGraph)<br/>o generate.py (directo)"]
+        ret["retrieve.buscar<br/>ChromaDB + reranker<br/>filtro por permisos"]
+        ollama["Ollama<br/>LLM local, por defecto"]
+    end
+
+    nav --> nginx -- "/api/" --> api
+    asis -- stdio --> mcp
+    api & mcp -.- serv
+    api & mcp --> resp
+    api & mcp -- "solo buscar" --> ret
+    cli --> resp
+    resp --> ret
+    resp --> ollama
+    resp -- "solo fragmentos públicos<br/>(config.comprobar_envio)" --> groq
+    api -- "solo fragmentos públicos<br/>(servicio.comprobar_salida)" --> nav
+    mcp -- "solo fragmentos públicos<br/>(servicio.comprobar_salida)" --> asis
+    api -. "scripts/grabar_demo.py<br/>(una vez, por la API)" .-> pages
+
+    linkStyle 12,13,14 stroke:#b3261e,stroke-width:2px,stroke-dasharray:5
+```
+
+- **Dos puertas con acceso fijo a lo público:** la API y el servidor MCP llaman directamente a `retrieve.buscar`, `grafo.responder` y `generate.responder`, siempre con `config.ACCESO_POR_DEFECTO`. Las dos usan `servicio.py` para las comprobaciones comunes. Solo la línea de comandos puede pedir `--acceso=publico,restringido`.
+- **Lo restringido nunca cruza la línea roja.** Antes de enviar fragmentos a un LLM externo (Groq), `config.comprobar_envio` falla en cerrado si alguno no es público. Antes de devolver nada al navegador o al asistente MCP, `servicio.comprobar_salida` hace la misma comprobación. Ollama cuenta como proveedor local (`PROVEEDORES_LOCALES`): se da por hecho que corre en la propia red.
+- **Docker:** nginx y la API van en contenedores, en una red interna de compose. La API no publica puertos, y Chroma va embebido en su proceso, con la colección y los modelos en volúmenes. El servicio `ollama` del compose es opcional (perfil `ollama`); si no se usa, `OLLAMA_URL` (en `.env`) apunta a otro Ollama de la red. El servidor MCP corre fuera de Docker, con su `chroma/` local.
+
+El grafo:
 
 ```mermaid
 graph TD;
@@ -427,7 +469,7 @@ Pod es un recurso de nivel superior en la API REST de Kubernetes. [...]
 | Proveedor y modelo del LLM solo en `.env`, con una sola fábrica (`config.crear_llm()`) para Ollama y Groq | Cambiar de modelo o de proveedor no toca el código, y el pipeline directo y el grafo no pueden usar LLM distintos por error. Si falta el modelo o la clave, el programa falla con un mensaje claro. Ollama por defecto: los datos solo salen de la red si se elige así |
 | Comprobación de cada fragmento antes de enviarlo a un proveedor externo | El filtro de la búsqueda depende del acceso de quien pregunta; esto depende de adónde van los datos. Con acceso total y Groq, lo restringido no sale, y se avisa con un error en vez de quitarlo en silencio |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (211 tests de Python en ~5 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez, el servidor MCP y la API; el frontend tiene 45 más, con Vitest, en ~4 s) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (216 tests de Python en ~5 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez, el servidor MCP y la API; el frontend tiene 56 más, con Vitest, en ~4 s) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
@@ -475,9 +517,10 @@ Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · 
 - Los modelos se ejecutan en CPU: la primera ingesta tarda varios minutos y el reranker añade unos 8 s por consulta.
 - Docker Engine instalado como snap (Ubuntu) no ejecuta nada en un contenedor con `no-new-privileges` ("exec ...: operation not permitted"), ni siquiera la imagen base de Python, y a veces tampoco deja parar contenedores ("cannot stop container: permission denied"). `docker-compose.yml` mantiene esa opción. Para probar con el snap, se usa un `docker-compose.snap.yml` local (no se sube) que la quita: `docker compose -f docker-compose.yml -f docker-compose.snap.yml up -d`. Con Docker Desktop no pasa (comprobado); con el Docker de los repositorios oficiales no se ha probado.
 - Trivy (2026-11-22) encuentra en la imagen de la API 50 vulnerabilidades HIGH de Debian 13 y 4 de chromadb 1.5.9 (2 CRITICAL) que aún no tienen arreglo. Las de chromadb afectan al servidor HTTP de Chroma (su API REST y la autorización entre inquilinos), que este proyecto no arranca: Chroma va embebido en el proceso (`PersistentClient`). Las de Debian no se han revisado una a una.
-- nginx 1.30.6 tiene 6 vulnerabilidades HIGH o CRITICAL arregladas en 1.30.7, que salió el 2026-11-18 y aún no tiene imagen. Ninguna se aplica a esta configuración (mail, HTTP/2, HTTP/3, TLS en nginx, SSI o mirror): son excepciones en `.trivyignore.yaml` que caducan el 2026-12-02.
+- nginx 1.30.6 tiene 6 vulnerabilidades HIGH o CRITICAL arregladas en 1.30.7, que salió el 2026-11-18 y aún no tiene imagen de `nginx-unprivileged` (comprobado el 2026-11-23). Ninguna se aplica a esta configuración (mail, HTTP/2, HTTP/3, TLS en nginx, SSI o mirror): son excepciones en `.trivyignore.yaml` que caducan el 2026-12-02.
 - GitHub desactiva los workflows programados de un repositorio público tras 60 días sin actividad: el análisis semanal deja de ejecutarse si el repositorio se queda quieto.
-- La demo pública es grabada: no hay despliegue en vivo (ver [Demo grabada](#demo-grabada)).
+- No hay despliegue en vivo: la API necesita unos 4 GiB de RAM residentes y ningún plan gratuito sin tarjeta los da (ver [Demo grabada](#demo-grabada)). La demo pública solo reproduce 4 preguntas grabadas, en los dos modos; no admite preguntas libres y no se actualiza sola si cambia el código o el corpus (hay que volver a grabarla).
+- En la demo, la CSP va en un `<meta>`, porque GitHub Pages no permite cabeceras propias: no hay `frame-ancestors`, así que la página se puede meter en un iframe de otra web. Como no tiene formularios ni datos de quien la visita, el riesgo es bajo.
 - En el primer arranque con Docker, mientras se descargan los modelos y se indexa `data/` (unos 7 min medidos), la API todavía no escucha y no se puede preguntar. La web lo avisa ("Arrancando") y vuelve a comprobar sola cada 10 s (ver [Ejecutarlo con Docker](#ejecutarlo-con-docker)). nginx no distingue entre "arrancando" y "caída", así que el aviso cubre los dos casos.
 
 ## Ejecutarlo en local
@@ -503,8 +546,8 @@ python evaluate.py --juzgar       # juez de fidelidad y corrección sobre los ú
 python evaluate.py --acuerdo eval/revision/<fichero>.json  # % de acuerdo con el juez, tras revisar la muestra a mano
 python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin mitigaciones (~6 min)
 python scripts/probar_mcp.py      # el servidor MCP por stdio, con cuatro preguntas (necesita el LLM)
-python -m pytest                  # 211 tests sin LLM ni modelos (~5 s)
-(cd web && npx ng test --watch=false)  # 45 tests del frontend con Vitest (~4 s)
+python -m pytest                  # 216 tests sin LLM ni modelos (~5 s)
+(cd web && npx ng test --watch=false)  # 56 tests del frontend con Vitest (~4 s)
 ```
 
 ## Ejecutarlo con Docker
@@ -576,6 +619,18 @@ incluido lo que no funciona. La revisión manual del juez la decidí yo caso a
 caso, y en un caso (pregunta 8) cambié mi marca al repasarla. Las decisiones de la tabla de decisiones técnicas las puedo explicar
 una a una.
 
+En la parte de aplicación (API, frontend, Docker, CI y demo) planteé las fases y
+pedí que el trabajo se parara al final de cada una. Revisé cada resumen y cada
+diff antes de hacer los commits. Algunas decisiones de esta parte las tomé yo:
+que el streaming enseñe el progreso del grafo y que la respuesta llegue al
+final, ya validada; que `/salud` no espere en la cola de las consultas y que
+una consulta se cancele si el cliente se desconecta; medir con Docker Engine y
+no con Docker Desktop; la política de Trivy, con excepciones que llevan motivo
+y fecha de caducidad; y, como no había un despliegue gratuito que aguantara la
+API, publicar una demo grabada en vez de un modo recortado. El asistente
+escribió el código, propuso cómo resolver cada fase y ejecutó las pruebas y las
+medidas.
+
 ## Estructura
 
 ```
@@ -596,7 +651,7 @@ docker-compose.yml     API + frontend (y Ollama opcional, con el perfil ollama)
 .github/workflows/     CI (tests, Gitleaks y Trivy, y análisis semanal de las imágenes) y publicación de la demo en GitHub Pages
 .trivyignore.yaml      excepciones de Trivy, con motivo, condición y caducidad
 .gitleaksignore        falsos positivos de Gitleaks, por huella exacta
-tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM, del servidor MCP y de la API
+tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM, del servidor MCP, de la API y de la grabación de la demo
 docs/grafo.md          diagrama del grafo
 docs/demo.gif          el GIF del principio (la demo publicada, a velocidad real)
 data/                  los 20 documentos del corpus
