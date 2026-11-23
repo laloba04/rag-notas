@@ -16,7 +16,7 @@ Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el pro
 - **Grafo** (`grafo.py`, LangGraph): decide si la pregunta necesita buscar, evalúa si lo recuperado es relevante y, si no lo es, reformula la pregunta una vez antes de responder "No lo tengo en la documentación."
 - **Servidor MCP** (`mcp_server.py`): la búsqueda y el grafo como dos herramientas para un asistente externo ([ver más abajo](#usarlo-desde-un-asistente-mcp)).
 - **API web** (`api.py`, FastAPI): `/buscar`, `/preguntar` (con el progreso del grafo por SSE) y `/salud`. Comparte con el MCP las comprobaciones de `servicio.py` ([ver más abajo](#usarlo-desde-la-web)).
-- **Frontend** (`web/`, Angular): chat con citas pulsables y la traza del grafo.
+- **Frontend** (`web/`, Angular y Tailwind): cada consulta como un informe, con las fuentes en notas al margen y la traza del grafo en cascada.
 - **Docker** (`Dockerfile`, `web/Dockerfile`, `docker-compose.yml`): nginx sirve el frontend y reenvía `/api/` a la API, que no publica puertos ([ver más abajo](#ejecutarlo-con-docker)).
 - **CI** (`.github/workflows/ci.yml`, GitHub Actions): tests, Gitleaks y Trivy ([ver más abajo](#integración-continua)).
 
@@ -241,7 +241,7 @@ Resultados en `eval/resultados/2026-11-07_1834_injection.json`.
 
 - Son 6 ataques, un modelo y una pregunta, y las repeticiones salen casi idénticas por la temperatura baja. Esto indica que el sistema resiste estos ataques, no otros.
 - El mismo modelo que recibe el ataque es el que debe ignorarlo: las capas 1 y 2 dependen de que obedezca. Un ataque que obedeciera *y* citara pasaría también la capa 3.
-- `filtrar_datos` no funcionó en ningún caso, así que la defensa contra esa fuga no está puesta a prueba. La validación no la frenaría: la respuesta llevaría cita. Ahora hay interfaz web, y lo que la protege es esto: el frontend no interpreta Markdown ni usa `innerHTML`, sino que pinta la respuesta y los fragmentos como texto (Angular los escapa), así que una imagen en Markdown no se convierte en imagen, y una etiqueta `<img>` dentro de un fragmento se ve como texto y no se carga (lo comprueba un test). Las URL de las fuentes solo se convierten en enlace si empiezan por `https://` (`urlSegura`). Con Docker, la CSP de nginx tiene `img-src 'self'` y `connect-src 'self'`: el navegador no carga imágenes de otros servidores ni les hace peticiones desde la página. Con `ng serve`, en desarrollo, no hay CSP. Lo que sigue sin probar: el ataque `filtrar_datos` no se ha lanzado contra la web.
+- `filtrar_datos` no funcionó en ningún caso, así que la defensa contra esa fuga no está puesta a prueba. La validación no la frenaría: la respuesta llevaría cita. Ahora hay interfaz web, y lo que la protege es esto: el frontend no usa `innerHTML`. La respuesta pasa por un analizador propio de Markdown que solo entiende negrita, código y listas (`web/src/app/markdown.ts`) y devuelve datos, que la plantilla pinta como texto (Angular los escapa); imágenes, enlaces y HTML se quedan como texto literal. Los fragmentos se pintan tal cual, como texto: una etiqueta `<img>` dentro de un fragmento se ve y no se carga. Lo comprueban tests con control negativo: si el texto se pinta con `innerHTML`, o si el analizador acepta enlaces, fallan. Las URL de las fuentes solo se convierten en enlace si empiezan por `https://` (`urlSegura`). Con Docker, la CSP de nginx tiene `img-src 'self'` y `connect-src 'self'`: el navegador no carga imágenes de otros servidores ni les hace peticiones desde la página. Con `ng serve`, en desarrollo, no hay CSP. Lo que sigue sin probar: el ataque `filtrar_datos` no se ha lanzado contra la web.
 - El nodo del LLM juez (`METODO_EVALUACION=llm`, no es el valor por defecto) recibe los fragmentos sin delimitar, y esta prueba no lo cubre.
 - El mejor control sigue siendo reducir lo que puede hacer el modelo: aquí no tiene herramientas ni acceso a datos más allá de lo que ya filtró la búsqueda, así que un ataque con éxito puede engañar a quien lee, pero no actuar. Por MCP cambia, porque el que lee es un asistente que sí puede tener herramientas ([ver más abajo](#el-servidor-mcp-una-salida-hacia-fuera)). También importa quién puede añadir documentos al índice.
 
@@ -311,7 +311,7 @@ La API (`api.py`) envuelve lo que ya existe (`retrieve.buscar`, `grafo.responder
 - **Límites.** `LIMITE_POR_MINUTO` peticiones por minuto y por IP a `/buscar` y `/preguntar` (por defecto 10: se admiten 10 y la 11.ª da 429 con `Retry-After`), y `LIMITE_PREGUNTAS_DIA` preguntas al día para todo el servidor (por defecto 200), que protege la cuota del LLM. Los dos se cuentan en memoria y vuelven a cero al reiniciar. Cada petición tiene como mucho `TIMEOUT_PETICION_S` (180 s); si se pasa, 504.
 - **Errores sin detalles internos:** `{"error": "...", "tipo": "..."}`, sin trazas ni direcciones internas.
 
-El frontend (`web/`, Angular) muestra el último nodo del grafo mientras piensa, la respuesta con las citas `[n]` pulsables (cada una abre el fragmento citado y el enlace a su documento), "No lo tengo" como resultado válido (y si fue la validación la que descartó la respuesta) y un panel plegable con la traza del grafo. Permite elegir el modo y cancelar una pregunta en curso.
+El frontend (`web/`, Angular y Tailwind) presenta cada consulta como un informe, con la más reciente arriba. Las fuentes van en notas al margen, a la altura del párrafo que las cita: documentación, documento, sección, el principio del fragmento, el fragmento completo desplegable y el enlace al original. La llamada `[n]` lleva a su nota. La traza del grafo es una cascada de tiempos por paso: mientras piensa, se pinta en vivo con los nodos que llegan por SSE; al terminar, con las latencias que mide la API. "No lo tengo" se muestra como resultado válido, distinguiendo si fue la validación la que descartó la respuesta, y si el grafo reformuló la pregunta, lo dice. Permite elegir el modo, cancelar una pregunta en curso y cambiar el tema (sistema, claro u oscuro). Las preguntas de ejemplo de la portada están probadas contra el RAG: las tres respondieron con cita en 2 de 2 intentos.
 
 Sin Docker, en dos terminales (desde la raíz del repo, con el entorno activado y `chroma/` creado con `python ingest.py`):
 
@@ -403,7 +403,7 @@ Pod es un recurso de nivel superior en la API REST de Kubernetes. [...]
 | Proveedor y modelo del LLM solo en `.env`, con una sola fábrica (`config.crear_llm()`) para Ollama y Groq | Cambiar de modelo o de proveedor no toca el código, y el pipeline directo y el grafo no pueden usar LLM distintos por error. Si falta el modelo o la clave, el programa falla con un mensaje claro. Ollama por defecto: los datos solo salen de la red si se elige así |
 | Comprobación de cada fragmento antes de enviarlo a un proveedor externo | El filtro de la búsqueda depende del acceso de quien pregunta; esto depende de adónde van los datos. Con acceso total y Groq, lo restringido no sale, y se avisa con un error en vez de quitarlo en silencio |
 | Trazas en JSON por línea con ruta, reintentos, latencia por nodo y fragmentos antes/después de evaluar | Permite auditar cada respuesta. De la pregunta solo se guarda un hash y su longitud, no el texto |
-| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (211 tests de Python en ~5 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez, el servidor MCP y la API; el frontend tiene 21 más, con Vitest, en ~4 s) |
+| Dependencias del grafo inyectadas (LLM y búsqueda) | Los tests prueban el enrutado con funciones simuladas, sin Ollama ni modelos (211 tests de Python en ~5 s, contando los de RRF, permisos, prompt injection, la fábrica del LLM, el bloqueo hacia proveedores externos, las métricas, el juez, el servidor MCP y la API; el frontend tiene 42 más, con Vitest, en ~4 s) |
 | Búsqueda híbrida (BM25 + vectorial con Reciprocal Rank Fusion, k=60) antes del reranker, desactivada por defecto | Implementada y medida, pero no mejora (ver resultados). RRF combina puestos, no puntuaciones, porque las de BM25 y las del coseno no son comparables; k=60 es el valor del artículo original. Se mantiene en el código para poder medirla con otros corpus |
 | Índice BM25 en memoria, construido con los mismos fragmentos de Chroma | Con 610 fragmentos, leerlos de Chroma y construir el índice tarda 0,08 s y no hay que mantener otro almacén. En producción usaría la búsqueda de texto completo de la base de datos (Postgres con `tsvector` y configuración en español) u OpenSearch, que se actualizan con cada documento y no ocupan memoria del proceso |
 | Filtro por permisos en la búsqueda (`where` de Chroma sobre el metadato `confidencialidad`), por defecto solo `publico` | Lo que no se recupera no puede llegar al LLM. Filtrarlo en el prompt ("no uses los documentos restringidos") dependería de que el modelo obedezca, y el LLM no es un control de acceso. Ver [Seguridad](#seguridad) |
@@ -423,11 +423,15 @@ Pod es un recurso de nivel superior en la API REST de Kubernetes. [...]
 | Proxy de confianza por IP fija (la de nginx), no por red | Desde el host se llega a la API por la puerta de enlace de la red de Docker: confiar en toda la red dejaría falsear `X-Forwarded-For` y saltarse el límite por IP |
 | Modelos en un volumen, no en la imagen | Son 4,3 GB: en la imagen, cada construcción y cada subida los repetiría. A cambio, el primer arranque los descarga (~10 min medidos) |
 | CSP con nonce para los estilos de Angular | Sin `'unsafe-inline'`, que permitiría estilos inyectados; nginx genera un nonce distinto en cada petición |
+| Markdown con un analizador propio y solo un subconjunto (negrita, código, listas), sin `innerHTML` | Las respuestas del modelo usan bloques de código y negrita, y en texto plano se leían mal. Una librería de Markdown genera HTML que habría que sanear; el analizador propio devuelve datos y no sabe crear imágenes ni enlaces, así que no hay nada que sanear |
+| Tailwind compilado en el build, no por CDN | Sale un `.css` estático del propio origen, así que la CSP no cambia. La versión por CDN mete un script externo y estilos en línea, que la CSP bloquearía |
+| Fuentes (IBM Plex) desde npm, servidas por nuestro nginx | Sin peticiones a Google Fonts ni a otros servidores (`font-src 'self'`), y con la versión fijada en `package-lock.json` como cualquier dependencia |
+| Las posiciones de las barras y las notas, por enlace de estilo de Angular (CSSOM) | La CSP bloquea los atributos `style=""` del HTML, pero no los cambios de estilo desde JavaScript |
 | El CI falla solo con vulnerabilidades que tienen arreglo | Lo que no tiene arreglo no se resuelve actualizando: bloquear por ello dejaría el CI en rojo sin nada que hacer. Se ve en el informe y las excepciones caducan |
 
 ## Stack
 
-Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · Ollama · Groq · FastAPI · pytest · Angular · Vitest · nginx · Docker · GitHub Actions · Gitleaks · Trivy
+Python · ChromaDB · sentence-transformers · LangChain · LangGraph · MCP · Ollama · Groq · FastAPI · pytest · Angular · Tailwind CSS · Vitest · nginx · Docker · GitHub Actions · Gitleaks · Trivy
 
 ## Limitaciones
 
@@ -474,7 +478,7 @@ python evaluate.py --acuerdo eval/revision/<fichero>.json  # % de acuerdo con el
 python scripts/prueba_injection.py  # 6 ataques de prompt injection, con y sin mitigaciones (~6 min)
 python scripts/probar_mcp.py      # el servidor MCP por stdio, con cuatro preguntas (necesita el LLM)
 python -m pytest                  # 211 tests sin LLM ni modelos (~5 s)
-(cd web && npx ng test --watch=false)  # 21 tests del frontend con Vitest (~4 s)
+(cd web && npx ng test --watch=false)  # 42 tests del frontend con Vitest (~4 s)
 ```
 
 ## Ejecutarlo con Docker
@@ -500,7 +504,7 @@ Medido el 2026-11-22 en el portátil (CPU, Docker Engine 29.8.0), con la API sob
 | Medida | Valor | Cómo se ha medido |
 |---|---|---|
 | Imagen de la API | 1,83 GB | `docker images rag-notas-api:local` |
-| Imagen del frontend | 72,4 MB | `docker images rag-notas-web:local` |
+| Imagen del frontend | 72,7 MB (el 2026-11-23, con el diseño nuevo, Tailwind y las fuentes; antes, 72,4 MB) | `docker images rag-notas-web:local` |
 | Construcción de las dos imágenes, sin caché (imágenes base ya descargadas) | 3 min 11 s | `time docker compose build --no-cache` |
 | Volumen de modelos / colección | 4,3 GB / 7,2 MB | `docker compose exec api du -sh /modelos /app/chroma` |
 | Arranque en frío (volúmenes vacíos) hasta `/salud` con `"estado": "ok"` | 410,1 s | `docker compose up -d` y `/api/salud` cada segundo; incluye descargar el modelo de embeddings e indexar `data/` (610 fragmentos) |
@@ -558,7 +562,7 @@ juez.py                juez de fidelidad y corrección: salida estructurada, rei
 mcp_server.py          servidor MCP (stdio): buscar_documentacion y preguntar, con acceso solo público
 api.py                 API web (FastAPI): /buscar, /preguntar con SSE del progreso y /salud; límites y cancelación
 servicio.py            comprobaciones comunes de la API y del MCP (pregunta, k, salida, colección, LLM)
-web/                   frontend en Angular (chat, citas y traza), su Dockerfile y la configuración de nginx
+web/                   frontend en Angular y Tailwind (informes, notas al margen y traza), su Dockerfile y la configuración de nginx
 docker/                script de arranque del contenedor de la API (ingesta si no hay colección)
 Dockerfile             imagen de la API
 docker-compose.yml     API + frontend (y Ollama opcional, con el perfil ollama)
