@@ -6,6 +6,7 @@ import { ApiService } from '../api.service';
 import { ErrorApi, Modo, Respuesta, Salud } from '../api.types';
 import { Fila, analizar, maquetar } from '../markdown';
 import { Tema, cambiarTema, leerTema } from '../tema';
+import { Grabaciones, MODO_DEMO, ReproductorDemo } from '../demo';
 
 export interface Turno {
   pregunta: string;
@@ -40,6 +41,18 @@ export const SUGERENCIAS = [
   { color: 'text-http', nombre: 'MDN HTTP', pregunta: '¿Para qué sirve la cabecera Cache-Control?' },
   { color: 'text-k8s', nombre: 'Kubernetes', pregunta: '¿Qué es un ReplicaSet?' },
 ] as const;
+
+/** En la demo grabada, además de las sugerencias, una pregunta que no está en el corpus: así se ve
+ * el reintento del grafo y el «No lo tengo». Tiene que coincidir con scripts/grabar_demo.py. */
+export const SUGERENCIAS_DEMO = [
+  ...SUGERENCIAS,
+  { color: 'text-tenue', nombre: 'Fuera', pregunta: '¿Cuál es la capital de Francia?' },
+] as const;
+
+/** "2026-11-23T16:23:07+01:00" → "23-11-2026". */
+export function fechaCorta(iso: string): string {
+  return iso.slice(0, 10).split('-').reverse().join('-');
+}
 
 /** Cada cuánto se vuelve a comprobar /salud mientras la API no responde (el Retry-After de nginx). */
 export const ESPERA_ARRANQUE_MS = new InjectionToken<number>('ESPERA_ARRANQUE_MS', { factory: () => 10_000 });
@@ -148,6 +161,12 @@ export class Chat implements OnInit {
   protected readonly NODOS = NODOS;
   protected readonly SUGERENCIAS = SUGERENCIAS;
   protected readonly LONGITUD_MAX = LONGITUD_MAX;
+  /** Build "demo" (GitHub Pages): sin API, solo las preguntas grabadas. */
+  protected readonly demo = inject(MODO_DEMO);
+  private readonly reproductor = this.demo ? inject(ReproductorDemo) : null;
+  protected readonly grabacion = signal<Grabaciones | null>(null);
+  protected readonly sugerencias = this.demo ? SUGERENCIAS_DEMO : SUGERENCIAS;
+  protected readonly fechaCorta = fechaCorta;
   protected readonly cascada = cascada;
   protected readonly corpus = corpus;
   protected readonly segundos = segundos;
@@ -161,7 +180,8 @@ export class Chat implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    if (this.reproductor) this.grabacion.set(await this.reproductor.grabaciones().catch(() => null));
     return this.comprobarSalud();
   }
 

@@ -14,7 +14,8 @@
         class="min-w-0 flex-1 bg-transparent px-3 py-2 outline-none placeholder:text-tenue"
         autocomplete="off"
         [maxLength]="LONGITUD_MAX"
-        placeholder="Pregunta a la documentación…"
+        [placeholder]="demo ? 'Demo: elige una pregunta grabada' : 'Pregunta a la documentación…'"
+        [disabled]="demo"
         [value]="pregunta()"
         (input)="escribir($event)"
       />
@@ -44,7 +45,11 @@
     </form>
 
     <div class="flex items-center gap-4 max-md:w-full">
-    @if (salud(); as s) {
+    @if (demo) {
+      @if (grabacion(); as g) {
+        <p class="font-mono text-xs text-tenue">grabado · {{ g.llm.modelo ?? g.llm.proveedor }} · {{ g.fragmentos }} fragmentos</p>
+      }
+    } @else if (salud(); as s) {
       <p class="flex items-center gap-2 font-mono text-xs text-tenue">
         <span class="size-2 rounded-full" [class.bg-acento]="s.estado === 'ok'" [class.bg-aviso]="s.estado !== 'ok'"></span>
         {{ s.llm.modelo ?? s.llm.proveedor }} · {{ s.coleccion.fragmentos }} fragmentos
@@ -62,6 +67,28 @@
 
 <div class="mx-auto max-w-[1040px] px-4 pb-24">
   <!-- Avisos -->
+  @if (demo) {
+    <section class="aviso aviso--demo mt-6" aria-labelledby="titulo-demo">
+      <p class="meta text-aviso" id="titulo-demo">Demo grabada</p>
+      <p class="font-serif">
+        @if (grabacion(); as g) {
+          Las respuestas son reales, grabadas el {{ fechaCorta(g.grabado) }} con {{ g.llm.modelo ?? g.llm.proveedor }}
+          sobre los {{ g.fragmentos }} fragmentos, y se reproducen a la velocidad a la que llegaron.
+        }
+        Aquí no hay API en vivo: para hacer tus propias preguntas,
+        <a class="text-acento underline" href="https://github.com/laloba04/rag-notas#readme">levántalo en local</a>.
+      </p>
+      @if (turnos().length) {
+        <ul class="mt-3 flex flex-wrap gap-2" aria-label="Preguntas grabadas">
+          @for (s of sugerencias; track s.pregunta) {
+            <li>
+              <button type="button" class="sugerencia rounded-sm border border-linea px-2 py-1 text-left text-sm hover:text-acento disabled:opacity-40" [disabled]="ocupado()" (click)="sugerir(s.pregunta)">{{ s.pregunta }}</button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
   @if (arrancando()) {
     <div class="aviso aviso--arranque mt-6" role="status">
       <p class="meta text-aviso"><span class="animate-latido" aria-hidden="true">●</span> Arrancando</p>
@@ -73,7 +100,9 @@
   } @else if (sinConexion()) {
     <div class="aviso aviso--error mt-6" role="alert">
       <p class="meta text-error">Sin conexión</p>
-      <p class="font-serif">No se puede conectar con la API. Comprueba que está arrancada.</p>
+      <p class="font-serif">
+        @if (demo) { No se han podido cargar las respuestas grabadas. } @else { No se puede conectar con la API. Comprueba que está arrancada. }
+      </p>
     </div>
   } @else if (salud(); as s) {
     @if (!s.coleccion.ok) {
@@ -246,7 +275,7 @@
           </p>
           <p class="meta mb-3">Para empezar</p>
           <ol class="divide-y divide-linea border-y border-linea font-serif text-lg">
-            @for (s of SUGERENCIAS; track s.pregunta) {
+            @for (s of sugerencias; track s.pregunta) {
               <li>
                 <button type="button" class="sugerencia flex w-full items-baseline gap-4 py-3 text-left hover:text-acento disabled:opacity-40" [disabled]="arrancando()" (click)="sugerir(s.pregunta)">
                   <span class="w-24 flex-none font-mono text-xs uppercase" [class]="s.color">{{ s.nombre }}</span>{{ s.pregunta }}

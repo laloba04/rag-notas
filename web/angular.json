@@ -49,6 +49,28 @@
                 "fonts": true
               }
             },
+            "demo": {
+              "index": { "input": "src/index.demo.html", "output": "index.html" },
+              "baseHref": "/rag-notas/",
+              "fileReplacements": [
+                { "replace": "src/app/entorno.ts", "with": "src/app/entorno.demo.ts" }
+              ],
+              "assets": [
+                { "glob": "**/*", "input": "public" },
+                { "glob": "grabaciones.json", "input": "demo", "output": "demo" }
+              ],
+              "outputPath": "dist/demo",
+              "budgets": [
+                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
+              ],
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": true
+              }
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,

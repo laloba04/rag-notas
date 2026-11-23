@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Demo estática (GitHub Pages): no hay nginx que ponga cabeceras ni un nonce por petición, así
+         que la CSP va aquí. Sin nonce, sin 'unsafe-inline': solo ficheros del propio origen.
+         (frame-ancestors no se puede poner en un <meta>: el navegador lo ignora.) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="referrer" content="no-referrer" />
+    <title>rag-notas · demo grabada</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Demo grabada de rag-notas: preguntas sobre documentación técnica en español con un RAG" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

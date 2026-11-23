@@ -1,0 +1,423 @@
+{
+ "grabado": "2026-11-23T16:23:07+01:00",
+ "llm": {
+  "proveedor": "ollama",
+  "modelo": "qwen2.5:14b"
+ },
+ "fragmentos": 610,
+ "grabaciones": [
+  {
+   "pregunta": "¿Para qué sirve git stash?",
+   "modo": "grafo",
+   "nodos": [
+    {
+     "nodo": "decidir",
+     "ms": 3703
+    },
+    {
+     "nodo": "recuperar",
+     "ms": 12376
+    },
+    {
+     "nodo": "evaluar",
+     "ms": 12378
+    },
+    {
+     "nodo": "generar",
+     "ms": 14577
+    }
+   ],
+   "ms_total": 14582,
+   "respuesta": {
+    "respuesta": "El comando `git stash` sirve para guardar el desorden actual del directorio de trabajo y el índice (área de preparación) cuando no se desea hacer un commit inmediato de los cambios en curso. Esto permite cambiar a otras ramas o continuar con otros trabajos sin comprometer la limpieza del estado actual del proyecto, permitiendo volver a esos cambios más tarde [1].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "grafo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "14-git-stash-y-clean.md",
+      "seccion": "Guardado rápido y Limpieza",
+      "url": "https://github.com/progit/progit2-es/blob/057c05738acd27b87232983c01dc53dc1388ce64/book/07-git-tools/sections/stashing-cleaning.asc",
+      "puntuacion": 0.977,
+      "texto": "Guardado rápido y Limpieza\nMuchas veces, cuando has estado trabajando en una parte de tu proyecto, las cosas se encuentran desordenadas y quieres cambiar de ramas por un momento para trabajar en algo más.\nEl problema es que no quieres hacer un ``commit'' de un trabajo que va por la mitad, así puedes volver a ese punto más tarde.\nLa respuesta a ese problema es el comando `git stash`.  \nEl guardado rápido toma el desorden de tu directorio de trabajo – que es, tus archivos controlados por la versión modificados y cambios almacenados – y lo guarda en un saco de cambios sin terminar que puedes volver a usar en cualquier momento."
+     }
+    ],
+    "traza": {
+     "ruta": [
+      "decidir",
+      "recuperar",
+      "evaluar",
+      "generar"
+     ],
+     "reintentos": 0,
+     "pregunta_reescrita": null,
+     "latencias": [
+      {
+       "nodo": "decidir",
+       "s": 3.07
+      },
+      {
+       "nodo": "recuperar",
+       "s": 8.673
+      },
+      {
+       "nodo": "evaluar",
+       "s": 0.0
+      },
+      {
+       "nodo": "generar",
+       "s": 2.198
+      }
+     ],
+     "error": null
+    },
+    "segundos": 14.54
+   }
+  },
+  {
+   "pregunta": "¿Para qué sirve git stash?",
+   "modo": "directo",
+   "nodos": [],
+   "ms_total": 10361,
+   "respuesta": {
+    "respuesta": "El comando `git stash` sirve para guardar el desorden actual de tu directorio de trabajo y el índice (área de preparación) cuando no quieres hacer un commit de los cambios que aún están en proceso. Esto te permite cambiar a otra rama o trabajar en algo diferente sin perder tus cambios parciales, que puedes volver a aplicar más tarde [1].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "directo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "14-git-stash-y-clean.md",
+      "seccion": "Guardado rápido y Limpieza",
+      "url": "https://github.com/progit/progit2-es/blob/057c05738acd27b87232983c01dc53dc1388ce64/book/07-git-tools/sections/stashing-cleaning.asc",
+      "puntuacion": 0.977,
+      "texto": "Guardado rápido y Limpieza\nMuchas veces, cuando has estado trabajando en una parte de tu proyecto, las cosas se encuentran desordenadas y quieres cambiar de ramas por un momento para trabajar en algo más.\nEl problema es que no quieres hacer un ``commit'' de un trabajo que va por la mitad, así puedes volver a ese punto más tarde.\nLa respuesta a ese problema es el comando `git stash`.  \nEl guardado rápido toma el desorden de tu directorio de trabajo – que es, tus archivos controlados por la versión modificados y cambios almacenados – y lo guarda en un saco de cambios sin terminar que puedes volver a usar en cualquier momento."
+     }
+    ],
+    "traza": null,
+    "segundos": 10.33
+   }
+  },
+  {
+   "pregunta": "¿Para qué sirve la cabecera Cache-Control?",
+   "modo": "grafo",
+   "nodos": [
+    {
+     "nodo": "decidir",
+     "ms": 566
+    },
+    {
+     "nodo": "recuperar",
+     "ms": 7737
+    },
+    {
+     "nodo": "evaluar",
+     "ms": 7738
+    },
+    {
+     "nodo": "generar",
+     "ms": 10604
+    }
+   ],
+   "ms_total": 10605,
+   "respuesta": {
+    "respuesta": "La cabecera `Cache-Control` se utiliza para controlar el comportamiento del almacenamiento en caché, permitiendo a los servidores y clientes especificar cómo deben manejar y almacenar las respuestas. En particular, si no se proporciona esta cabecera, por defecto se aplica un **almacenamiento en caché heurístico** que almacena y reutiliza las respuestas según ciertas condiciones [1][2]. Para evitar este comportamiento predeterminado, es recomendable especificar explícitamente una directiva `Cache-Control` como \"no-cache\" para indicar claramente cómo debe ser manejada la caché de una respuesta [2].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "grafo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Caché heurística",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.801,
+      "texto": "HTTP caching > Caché heurística\nHTTP está diseñado para almacenar en caché tanto como sea posible, por lo que incluso si no se proporciona una cabecera `Cache-Control`, las respuestas se almacenarán y reutilizarán si se cumplen ciertas condiciones. A esto se le conoce como **Caché heurística**  \nPor ejemplo, en el ejemplo siguiente la respuesta fué actualizada hace un año.  \n```http\nHTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1024\nDate: Tue, 22 Feb 2022 22:22:22 GMT\nLast-Modified: Tue, 22 Feb 2021 22:22:22 GMT"
+     },
+     {
+      "numero": 2,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Patrones comunes de almacenamiento caché > Configuración por defecto",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.734,
+      "texto": "HTTP caching > Patrones comunes de almacenamiento caché > Configuración por defecto\nComo se mencionó anteriormente, el comportamiento predeterminado para el almacenamiento en caché (es decir, para una respuesta sin `Cache-Control`) no es simplemente \"no almacenar en caché\", sino el almacenamiento en caché implícito de acuerdo con el llamado \"almacenamiento en caché heurístico\".  \nTo avoid that heuristic caching, it's preferable to explicitly give all responses a default `Cache-Control` header.  \nPara evitar ese almacenamiento en caché heurístico, es preferible dar explícitamente a todas las respuestas un header `Cache-Control` predeterminado.  \n```http\nCache-Control: no-cache\n```"
+     }
+    ],
+    "traza": {
+     "ruta": [
+      "decidir",
+      "recuperar",
+      "evaluar",
+      "generar"
+     ],
+     "reintentos": 0,
+     "pregunta_reescrita": null,
+     "latencias": [
+      {
+       "nodo": "decidir",
+       "s": 0.536
+      },
+      {
+       "nodo": "recuperar",
+       "s": 7.171
+      },
+      {
+       "nodo": "evaluar",
+       "s": 0.0
+      },
+      {
+       "nodo": "generar",
+       "s": 2.865
+      }
+     ],
+     "error": null
+    },
+    "segundos": 10.58
+   }
+  },
+  {
+   "pregunta": "¿Para qué sirve la cabecera Cache-Control?",
+   "modo": "directo",
+   "nodos": [],
+   "ms_total": 10824,
+   "respuesta": {
+    "respuesta": "La cabecera `Cache-Control` se utiliza para controlar el almacenamiento en caché de recursos HTTP. Puede especificar directivas que indican si un recurso debe ser almacenado en caché, cuánto tiempo puede permanecer en caché y cómo debe ser utilizado por los clientes y servidores intermedios [1][2].\n\nEn la documentación se menciona que sin una cabecera `Cache-Control`, las respuestas pueden ser almacenadas en caché de manera heurística si se cumplen ciertas condiciones, lo cual puede no ser deseable para algunos casos específicos. Por tanto, es recomendable proporcionar explícitamente un header `Cache-Control` para controlar el comportamiento del almacenamiento en caché [2].\n\nAdemás, hay directivas específicas como `no-store`, que indican que ningún recurso debe ser almacenado en caché, y otras combinaciones de directivas que pueden usarse para evitar implementaciones obsoletas de la caché proxy [3][5].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "directo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Caché heurística",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.801,
+      "texto": "HTTP caching > Caché heurística\nHTTP está diseñado para almacenar en caché tanto como sea posible, por lo que incluso si no se proporciona una cabecera `Cache-Control`, las respuestas se almacenarán y reutilizarán si se cumplen ciertas condiciones. A esto se le conoce como **Caché heurística**  \nPor ejemplo, en el ejemplo siguiente la respuesta fué actualizada hace un año.  \n```http\nHTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1024\nDate: Tue, 22 Feb 2022 22:22:22 GMT\nLast-Modified: Tue, 22 Feb 2021 22:22:22 GMT"
+     },
+     {
+      "numero": 2,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Patrones comunes de almacenamiento caché > Configuración por defecto",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.734,
+      "texto": "HTTP caching > Patrones comunes de almacenamiento caché > Configuración por defecto\nComo se mencionó anteriormente, el comportamiento predeterminado para el almacenamiento en caché (es decir, para una respuesta sin `Cache-Control`) no es simplemente \"no almacenar en caché\", sino el almacenamiento en caché implícito de acuerdo con el llamado \"almacenamiento en caché heurístico\".  \nTo avoid that heuristic caching, it's preferable to explicitly give all responses a default `Cache-Control` header.  \nPara evitar ese almacenamiento en caché heurístico, es preferible dar explícitamente a todas las respuestas un header `Cache-Control` predeterminado.  \n```http\nCache-Control: no-cache\n```"
+     },
+     {
+      "numero": 3,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Tipos de caché > Caché compartida",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.479,
+      "texto": "HTTP caching > Tipos de caché > Caché compartida\n```http\nCache-Control: no-store\n```  \nPor ejemplo, Varnish usa la lógica basada en VCL para manegar el almacenamiento caché, mientras los service workes, en combinación con la API, permiten crear esa lógica en Javascript.  \nEso significa que si una caché administrada ignora intencionalmente una directiva `no-store`, entonces no hay necesidad de percibirla como \"no compatible\" con el estándar. Lo que se debería hacer entonces es evitar cabeceras kitchen-sink\", pero leer atentamente la documentación del mecanismo de caché administrada que se esté usando, y asegurarse que se está controlando la caché correctamente de la manera proporcionada por el mecanismo que se ha elegido utilizar."
+     },
+     {
+      "numero": 5,
+      "documento": "19-http-cache.md",
+      "seccion": "HTTP caching > Tipos de caché > Caché compartida",
+      "url": "https://github.com/mdn/translated-content/blob/d986dd31d314c87ff0a3330cc3c404b99b915174/files/es/web/http/guides/caching/index.md",
+      "puntuacion": 0.408,
+      "texto": "HTTP caching > Tipos de caché > Caché compartida\n**Kitchen-sink headers** como los siguientes se utilizan para tratar de evitar las implementaciones de \"caché de proxy antiguo y no actualizado\" que no comprenden las directivas de especificación de almacenamiento en caché HTTP actuales como `no-store`.  \n```http\nCache-Control: no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate\n```  \nDe todos modos, en los últimos años, a medida que HTTPS se ha vuelto más común y la comunicación cliente/servidor se ha encriptado, las cachés de proxy en la ruta solamente pueden canalizar una respuesta y no pueden comportarse como una caché, en muchos casos. Así que en este escenario, no hay necesidad de preocuparse por las implementaciones obsoletas de la caché proxy que ni siquiera pueden ver la respuesta."
+     }
+    ],
+    "traza": null,
+    "segundos": 10.8
+   }
+  },
+  {
+   "pregunta": "¿Qué es un ReplicaSet?",
+   "modo": "grafo",
+   "nodos": [
+    {
+     "nodo": "decidir",
+     "ms": 532
+    },
+    {
+     "nodo": "recuperar",
+     "ms": 9242
+    },
+    {
+     "nodo": "evaluar",
+     "ms": 9243
+    },
+    {
+     "nodo": "generar",
+     "ms": 11236
+    }
+   ],
+   "ms_total": 11237,
+   "respuesta": {
+    "respuesta": "Un ReplicaSet en Kubernetes garantiza que un número específico de réplicas (copia idéntica) de un Pod estén siempre en ejecución. En el contexto de los Deployments, cada vez que se actualiza un Deployment, se crea un nuevo ReplicaSet para gestionar la transición entre las versiones antiguas y nuevas de los Pods [1].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "grafo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "04-k8s-deployments.md",
+      "seccion": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)",
+      "url": "https://github.com/kubernetes/website/blob/256a1f49419171f6c7fbdb1857146da1c63eb533/content/es/docs/concepts/workloads/controllers/deployment.md",
+      "puntuacion": 0.986,
+      "texto": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)\nCada vez que el controlador del Deployment observa un nuevo objeto de despliegue, se crea un ReplicaSet para arrancar\nlos Pods deseados si es que no existe otro ReplicaSet haciéndolo. Los ReplicaSet existentes que controlan los Pods cuyas etiquetas\ncoinciden con el valor del campo `.spec.selector`, pero cuya plantilla no coincide con el valor del campo `.spec.template` se reducen. Al final,\nel nuevo ReplicaSet se escala hasta el valor del campo `.spec.replicas` y todos los viejos ReplicaSets se escalan a 0.  \nSi actualizas un Deployment mientras otro despliegue está en curso, el Deployment creará un nuevo ReplicaSet\ncomo consecuencia de la actualización y comenzará a escalarlo, y sobrescribirá al ReplicaSet que estaba escalando anteriormente"
+     }
+    ],
+    "traza": {
+     "ruta": [
+      "decidir",
+      "recuperar",
+      "evaluar",
+      "generar"
+     ],
+     "reintentos": 0,
+     "pregunta_reescrita": null,
+     "latencias": [
+      {
+       "nodo": "decidir",
+       "s": 0.503
+      },
+      {
+       "nodo": "recuperar",
+       "s": 8.71
+      },
+      {
+       "nodo": "evaluar",
+       "s": 0.0
+      },
+      {
+       "nodo": "generar",
+       "s": 1.992
+      }
+     ],
+     "error": null
+    },
+    "segundos": 11.21
+   }
+  },
+  {
+   "pregunta": "¿Qué es un ReplicaSet?",
+   "modo": "directo",
+   "nodos": [],
+   "ms_total": 9862,
+   "respuesta": {
+    "respuesta": "Un ReplicaSet en Kubernetes garantiza que un número específico de réplicas (copia idéntica) de un Pod estén siempre en ejecución. En el contexto de los Deployments, cada vez que se actualiza un Deployment, se crea un nuevo ReplicaSet para gestionar la transición entre las versiones antiguas y nuevas de los Pods [1].",
+    "no_lo_tengo": false,
+    "salida_bloqueada": false,
+    "modo": "directo",
+    "citas": [
+     {
+      "numero": 1,
+      "documento": "04-k8s-deployments.md",
+      "seccion": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)",
+      "url": "https://github.com/kubernetes/website/blob/256a1f49419171f6c7fbdb1857146da1c63eb533/content/es/docs/concepts/workloads/controllers/deployment.md",
+      "puntuacion": 0.986,
+      "texto": "Deployment > Actualizar un Deployment > Sobrescritura (o sea, múltiples actualizaciones a la vez)\nCada vez que el controlador del Deployment observa un nuevo objeto de despliegue, se crea un ReplicaSet para arrancar\nlos Pods deseados si es que no existe otro ReplicaSet haciéndolo. Los ReplicaSet existentes que controlan los Pods cuyas etiquetas\ncoinciden con el valor del campo `.spec.selector`, pero cuya plantilla no coincide con el valor del campo `.spec.template` se reducen. Al final,\nel nuevo ReplicaSet se escala hasta el valor del campo `.spec.replicas` y todos los viejos ReplicaSets se escalan a 0.  \nSi actualizas un Deployment mientras otro despliegue está en curso, el Deployment creará un nuevo ReplicaSet\ncomo consecuencia de la actualización y comenzará a escalarlo, y sobrescribirá al ReplicaSet que estaba escalando anteriormente"
+     }
+    ],
+    "traza": null,
+    "segundos": 9.83
+   }
+  },
+  {
+   "pregunta": "¿Cuál es la capital de Francia?",
+   "modo": "grafo",
+   "nodos": [
+    {
+     "nodo": "decidir",
+     "ms": 566
+    },
+    {
+     "nodo": "recuperar",
+     "ms": 9518
+    },
+    {
+     "nodo": "evaluar",
+     "ms": 9518
+    },
+    {
+     "nodo": "reescribir",
+     "ms": 10255
+    },
+    {
+     "nodo": "recuperar",
+     "ms": 20022
+    },
+    {
+     "nodo": "evaluar",
+     "ms": 20023
+    },
+    {
+     "nodo": "sin_respuesta",
+     "ms": 20023
+    }
+   ],
+   "ms_total": 20024,
+   "respuesta": {
+    "respuesta": "No lo tengo en la documentación.",
+    "no_lo_tengo": true,
+    "salida_bloqueada": false,
+    "modo": "grafo",
+    "citas": [],
+    "traza": {
+     "ruta": [
+      "decidir",
+      "recuperar",
+      "evaluar",
+      "reescribir",
+      "recuperar",
+      "evaluar",
+      "sin_respuesta"
+     ],
+     "reintentos": 1,
+     "pregunta_reescrita": "¿Cuál es el nodo maestro en una arquitectura Kubernetes?",
+     "latencias": [
+      {
+       "nodo": "decidir",
+       "s": 0.543
+      },
+      {
+       "nodo": "recuperar",
+       "s": 8.95
+      },
+      {
+       "nodo": "evaluar",
+       "s": 0.0
+      },
+      {
+       "nodo": "reescribir",
+       "s": 0.736
+      },
+      {
+       "nodo": "recuperar",
+       "s": 9.766
+      },
+      {
+       "nodo": "evaluar",
+       "s": 0.0
+      },
+      {
+       "nodo": "sin_respuesta",
+       "s": 0.0
+      }
+     ],
+     "error": null
+    },
+    "segundos": 20.0
+   }
+  },
+  {
+   "pregunta": "¿Cuál es la capital de Francia?",
+   "modo": "directo",
+   "nodos": [],
+   "ms_total": 10065,
+   "respuesta": {
+    "respuesta": "No lo tengo en la documentación.",
+    "no_lo_tengo": true,
+    "salida_bloqueada": false,
+    "modo": "directo",
+    "citas": [],
+    "traza": null,
+    "segundos": 10.04
+   }
+  }
+ ]
+}

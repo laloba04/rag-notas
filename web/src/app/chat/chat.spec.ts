@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiService } from '../api.service';
 import { ErrorApi, Fragmento, Respuesta, Salud } from '../api.types';
-import { Chat, ESPERA_ARRANQUE_MS, Turno, cascada, corpus } from './chat';
+import { Chat, ESPERA_ARRANQUE_MS, SUGERENCIAS_DEMO, Turno, cascada, corpus } from './chat';
+import { MODO_DEMO, ReproductorDemo } from '../demo';
 
 const CITA: Fragmento = {
   numero: 1,
@@ -297,5 +298,60 @@ describe('corpus', () => {
     expect(corpus('12-git-ramas-y-fusiones.md').nombre).toBe('Pro Git');
     expect(corpus('19-http-cache.md').nombre).toBe('MDN HTTP');
     expect(corpus('otro.pdf').clase).toBe('otro');
+  });
+});
+
+describe('Chat en el build "demo"', () => {
+  const GRABADO = {
+    grabado: '2026-11-23T16:23:07+01:00',
+    llm: { proveedor: 'ollama', modelo: 'qwen2.5:14b' },
+    fragmentos: 610,
+    grabaciones: [],
+  };
+
+  async function montarDemo(api = new ApiFalsa()) {
+    TestBed.configureTestingModule({ imports: [Chat], providers: [
+      { provide: ApiService, useValue: api },
+      { provide: ReproductorDemo, useValue: { grabaciones: async () => GRABADO } },
+      { provide: MODO_DEMO, useValue: true },
+    ] });
+    const fixture = TestBed.createComponent(Chat);
+    await fixture.whenStable();
+    // ngOnInit carga la grabación (asíncrono) antes de comprobar la salud: se espera a que termine.
+    await new Promise((r) => setTimeout(r));
+    await fixture.whenStable();
+    return { fixture, raiz: fixture.nativeElement as HTMLElement, api };
+  }
+
+  it('avisa de que es una demo grabada, con fecha y modelo, y desactiva el campo libre', async () => {
+    const { raiz } = await montarDemo();
+    const aviso = raiz.querySelector('.aviso--demo')!.textContent!.replace(/\s+/g, ' ');
+    expect(aviso).toContain('grabadas el 23-11-2026 con qwen2.5:14b');
+    expect(aviso).toContain('Aquí no hay API en vivo');
+    expect(raiz.querySelector<HTMLInputElement>('#pregunta')!.disabled).toBe(true);
+    // Sin el punto verde de "conectado": no hay servidor en vivo.
+    expect(raiz.querySelector('header')!.textContent).toContain('grabado · qwen2.5:14b · 610 fragmentos');
+    expect(raiz.querySelector('header .rounded-full')).toBeNull();
+  });
+
+  it('propone las preguntas grabadas y, tras una consulta, se pueden pedir otras desde el aviso', async () => {
+    const { fixture, raiz, api } = await montarDemo();
+    const portada = [...raiz.querySelectorAll<HTMLButtonElement>('.inicio .sugerencia')];
+    expect(portada.map((b) => b.textContent)).toEqual(SUGERENCIAS_DEMO.map((s) => expect.stringContaining(s.pregunta)));
+    expect(raiz.querySelector('.aviso--demo .sugerencia')).toBeNull(); // en la portada ya están abajo
+    portada[3].click();
+    await fixture.whenStable();
+    expect(api.preguntas).toEqual(['¿Cuál es la capital de Francia?']);
+    const enAviso = raiz.querySelectorAll<HTMLButtonElement>('.aviso--demo .sugerencia');
+    expect(enAviso.length).toBe(SUGERENCIAS_DEMO.length);
+    enAviso[0].click();
+    await fixture.whenStable();
+    expect(api.preguntas.at(-1)).toBe('¿Para qué sirve git stash?');
+  });
+
+  it('fuera del build "demo" no hay aviso de demo y el campo funciona', async () => {
+    const { raiz } = await montar();
+    expect(raiz.querySelector('.aviso--demo')).toBeNull();
+    expect(raiz.querySelector<HTMLInputElement>('#pregunta')!.disabled).toBe(false);
   });
 });
