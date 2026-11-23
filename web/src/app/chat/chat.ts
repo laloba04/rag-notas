@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal,
+  ChangeDetectionStrategy, Component, DestroyRef, InjectionToken, OnInit, computed, inject, signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ApiService } from '../api.service';
@@ -40,6 +40,9 @@ export const SUGERENCIAS = [
   { color: 'text-http', nombre: 'MDN HTTP', pregunta: '¿Para qué sirve la cabecera Cache-Control?' },
   { color: 'text-k8s', nombre: 'Kubernetes', pregunta: '¿Qué es un ReplicaSet?' },
 ] as const;
+
+/** Cada cuánto se vuelve a comprobar /salud mientras la API no responde (el Retry-After de nginx). */
+export const ESPERA_ARRANQUE_MS = new InjectionToken<number>('ESPERA_ARRANQUE_MS', { factory: () => 10_000 });
 
 const LONGITUD_MAX = 500; // la misma que config.LONGITUD_MAX_PREGUNTA en la API
 
@@ -138,6 +141,9 @@ export class Chat implements OnInit {
   protected readonly ocupado = signal(false);
   protected readonly salud = signal<Salud | null>(null);
   protected readonly sinConexion = signal(false);
+  protected readonly arrancando = signal(false);
+  private readonly esperaArranque = inject(ESPERA_ARRANQUE_MS);
+  private reintentoSalud?: ReturnType<typeof setTimeout>;
   protected readonly ahora = signal(Date.now());
   protected readonly NODOS = NODOS;
   protected readonly SUGERENCIAS = SUGERENCIAS;
@@ -149,15 +155,35 @@ export class Chat implements OnInit {
   private reloj?: ReturnType<typeof setInterval>;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.pararReloj());
+    inject(DestroyRef).onDestroy(() => {
+      this.pararReloj();
+      clearTimeout(this.reintentoSalud);
+    });
   }
 
-  async ngOnInit() {
+  ngOnInit() {
+    return this.comprobarSalud();
+  }
+
+  /** Lee /salud. Si la API está arrancando (503 de nginx), lo avisa y vuelve a probar sola. */
+  private async comprobarSalud() {
     try {
       this.salud.set(await this.api.salud());
-    } catch {
-      this.sinConexion.set(true);
+      this.arrancando.set(false);
+      this.sinConexion.set(false);
+    } catch (e) {
+      if (e instanceof ErrorApi && e.tipo === 'arrancando') {
+        this.arrancando.set(true);
+        this.reintentoSalud = setTimeout(() => this.comprobarSalud(), this.esperaArranque);
+      } else {
+        this.arrancando.set(false);
+        this.sinConexion.set(true);
+      }
     }
+  }
+
+  protected esperaSegundos(): number {
+    return Math.round(this.esperaArranque / 1000);
   }
 
   protected urlSegura(url: string): string | null {

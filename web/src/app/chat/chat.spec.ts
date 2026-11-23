@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiService } from '../api.service';
 import { ErrorApi, Fragmento, Respuesta, Salud } from '../api.types';
-import { Chat, Turno, cascada, corpus } from './chat';
+import { Chat, ESPERA_ARRANQUE_MS, Turno, cascada, corpus } from './chat';
 
 const CITA: Fragmento = {
   numero: 1,
@@ -49,7 +49,10 @@ class ApiFalsa {
 }
 
 async function montar(api = new ApiFalsa()) {
-  TestBed.configureTestingModule({ imports: [Chat], providers: [{ provide: ApiService, useValue: api }] });
+  TestBed.configureTestingModule({ imports: [Chat], providers: [
+    { provide: ApiService, useValue: api },
+    { provide: ESPERA_ARRANQUE_MS, useValue: 20 },
+  ] });
   const fixture = TestBed.createComponent(Chat);
   await fixture.whenStable();
   const raiz = fixture.nativeElement as HTMLElement;
@@ -218,6 +221,25 @@ describe('Chat', () => {
     await fixture.whenStable();
     expect(api.preguntas).toEqual(['¿Para qué sirve git stash?']);
     expect(raiz.querySelector('.inicio')).toBeNull();
+  });
+
+  it('si la API está arrancando, lo avisa, vuelve a comprobar sola y quita el aviso al responder', async () => {
+    const api = new ApiFalsa();
+    let intentos = 0;
+    api.salud = async () => {
+      if (++intentos < 3) throw new ErrorApi('La API todavía no responde.', 'arrancando', 503);
+      return SALUD;
+    };
+    const { raiz, fixture } = await montar(api);
+    expect(raiz.querySelector('.aviso--arranque')!.textContent).toContain('La API todavía no responde');
+    expect(raiz.querySelector('[role=alert]')).toBeNull(); // no es "sin conexión"
+    expect(raiz.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled).toBe(true);
+    expect(raiz.querySelector<HTMLButtonElement>('.sugerencia')!.disabled).toBe(true);
+    await new Promise((r) => setTimeout(r, 120));
+    await fixture.whenStable();
+    expect(intentos).toBe(3);
+    expect(raiz.querySelector('.aviso--arranque')).toBeNull();
+    expect(raiz.querySelector('header')!.textContent).toContain('610 fragmentos');
   });
 
   it('sin conexión con la API lo avisa al cargar', async () => {

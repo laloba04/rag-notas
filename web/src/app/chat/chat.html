@@ -37,7 +37,7 @@
         <button
           type="submit"
           class="bg-tinta px-4 font-mono text-xs tracking-wider text-papel uppercase hover:bg-acento disabled:opacity-40"
-          [disabled]="!pregunta().trim()"
+          [disabled]="!pregunta().trim() || arrancando()"
           aria-label="Consultar"
         ><span class="max-sm:hidden">Consultar </span>⏎</button>
       }
@@ -62,7 +62,15 @@
 
 <div class="mx-auto max-w-[1040px] px-4 pb-24">
   <!-- Avisos -->
-  @if (sinConexion()) {
+  @if (arrancando()) {
+    <div class="aviso aviso--arranque mt-6" role="status">
+      <p class="meta text-aviso"><span class="animate-latido" aria-hidden="true">●</span> Arrancando</p>
+      <p class="font-serif">
+        La API todavía no responde. Si el servidor acaba de arrancar, está preparando los documentos y los
+        modelos (la primera vez, varios minutos). La página lo vuelve a comprobar sola cada {{ esperaSegundos() }} s.
+      </p>
+    </div>
+  } @else if (sinConexion()) {
     <div class="aviso aviso--error mt-6" role="alert">
       <p class="meta text-error">Sin conexión</p>
       <p class="font-serif">No se puede conectar con la API. Comprueba que está arrancada.</p>
@@ -240,7 +248,7 @@
           <ol class="divide-y divide-linea border-y border-linea font-serif text-lg">
             @for (s of SUGERENCIAS; track s.pregunta) {
               <li>
-                <button type="button" class="sugerencia flex w-full items-baseline gap-4 py-3 text-left hover:text-acento" (click)="sugerir(s.pregunta)">
+                <button type="button" class="sugerencia flex w-full items-baseline gap-4 py-3 text-left hover:text-acento disabled:opacity-40" [disabled]="arrancando()" (click)="sugerir(s.pregunta)">
                   <span class="w-24 flex-none font-mono text-xs uppercase" [class]="s.color">{{ s.nombre }}</span>{{ s.pregunta }}
                 </button>
               </li>

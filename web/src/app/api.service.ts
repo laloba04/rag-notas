@@ -17,9 +17,15 @@ export class ApiService {
 
   async salud(): Promise<Salud> {
     const r = await this.fetch(`${this.base}/salud`);
-    // 503 (sin colección) también trae el cuerpo de /salud.
-    if (!r.ok && r.status !== 503) throw await errorDe(r);
-    return r.json();
+    if (r.ok) return r.json();
+    // Un 503 de la API (sin colección) trae el cuerpo de /salud; el 503 de nginx cuando la API no
+    // responde (tipo "arrancando", ver nginx.conf) trae un error, que se lanza como ErrorApi.
+    if (r.status === 503) {
+      const cuerpo = await r.json().catch(() => null);
+      if (cuerpo && 'coleccion' in cuerpo) return cuerpo as Salud;
+      if (typeof cuerpo?.error === 'string') throw new ErrorApi(cuerpo.error, cuerpo.tipo, r.status);
+    }
+    throw await errorDe(r);
   }
 
   /**

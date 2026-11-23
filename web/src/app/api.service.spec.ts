@@ -101,4 +101,20 @@ describe('ApiService.salud', () => {
     const api = servicioCon(async () => new Response(JSON.stringify(cuerpo), { status: 503 }));
     expect(await api.salud()).toEqual(cuerpo);
   });
+
+  it('con el 503 de nginx (la API no responde) lanza ErrorApi de tipo "arrancando"', async () => {
+    const cuerpo = { error: 'La API todavía no responde.', tipo: 'arrancando' };
+    const api = servicioCon(async () => new Response(JSON.stringify(cuerpo), { status: 503 }));
+    const error = await api.salud().catch((e) => e);
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect(error.tipo).toBe('arrancando');
+    expect(error.message).toBe('La API todavía no responde.');
+  });
+
+  it('un 502 en HTML de un proxy es un error genérico', async () => {
+    const api = servicioCon(async () => new Response('<html>502 Bad Gateway</html>', { status: 502 }));
+    const error = await api.salud().catch((e) => e);
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect(error.tipo).toBe('interno');
+  });
 });
