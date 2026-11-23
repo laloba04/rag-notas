@@ -11,6 +11,8 @@
 53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:324
 53d15f4a07d22f18f39d47923c909af44e645d43:data/06-k8s-secrets.md:generic-api-key:819
 
-# Revisado el 2026-11-23. Nombres de fichero en un test de grabar_demo.py
-# ("06-k8s-secrets.md", "99-no-existe.md"): la palabra "secrets" seguida de otra cadena.
+# Revisado el 2026-11-23. Nombres de fichero en un test de grabar_demo.py (el del documento
+# restringido y uno inexistente): la palabra "secrets" seguida de otra cadena.
 8a919b3f8cbdf3b64cce63e7f1b67dc7c5da39dc:tests/test_grabar_demo.py:generic-api-key:26
+# La misma pareja de nombres, citada en el comentario de arriba en su primera versión.
+45e3709d4c4454c52f5c3bc3b7997ef3a02e2f93:.gitleaksignore:generic-api-key:15
