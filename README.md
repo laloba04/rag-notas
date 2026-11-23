@@ -27,38 +27,38 @@ Dos formas de responder, que comparten la búsqueda (`retrieve.buscar`) y el pro
 - **CI** (`.github/workflows/ci.yml`, GitHub Actions): tests, Gitleaks y Trivy ([ver más abajo](#integración-continua)).
 - **Demo grabada** (`scripts/grabar_demo.py`, `.github/workflows/pages.yml`): la web en GitHub Pages, reproduciendo respuestas grabadas de la API real ([ver más abajo](#demo-grabada)).
 
-Cómo encajan las piezas (la línea de puntos roja marca lo que sale de nuestra red):
+Cómo encajan las piezas (las flechas rojas discontinuas son lo que sale de nuestra red, y solo llevan fragmentos públicos):
 
 ```mermaid
 flowchart LR
     nav["Navegador"]
-    asis["Asistente MCP<br/>(su modelo es externo)"]
-    groq["Groq<br/>LLM externo, opcional"]
-    pages["GitHub Pages<br/>demo grabada, sin API"]
+    asis["Asistente MCP<br/>(modelo externo)"]
+    groq["Groq<br/>(externo, opcional)"]
+    pages["GitHub Pages<br/>demo grabada"]
 
-    subgraph red["Nuestra red: aquí está también lo restringido"]
-        nginx["nginx<br/>frontend Angular + CSP"]
-        api["api.py · FastAPI<br/>acceso fijo: público"]
-        mcp["mcp_server.py · stdio<br/>acceso fijo: público"]
-        cli["Línea de comandos<br/>puede pedir lo restringido"]
-        serv["servicio.py<br/>comprobaciones comunes"]
-        resp["grafo.py (LangGraph)<br/>o generate.py (directo)"]
-        ret["retrieve.buscar<br/>ChromaDB + reranker<br/>filtro por permisos"]
-        ollama["Ollama<br/>LLM local, por defecto"]
+    subgraph red["Nuestra red (aquí está lo restringido)"]
+        nginx["nginx<br/>Angular + CSP"]
+        api["api.py<br/>acceso: público"]
+        mcp["mcp_server.py<br/>acceso: público"]
+        cli["CLI<br/>acceso a elegir"]
+        serv["servicio.py<br/>comprobaciones"]
+        resp["grafo.py o<br/>generate.py"]
+        ret["retrieve.buscar<br/>Chroma + reranker"]
+        ollama["Ollama<br/>(local)"]
     end
 
     nav --> nginx -- "/api/" --> api
     asis -- stdio --> mcp
     api & mcp -.- serv
     api & mcp --> resp
-    api & mcp -- "solo buscar" --> ret
+    api & mcp --> ret
     cli --> resp
     resp --> ret
     resp --> ollama
-    resp -- "solo fragmentos públicos<br/>(config.comprobar_envio)" --> groq
-    api -- "solo fragmentos públicos<br/>(servicio.comprobar_salida)" --> nav
-    mcp -- "solo fragmentos públicos<br/>(servicio.comprobar_salida)" --> asis
-    api -. "scripts/grabar_demo.py<br/>(una vez, por la API)" .-> pages
+    resp -- "solo público" --> groq
+    api -- "solo público" --> nav
+    mcp -- "solo público" --> asis
+    api -. "grabar_demo.py" .-> pages
 
     linkStyle 12,13,14 stroke:#b3261e,stroke-width:2px,stroke-dasharray:5
 ```
