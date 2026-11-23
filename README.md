@@ -4,6 +4,10 @@
 
 Asistente de preguntas y respuestas sobre documentación técnica en español, construido con RAG (Retrieval-Augmented Generation): busca en los documentos los fragmentos relevantes para cada pregunta y responde a partir de ellos.
 
+![La demo publicada: "¿Para qué sirve git stash?" en modo grafo, de la portada a la respuesta con su nota al margen y la traza](docs/demo.gif)
+
+*La demo publicada, a velocidad real (la respuesta tarda 14,5 s; el GIF dura 21,7 s), capturada el 23-11-2026 con Chrome.*
+
 **Demo grabada:** [laloba04.github.io/rag-notas](https://laloba04.github.io/rag-notas/). Son respuestas reales, grabadas el 23-11-2026, que se reproducen sin API: no se pueden hacer preguntas nuevas ([por qué](#demo-grabada)).
 
 > Proyecto de aprendizaje personal, en desarrollo. Cada etapa se implementa primero sin frameworks para entender qué hace, y se mide antes de pasar a la siguiente.
@@ -594,6 +598,7 @@ docker-compose.yml     API + frontend (y Ollama opcional, con el perfil ollama)
 .gitleaksignore        falsos positivos de Gitleaks, por huella exacta
 tests/                 tests del grafo (LLM simulado), de la fusión RRF, del filtro por permisos, de las mitigaciones, de la fábrica del LLM, del servidor MCP y de la API
 docs/grafo.md          diagrama del grafo
+docs/demo.gif          el GIF del principio (la demo publicada, a velocidad real)
 data/                  los 20 documentos del corpus
 eval/golden_set.json   preguntas de evaluación
 eval/resultados/       resultados de cada evaluación, con fecha
