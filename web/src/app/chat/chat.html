@@ -1,152 +1,296 @@
-<header class="cabecera">
-  <h1>rag-notas</h1>
-  <p>Preguntas sobre la documentación en español de Kubernetes, Git (Pro Git) y HTTP (MDN).</p>
+<!-- Cabecera: nombre, barra de consulta y estado del servidor -->
+<header class="sticky top-0 z-10 border-b border-tinta bg-papel">
+  <div class="mx-auto flex max-w-[1040px] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
+    <h1 class="font-serif text-xl font-semibold tracking-tight">rag-notas<span class="text-acento" aria-hidden="true">.</span></h1>
+
+    <form
+      class="flex min-w-[260px] flex-1 items-stretch border border-tinta bg-hoja focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-acento"
+      role="search"
+      (submit)="$event.preventDefault(); enviar()"
+    >
+      <label class="sr-only" for="pregunta">Pregunta</label>
+      <input
+        id="pregunta"
+        class="min-w-0 flex-1 bg-transparent px-3 py-2 outline-none placeholder:text-tenue"
+        autocomplete="off"
+        [maxLength]="LONGITUD_MAX"
+        placeholder="Pregunta a la documentación…"
+        [value]="pregunta()"
+        (input)="escribir($event)"
+      />
+      <label class="sr-only" for="modo">Modo</label>
+      <select
+        id="modo"
+        class="border-l border-linea bg-transparent px-2 font-mono text-xs text-tenue outline-none"
+        title="Grafo: decide si buscar, evalúa lo encontrado y reintenta. Directo: busca y responde."
+        [value]="modo()"
+        (change)="modo.set($any($event.target).value)"
+      >
+        <option value="grafo">grafo</option>
+        <option value="directo">directo</option>
+      </select>
+      @if (ocupado()) {
+        <button type="button" class="cancelar bg-tenue px-4 font-mono text-xs tracking-wider text-papel uppercase" (click)="detener()">
+          Cancelar
+        </button>
+      } @else {
+        <button
+          type="submit"
+          class="bg-tinta px-4 font-mono text-xs tracking-wider text-papel uppercase hover:bg-acento disabled:opacity-40"
+          [disabled]="!pregunta().trim()"
+          aria-label="Consultar"
+        ><span class="max-sm:hidden">Consultar </span>⏎</button>
+      }
+    </form>
+
+    <div class="flex items-center gap-4 max-md:w-full">
+    @if (salud(); as s) {
+      <p class="flex items-center gap-2 font-mono text-xs text-tenue">
+        <span class="size-2 rounded-full" [class.bg-acento]="s.estado === 'ok'" [class.bg-aviso]="s.estado !== 'ok'"></span>
+        {{ s.llm.modelo ?? s.llm.proveedor }} · {{ s.coleccion.fragmentos }} fragmentos
+      </p>
+    }
+      <button
+        type="button"
+        class="boton-tema ml-auto rounded-sm border border-linea px-2 py-1 font-mono text-xs text-tenue hover:text-tinta"
+        [attr.aria-label]="'Tema: ' + tema() + '. Pulsa para cambiarlo.'"
+        (click)="alternarTema()"
+      >{{ tema() === 'claro' ? '☀ claro' : tema() === 'oscuro' ? '☾ oscuro' : '◐ sistema' }}</button>
+    </div>
+  </div>
 </header>
 
-@if (sinConexion()) {
-  <p class="aviso aviso--error" role="alert">
-    No se puede conectar con la API. Comprueba que está arrancada.
-  </p>
-} @else if (salud(); as s) {
-  @if (!s.coleccion.ok) {
-    <p class="aviso aviso--error" role="alert">
-      El servidor no tiene documentos indexados: hay que ejecutar <code>python ingest.py</code>.
-    </p>
-  } @else if (!s.llm.ok) {
-    <p class="aviso" role="status">
-      El LLM no está disponible ahora mismo: las preguntas darán error hasta que vuelva.
-    </p>
-  } @else if (!s.modelos_cargados) {
-    <p class="aviso" role="status">
-      La primera pregunta puede tardar medio minuto o más: el servidor carga los modelos al
-      recibirla.
-    </p>
+<div class="mx-auto max-w-[1040px] px-4 pb-24">
+  <!-- Avisos -->
+  @if (sinConexion()) {
+    <div class="aviso aviso--error mt-6" role="alert">
+      <p class="meta text-error">Sin conexión</p>
+      <p class="font-serif">No se puede conectar con la API. Comprueba que está arrancada.</p>
+    </div>
+  } @else if (salud(); as s) {
+    @if (!s.coleccion.ok) {
+      <div class="aviso aviso--error mt-6" role="alert">
+        <p class="meta text-error">Sin documentos</p>
+        <p class="font-serif">El servidor no tiene documentos indexados: hay que ejecutar <code class="font-mono">python ingest.py</code>.</p>
+      </div>
+    } @else if (!s.llm.ok) {
+      <div class="aviso mt-6" role="status">
+        <p class="meta text-aviso">LLM no disponible</p>
+        <p class="font-serif">Las preguntas darán error hasta que vuelva.</p>
+      </div>
+    } @else if (!s.modelos_cargados) {
+      <div class="aviso mt-6" role="status">
+        <p class="meta text-aviso">Primera pregunta</p>
+        <p class="font-serif">La primera pregunta puede tardar medio minuto o más: el servidor carga los modelos al recibirla.</p>
+      </div>
+    }
   }
-}
 
-<main class="conversacion" aria-live="polite">
-  @for (turno of turnos(); track $index; let i = $index) {
-    <article class="turno">
-      <p class="turno__pregunta">{{ turno.pregunta }}</p>
+  <!-- Lo que se anuncia a los lectores de pantalla: frases cortas, no la respuesta entera ni cada
+       cambio de la traza (un aria-live sobre todo el main lo leería todo en voz alta). -->
+  <p class="sr-only" role="status" aria-live="polite">{{ anuncio() }}</p>
 
-      @switch (turno.estado) {
-        @case ('pensando') {
-          <div class="turno__pensando" role="status">
-            <span class="punto"></span>
-            @if (turno.nodos.length) {
-              {{ NODOS[turno.nodos[turno.nodos.length - 1]] ?? turno.nodos[turno.nodos.length - 1] }}…
-            } @else {
-              Pensando…
-            }
-          </div>
-        }
-        @case ('error') {
-          <p class="turno__error" role="alert">{{ turno.error }}</p>
-        }
-        @case ('cancelado') {
-          <p class="turno__nota">Pregunta cancelada.</p>
-        }
-        @case ('hecho') {
-          @if (turno.respuesta; as r) {
-            @if (r.no_lo_tengo) {
-              <p class="turno__no-lo-tengo">
-                <strong>{{ r.respuesta }}</strong>
-                @if (r.salida_bloqueada) {
-                  <span>El modelo dio una respuesta que no citaba ningún fragmento, y se ha
-                    descartado: es la validación de salida contra la prompt injection.</span>
+  <main>
+    @for (inf of informes(); track inf.i) {
+      @let turno = inf.turno;
+      @let i = inf.i;
+      <article class="informe-turno border-b border-linea py-10 last:border-b-0" [attr.aria-busy]="turno.estado === 'pensando'">
+        <p class="meta mb-2">
+          Consulta {{ numero(i) }} · {{ turno.modo }}
+          @switch (turno.estado) {
+            @case ('pensando') { · <span class="animate-latido text-acento">en curso</span> }
+            @case ('hecho') { · {{ segundos(turno.respuesta!.segundos, 2) }} s }
+            @case ('cancelado') { · cancelada }
+            @case ('error') { · <span class="text-error">error</span> }
+          }
+        </p>
+        <h2 class="titular mb-6">{{ turno.pregunta }}</h2>
+
+        @switch (turno.estado) {
+          @case ('pensando') {
+            <div class="pensando">
+              <ng-container *ngTemplateOutlet="traza; context: { $implicit: turno, enCurso: true }" />
+              <p class="mt-3 font-serif text-tenue italic">
+                @if (turno.nodos.length) {
+                  Hecho: {{ NODOS[turno.nodos[turno.nodos.length - 1]] ?? turno.nodos[turno.nodos.length - 1] }}…
                 } @else {
-                  <span>Con los fragmentos que ha recuperado, el modelo no ha encontrado la
-                    respuesta, y no se la inventa.</span>
+                  Pensando…
                 }
               </p>
+            </div>
+          }
+          @case ('error') {
+            <p class="error-turno border-l-4 border-error pl-4 font-serif text-error" role="alert">{{ turno.error }}</p>
+          }
+          @case ('cancelado') {
+            <p class="font-serif text-tenue italic">Consulta cancelada.</p>
+          }
+          @case ('hecho') {
+            @let r = turno.respuesta!;
+            @if (r.no_lo_tengo) {
+              <div class="informe no-lo-tengo">
+                <div class="bloque">
+                  <p class="border-l-4 pl-4 font-serif text-[22px] italic" [class.border-aviso]="!r.salida_bloqueada" [class.border-error]="r.salida_bloqueada">
+                    {{ r.respuesta }}
+                  </p>
+                  @if (!r.salida_bloqueada) {
+                    <p class="mt-3 pl-5 font-serif text-[17px] leading-[1.7] text-tenue">
+                      Con los fragmentos que ha recuperado, el modelo no ha encontrado la respuesta, y no se la inventa.
+                    </p>
+                  }
+                </div>
+                @if (r.salida_bloqueada) {
+                  <aside class="margen">
+                    <div class="nota border-error">
+                      <p class="mb-1 font-mono text-xs text-error">Salida bloqueada</p>
+                      <p>El modelo dio una respuesta que no citaba ningún fragmento, y se ha descartado: es la validación de salida contra la prompt injection.</p>
+                    </div>
+                  </aside>
+                } @else if (r.traza?.pregunta_reescrita) {
+                  <aside class="margen">
+                    <div class="nota border-aviso">
+                      <p class="mb-1 font-mono text-xs text-tinta">Reintento</p>
+                      <p>No encontró nada útil y reformuló la pregunta:</p>
+                      <p class="mt-1 font-serif text-tinta italic"><q>{{ r.traza!.pregunta_reescrita }}</q></p>
+                    </div>
+                  </aside>
+                }
+              </div>
             } @else {
-              <div class="turno__respuesta">
-                @for (parte of turno.partes; track $index) {
-                  @if (esCita(parte)) {
-                    <button
-                      type="button"
-                      class="cita"
-                      [class.cita--abierta]="turno.citaAbierta === parte.cita.numero"
-                      [attr.aria-expanded]="turno.citaAbierta === parte.cita.numero"
-                      [attr.aria-label]="'Ver la fuente ' + parte.cita.numero + ': ' + parte.cita.documento"
-                      (click)="alternarCita(i, parte.cita.numero)"
-                    ><span class="visualmente-oculto">[</span>{{ parte.cita.numero }}<span class="visualmente-oculto">]</span></button>
-                  } @else {
-                    <span>{{ parte.texto }}</span>
+              <div class="informe md respuesta">
+                @for (fila of turno.filas; track $index; let f = $index) {
+                  <div class="bloque">
+                    @switch (fila.bloque.t) {
+                      @case ('parrafo') {
+                        <p><ng-container *ngTemplateOutlet="enLinea; context: { $implicit: $any(fila.bloque).partes, turno: i }" /></p>
+                      }
+                      @case ('codigo') {
+                        <pre><code>{{ $any(fila.bloque).v }}</code></pre>
+                      }
+                      @case ('lista') {
+                        @if ($any(fila.bloque).ordenada) {
+                          <ol [attr.start]="$any(fila.bloque).inicio">
+                            @for (el of $any(fila.bloque).elementos; track $index) {
+                              <li><ng-container *ngTemplateOutlet="enLinea; context: { $implicit: el, turno: i }" /></li>
+                            }
+                          </ol>
+                        } @else {
+                          <ul>
+                            @for (el of $any(fila.bloque).elementos; track $index) {
+                              <li><ng-container *ngTemplateOutlet="enLinea; context: { $implicit: el, turno: i }" /></li>
+                            }
+                          </ul>
+                        }
+                      }
+                    }
+                  </div>
+                  @if (fila.notas.length) {
+                    <aside class="margen space-y-4" [style.--filas]="f + 1 + ' / ' + fila.hasta" aria-label="Notas">
+                      @for (c of fila.notas; track c.numero) {
+                        @let cp = corpus(c.documento);
+                        <div class="nota md:sticky md:top-24 nota--{{ cp.clase }}" [id]="idNota(i, c.numero)" tabindex="-1">
+                          <p class="mb-1 font-mono text-xs text-tinta"><span class="text-acento">{{ c.numero }}</span> · {{ cp.nombre }}</p>
+                          <p class="mb-1 font-medium break-words text-tinta">{{ c.documento }}</p>
+                          <p class="mb-2">{{ seccionCorta(c.seccion) }}</p>
+                          <p class="mb-2 font-serif italic"><q>{{ extracto(c.texto) }}</q></p>
+                          <details>
+                            <summary>Fragmento completo</summary>
+                            <pre class="fragmento mt-2 max-h-56 overflow-auto font-mono text-[12px] whitespace-pre-wrap">{{ c.texto }}</pre>
+                          </details>
+                          @if (urlSegura(c.url); as url) {
+                            <a class="mt-1 inline-block text-acento hover:underline" [href]="url" target="_blank" rel="noopener noreferrer">Original ↗</a>
+                          }
+                        </div>
+                      }
+                    </aside>
                   }
                 }
               </div>
+              @if (r.traza?.pregunta_reescrita) {
+                <p class="mt-2 text-[13px] text-tenue">Pregunta reformulada: <q class="font-serif text-tinta italic">{{ r.traza!.pregunta_reescrita }}</q></p>
+              }
             }
 
-            @if (citaAbierta(turno); as c) {
-              <aside class="fragmento" aria-label="Fragmento citado">
-                <p class="fragmento__origen">
-                  [{{ c.numero }}] <strong>{{ c.documento }}</strong> · {{ c.seccion }}
-                  @if (urlSegura(c.url); as url) {
-                    · <a [href]="url" target="_blank" rel="noopener noreferrer">original</a>
-                  }
+            @if (r.traza) {
+              <section class="traza mt-6" aria-label="Traza">
+                <p class="meta mb-2">
+                  Traza · {{ r.traza.ruta.length }} pasos
+                  @if (r.traza.reintentos) { · {{ r.traza.reintentos }} {{ r.traza.reintentos === 1 ? 'reintento' : 'reintentos' }} }
                 </p>
-                <pre class="fragmento__texto">{{ c.texto }}</pre>
-              </aside>
-            }
-
-            <p class="turno__pie">
-              {{ r.modo === 'grafo' ? 'Grafo' : 'Pipeline directo' }} · {{ r.segundos }} s
-            </p>
-
-            @if (r.traza; as traza) {
-              <details class="traza">
-                <summary>Cómo ha razonado ({{ traza.ruta.length }} pasos)</summary>
-                <ol>
-                  @for (nodo of traza.ruta; track $index; let p = $index) {
-                    <li>
-                      <code>{{ nodo }}</code> {{ NODOS[nodo] ?? '' }}
-                      @if (latencia(turno, p) !== undefined) {
-                        <span class="traza__s">{{ latencia(turno, p) }} s</span>
-                      }
-                    </li>
-                  }
-                </ol>
-                @if (traza.pregunta_reescrita) {
-                  <p>Pregunta reformulada: «{{ traza.pregunta_reescrita }}»</p>
-                }
-              </details>
+                <ng-container *ngTemplateOutlet="traza; context: { $implicit: turno, enCurso: false }" />
+              </section>
+            } @else {
+              <p class="meta mt-6">Pipeline directo: sin traza</p>
             }
           }
         }
-      }
-    </article>
-  } @empty {
-    <p class="vacio">
-      Prueba con «¿Cómo deshago el último commit?» o «¿Para qué sirve la cabecera
-      Cache-Control?».
-    </p>
-  }
-</main>
+      </article>
+    } @empty {
+      <!-- Portada -->
+      <section class="inicio grid gap-12 py-16 md:grid-cols-[minmax(0,1fr)_240px]">
+        <div>
+          <h2 class="mb-4 font-serif text-[clamp(32px,5vw,52px)] leading-[1.05] font-semibold tracking-tight">
+            Pregunta a la documentación.<br /><span class="font-normal text-tenue italic">Cada respuesta, con su fuente.</span>
+          </h2>
+          <p class="mb-10 max-w-[56ch] font-serif text-[17px] leading-[1.7] text-tenue">
+            Kubernetes, Git (Pro Git) y HTTP (MDN), en español. Busca en la documentación, comprueba si lo que
+            encuentra sirve y responde citando los fragmentos. Si no está, lo dice.
+          </p>
+          <p class="meta mb-3">Para empezar</p>
+          <ol class="divide-y divide-linea border-y border-linea font-serif text-lg">
+            @for (s of SUGERENCIAS; track s.pregunta) {
+              <li>
+                <button type="button" class="sugerencia flex w-full items-baseline gap-4 py-3 text-left hover:text-acento" (click)="sugerir(s.pregunta)">
+                  <span class="w-24 flex-none font-mono text-xs uppercase" [class]="s.color">{{ s.nombre }}</span>{{ s.pregunta }}
+                </button>
+              </li>
+            }
+          </ol>
+        </div>
+        <aside class="nota self-start border-acento">
+          <p class="mb-2 font-mono text-xs text-tinta">Cómo funciona (modo grafo)</p>
+          <ol class="list-decimal space-y-1 pl-4">
+            <li>Decide si hace falta buscar.</li>
+            <li>Busca: vectorial + reranker.</li>
+            <li>Comprueba si lo encontrado sirve; si no, reformula y reintenta.</li>
+            <li>Responde citando los fragmentos.</li>
+          </ol>
+        </aside>
+      </section>
+    }
+  </main>
+</div>
 
-<form class="formulario" (submit)="$event.preventDefault(); enviar()">
-  <label class="visualmente-oculto" for="pregunta">Pregunta</label>
-  <textarea
-    id="pregunta"
-    rows="2"
-    [maxLength]="LONGITUD_MAX"
-    placeholder="Escribe tu pregunta (Intro para enviar)"
-    [value]="pregunta()"
-    (input)="escribir($event)"
-    (keydown)="teclear($event)"
-  ></textarea>
-  <div class="formulario__controles">
-    <label>
-      Modo
-      <select [value]="modo()" (change)="modo.set($any($event.target).value)">
-        <option value="grafo">Grafo (decide, evalúa, reintenta)</option>
-        <option value="directo">Pipeline directo</option>
-      </select>
-    </label>
-    @if (ocupado()) {
-      <button type="button" class="boton boton--secundario" (click)="detener()">Cancelar</button>
-    } @else {
-      <button type="submit" class="boton" [disabled]="!pregunta().trim()">Preguntar</button>
+<!-- Texto con negrita, código y citas. Todo con interpolación: nunca HTML. -->
+<ng-template #enLinea let-partes let-turno="turno">
+  @for (p of partes; track $index) {
+    @switch (p.t) {
+      @case ('texto') {<ng-container>{{ p.v }}</ng-container>}
+      @case ('codigo') {<code>{{ p.v }}</code>}
+      @case ('cita') {<a class="llamada" [href]="'#' + idNota(turno, p.cita.numero)" [attr.aria-label]="'Nota ' + p.cita.numero + ': ' + p.cita.documento">[{{ p.cita.numero }}]</a>}
+      @case ('negrita') {<strong><ng-container *ngTemplateOutlet="enLinea; context: { $implicit: p.hijos, turno: turno }" /></strong>}
+    }
+  }
+</ng-template>
+
+<!-- Traza en cascada -->
+<ng-template #traza let-turno let-enCurso="enCurso">
+  <div class="cascada">
+    @for (b of cascada(turno, enCurso ? ahora() : 0); track $index) {
+      <span class="paso" [class.text-acento]="b.tipo === 'final' || b.tipo === 'activa'" [class.text-aviso]="b.tipo === 'reintento'" [title]="NODOS[b.nodo] ?? ''">
+        {{ b.tipo === 'reintento' && b.nodo === 'reescribir' ? '↺ ' : '' }}{{ b.nodo }}
+      </span>
+      <span class="cascada__pista">
+        <span
+          class="cascada__barra"
+          [class.cascada__barra--reintento]="b.tipo === 'reintento'"
+          [class.cascada__barra--final]="b.tipo === 'final'"
+          [class.cascada__barra--activa]="b.tipo === 'activa'"
+          [style.left.%]="b.inicio"
+          [style.width.%]="b.ancho"
+        ></span>
+      </span>
+      <span class="text-right text-tenue">{{ b.s === null ? '…' : segundos(b.s) + ' s' }}</span>
     }
   </div>
-</form>
+</ng-template>

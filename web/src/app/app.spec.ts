@@ -10,6 +10,6 @@ describe('App', () => {
     });
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).querySelector('app-chat h1')?.textContent).toBe('rag-notas');
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-chat h1')?.textContent).toContain('rag-notas');
   });
 });

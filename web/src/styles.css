@@ -1,62 +1,131 @@
-:root {
-  --fondo: #f7f7f5;
-  --superficie: #ffffff;
-  --texto: #1d1d1f;
-  --tenue: #63636b;
-  --borde: #dcdcd8;
-  --acento: #2f5bd3;
-  --acento-suave: #e6ecfb;
-  --aviso: #fff6dc;
-  --aviso-borde: #e8c766;
-  --error: #b42318;
-  --error-suave: #fdecea;
-  --exito-suave: #eef6ee;
-  --radio: 10px;
-  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  color-scheme: light dark;
-}
+/* Estilos globales con Tailwind 4. Se compilan al hacer ng build a un .css estático del propio
+   origen: la CSP (style-src 'self') no cambia. Nada de CDN. */
+@import "tailwindcss";
 
+/* Fuentes IBM Plex (OFL) desde npm: el build las copia a media/ y se sirven desde nuestro nginx
+   (font-src 'self'). Solo el subconjunto latino, que cubre el español. */
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-serif/latin-400.css";
+@import "@fontsource/ibm-plex-serif/latin-400-italic.css";
+@import "@fontsource/ibm-plex-serif/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+/* Colores como variables: el tema oscuro solo cambia las variables, así no hace falta repetir
+   dark: en cada clase. Tema: el del sistema, salvo que se elija otro con el botón de la cabecera
+   (data-theme en <html>, ver tema.ts). El bloque oscuro va dos veces porque CSS no deja
+   compartirlo entre la media query y el atributo: si cambias un color, cámbialo en los dos. */
+:root {
+  --papel: #f3f0e8; --hoja: #fbf9f4; --tinta: #1b1a17; --tenue: #6a655b; --linea: #d9d3c6;
+  --acento: #1e6b58; --acento-suave: #dbe9e2; --k8s: #3765c8; --git: #b34824; --http: #7647bd;
+  --aviso: #8a6100; --aviso-suave: #f6ecd2; --error: #b3261e; --error-suave: #f8e6e3;
+  --codigo: #23231f; --codigo-texto: #ece8de;
+  color-scheme: light;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #141416;
-    --superficie: #1e1e21;
-    --texto: #ececef;
-    --tenue: #a0a0aa;
-    --borde: #34343a;
-    --acento: #8aa8ff;
-    --acento-suave: #24304f;
-    --aviso: #3a3118;
-    --aviso-borde: #8a7330;
-    --error: #ff8a80;
-    --error-suave: #3b1f1d;
-    --exito-suave: #1f2e22;
+  :root:not([data-theme="light"]) {
+    --papel: #141412; --hoja: #1a1a18; --tinta: #e9e5dc; --tenue: #a09b90; --linea: #36352f;
+    --acento: #62c7a8; --acento-suave: #1b352d; --k8s: #82a5f0; --git: #f08c66; --http: #b597ee;
+    --aviso: #e6c36a; --aviso-suave: #2f2714; --error: #ff8a80; --error-suave: #351c1a;
+    --codigo: #0c0c0b; --codigo-texto: #e2ded4;
+    color-scheme: dark;
   }
 }
-
-* {
-  box-sizing: border-box;
+:root[data-theme="dark"] {
+  --papel: #141412; --hoja: #1a1a18; --tinta: #e9e5dc; --tenue: #a09b90; --linea: #36352f;
+  --acento: #62c7a8; --acento-suave: #1b352d; --k8s: #82a5f0; --git: #f08c66; --http: #b597ee;
+  --aviso: #e6c36a; --aviso-suave: #2f2714; --error: #ff8a80; --error-suave: #351c1a;
+  --codigo: #0c0c0b; --codigo-texto: #e2ded4;
+  color-scheme: dark;
 }
 
-body {
-  margin: 0;
-  background: var(--fondo);
-  color: var(--texto);
-  font-family: var(--fuente);
-  line-height: 1.55;
+@theme inline {
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-serif: "IBM Plex Serif", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --color-papel: var(--papel);
+  --color-hoja: var(--hoja);
+  --color-tinta: var(--tinta);
+  --color-tenue: var(--tenue);
+  --color-linea: var(--linea);
+  --color-acento: var(--acento);
+  --color-acento-suave: var(--acento-suave);
+  --color-k8s: var(--k8s);
+  --color-git: var(--git);
+  --color-http: var(--http);
+  --color-aviso: var(--aviso);
+  --color-aviso-suave: var(--aviso-suave);
+  --color-error: var(--error);
+  --color-error-suave: var(--error-suave);
+  --color-codigo: var(--codigo);
+  --color-codigo-texto: var(--codigo-texto);
+  --animate-latido: latido 1s ease-in-out infinite;
+  --animate-rayas: rayas 0.8s linear infinite;
+  @keyframes latido { 50% { opacity: 0.3; } }
+  @keyframes rayas { to { background-position: 16px 0; } }
 }
 
-code,
-pre {
-  font-family: var(--mono);
-  font-size: 0.88em;
+@layer base {
+  body { @apply bg-papel font-sans text-tinta antialiased; }
+  :focus-visible { @apply outline-2 outline-offset-2 outline-acento; }
+  q { quotes: "«" "»"; }
 }
 
-.visualmente-oculto {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+/* Las piezas con más lógica visual llevan nombre propio para que las plantillas se lean bien. */
+@layer components {
+  .meta { @apply font-mono text-xs tracking-wider text-tenue uppercase; }
+  .titular { @apply max-w-[34ch] font-serif text-[clamp(24px,3.4vw,32px)] leading-tight font-semibold break-words; }
+
+  /* Informe: dos columnas, texto y margen. Cada bloque de la respuesta es una fila de la rejilla
+     y su nota va a la misma altura (--filas la pone la plantilla). En móvil, la nota va debajo. */
+  .informe { @apply grid grid-cols-1 gap-x-10 md:grid-cols-[minmax(0,1fr)_240px]; }
+  .informe > .bloque { @apply col-start-1; }
+  .informe > .margen { @apply mb-4 md:col-start-2 md:mb-0 md:[grid-row:var(--filas)]; }
+
+  /* Markdown seguro: párrafos, negrita, código y listas. */
+  .md { @apply font-serif text-[17px] leading-[1.7]; }
+  .md p, .md ul, .md ol, .md pre { @apply mb-4; }
+  .md p { @apply whitespace-pre-line; }
+  .md ul { @apply list-disc pl-5; }
+  .md ol { @apply list-decimal pl-5; }
+  .md strong { @apply font-semibold; }
+  .md :not(pre) > code { @apply rounded bg-acento-suave/60 px-1 font-mono text-[0.85em]; }
+  .md pre { @apply overflow-x-auto rounded-md bg-codigo px-4 py-3 font-mono text-sm leading-relaxed text-codigo-texto; }
+
+  /* Llamada a nota: número volado, como en un libro. */
+  .llamada {
+    @apply relative -top-[0.5em] mx-px rounded-sm px-0.5 font-mono text-[0.7em] font-medium text-acento
+      no-underline hover:bg-acento-suave;
+  }
+  /* El número es diminuto: un área invisible alrededor lo hace más fácil de pulsar (unos 28 px). */
+  .llamada::after { content: ""; position: absolute; inset: -8px -6px; }
+
+  .nota { @apply border-l-2 pl-3 font-sans text-[13px] leading-snug text-tenue; }
+  .nota:target { @apply bg-acento-suave/50; }
+  .nota summary { @apply cursor-pointer list-none text-acento hover:underline; }
+  .nota summary::-webkit-details-marker { display: none; }
+  .nota--k8s { @apply border-k8s; }
+  .nota--git { @apply border-git; }
+  .nota--http { @apply border-http; }
+  .nota--otro { @apply border-linea; }
+
+  /* Traza en cascada: cada barra empieza donde acabó el paso anterior (inicio y ancho en %). */
+  .cascada { @apply grid max-w-[640px] grid-cols-[96px_minmax(0,1fr)_52px] items-center gap-x-3 gap-y-1 font-mono text-xs; }
+  .cascada__pista { @apply relative h-2.5 rounded-sm bg-linea/50; }
+  .cascada__barra { @apply absolute inset-y-0 min-w-[2px] rounded-sm bg-tinta/70; }
+  .cascada__barra--reintento { @apply bg-aviso; }
+  .cascada__barra--final { @apply bg-acento; }
+  .cascada__barra--activa {
+    @apply animate-rayas bg-acento;
+    background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgb(255 255 255 / 30%) 4px 8px);
+  }
+
+  .aviso { @apply mb-6 border-y border-aviso bg-aviso-suave px-4 py-3; }
+  .aviso--error { @apply border-error bg-error-suave text-error; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
